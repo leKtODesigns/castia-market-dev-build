@@ -329,6 +329,7 @@
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      margin-left: 8px;
     }
     .copy-price-btn:hover {
       background: var(--bg3);
@@ -1044,6 +1045,9 @@
       font-weight: 500;
       letter-spacing: 0.01em;
       box-shadow: none;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       transition:
         background var(--dur-1),
         border-color var(--dur-1),
@@ -1122,26 +1126,44 @@
         min-width: 0;
       }
       .listings-toolbar__bottom-left {
-        align-items: flex-start;
+        align-items: stretch;
         flex-direction: column;
       }
       .listings-toolbar .spills,
       .listings-toolbar__bottom-right {
         width: 100%;
       }
+      .listings-toolbar .spills {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0.45rem;
+      }
+      .listings-toolbar .spill {
+        width: 100%;
+        min-height: 2.4rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 0.55rem;
+        font-size: 0.76rem;
+      }
       .listings-toolbar__bottom {
         gap: 0.65rem;
       }
       .listings-toolbar__bottom-right {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 0.45rem;
       }
       .listings-toolbar__bottom-right .vbtn {
         justify-content: center;
         min-width: 0;
+        min-height: 2.45rem;
+        padding: 0.48rem 0.45rem;
+        font-size: 0.75rem;
       }
-      .listings-toolbar__bottom-right .vbtn:nth-last-child(-n + 2) {
+      .listings-toolbar__bottom-right .vbtn:nth-last-child(-n + 2),
+      .listings-toolbar__bottom-right .vbtn {
         width: 100%;
         padding-inline: 0.45rem;
       }

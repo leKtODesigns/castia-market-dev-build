@@ -1834,15 +1834,6 @@ td.item-col {
   white-space: normal;
 }
 
-/* Scroll button always available */
-#scrollTopBtn {
-  display: flex !important;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.96;
-  z-index: 300;
-}
-
 @media (max-width: 420px) {
   .cgrid {
     grid-template-columns: 1fr 1fr !important;

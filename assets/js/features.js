@@ -876,6 +876,7 @@ window.addEventListener("scroll", _updateScrollTopBtnVisibility, {
 window.addEventListener("resize", _updateScrollTopBtnVisibility, {
   passive: true,
 });
+_updateScrollTopBtnVisibility();
 
 // Compare tooltip
 /**

@@ -114,10 +114,11 @@
         var totVal = total != null ? total.toLocaleString() : "—";
         var barPct = Math.min(100, pct || 0);
 
+        var avatarUrl = `https://mc-heads.net/avatar/${encodeURIComponent(name)}/96`;
         return `<button type="button" class="scard ${animCls}" data-seller="${esc(name)}" aria-label="Open seller ${esc(name)}">
           <div class="scard__head">
             <div class="scard__avatar ${avCls}">
-              <img src="https://render.crafty.gg/3d/bust/${esc(name)}" alt="${esc(name)} avatar" class="scard__avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="display: block;">
+              <img src="${avatarUrl}" alt="${esc(name)} avatar" class="scard__avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="display: block;">
               <span class="scard__avatar-fallback" style="display: none;">${esc(initials)}</span>
             </div>
             <div class="scard__info">
@@ -167,7 +168,7 @@
         title.textContent = name;
 
         // Set up avatar
-        const avatarUrl = `https://render.crafty.gg/3d/bust/${encodeURIComponent(name)}`;
+        const avatarUrl = `https://mc-heads.net/avatar/${encodeURIComponent(name)}/96`;
         avatarImg.src = avatarUrl;
         avatarImg.alt = `${name} avatar`;
         avatarImg.style.display = "block";
@@ -678,10 +679,11 @@
 
       function stopCardFx(card) {
         stopParticles(card);
+        var isFlagged = card.classList.contains("scard-flagged");
         var t = setTimeout(function () {
           card.classList.remove("fx-active");
           _cardFxTimeouts.delete(card);
-        }, 650);
+        }, isFlagged ? 1200 : 700);
         _cardFxTimeouts.set(card, t);
       }
 

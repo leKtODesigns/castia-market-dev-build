@@ -15,6 +15,8 @@
       if (action === "close-seller-panel") return window.closeSellerPanel?.();
       if (action === "set-seller-filter")
         return window.setSf?.(target.getAttribute("data-filter"));
+      if (action === "scroll-top")
+        return window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
     document.addEventListener("input", function (event) {
