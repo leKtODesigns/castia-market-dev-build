@@ -93,6 +93,7 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   color: var(--gold);
   flex-shrink: 0;
   line-height: 0;
+  overflow: hidden;
   transition:
     background 0.2s,
     border-color 0.2s;
@@ -482,12 +483,15 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   place-items: center;
   flex-shrink: 0;
   line-height: 0;
+  overflow: hidden;
 }
 .logo-mark svg {
   display: block;
   width: 13px;
   height: 13px;
   margin: 0;
+  transform: translateY(-0.5px);
+  transform-origin: center;
 }
 .header-right {
   display: flex;

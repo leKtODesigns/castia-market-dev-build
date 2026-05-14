@@ -535,7 +535,7 @@ function buildPanelHTML(item, listings, meta = {}) {
   </div>`;
 
   // Recent listings section with sortable header and controls
-  html += `<div class="psec"><div class="psec-title">Recent Listings</div>`;
+  html += `<div class="psec"><div class="psec-title">Listings</div>`;
   html += `<div class="pctrl">
     <span class="pcl">Sort</span>
     <div class="cselect" id="panelSortSel">
@@ -550,7 +550,7 @@ function buildPanelHTML(item, listings, meta = {}) {
       </div>
     </div>
     <button type="button" class="ctoggle ${panelIncludeFlagged ? "on" : ""}" id="panelFlagTog" data-act="panel-include-flagged" role="switch" aria-checked="${panelIncludeFlagged ? "true" : "false"}">
-      <span class="ctog" aria-hidden="true">Include flagged</span>
+      <span class="ctog" aria-hidden="true">Include Flagged</span>
     </button>
   </div>`;
 

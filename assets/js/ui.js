@@ -548,37 +548,37 @@ function updateChips() {
       conf = confEl?.value || "",
       tier = tierEl?.value || "";
   if (q)
-    addChip("search: " + q, () => {
+    addChip("Search: " + q, () => {
       qEl.value = "";
       $("xBtn")?.classList.remove("on");
       applyFilters();
     });
   if (favOnly)
-    addChip("favorites", () => {
+    addChip("Favorites", () => {
       favOnly = false;
       updateTopButtons();
       applyFilters();
     });
   if (cat)
-    addChip(CAT_LABELS[cat] || cat, () => {
+    addChip("Category: " + (CAT_LABELS[cat] || cat), () => {
       catEl.value = "";
       refreshCSelect("catEl");
       applyFilters();
     });
   if (conf)
-    addChip("conf: " + conf, () => {
+    addChip("Confidence: " + conf, () => {
       confEl.value = "";
       refreshCSelect("confEl");
       applyFilters();
     });
   if (tier === "0")
-    addChip("no tier", () => {
+    addChip("Tier: None", () => {
       tierEl.value = "";
       refreshCSelect("tierEl");
       applyFilters();
     });
   else if (tier)
-    addChip("tier " + tier, () => {
+    addChip("Tier: " + tier, () => {
       tierEl.value = "";
       refreshCSelect("tierEl");
       applyFilters();
@@ -1108,7 +1108,7 @@ function renderCards(rows) {
             ? `<div class="cimgwrap${isMisc ? " cimgwrap-misc" : ""}">${imgPaths.length ? imageHTMLForRow(r, "") : '<img src="./assets/images/items/_placeholder.svg" alt="" />'}</div>`
             : "";
         const a11yLabel = `Open details for ${r.displayName || r.rawKey || "item"}`;
-        return `<div class="pcard ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
+        return `<div class="pcard ${!showImg ? "pcard-no-img" : ""} ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
         ${imgHTML}
         <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
         <button type="button" class="pcard-act pcard-cmp cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
@@ -1501,6 +1501,8 @@ function setView(v) {
   vw = v;
   const tvw = $("tvw"),
       cvw = $("cvw");
+  if (tvw) tvw.style.display = "";
+  if (cvw) cvw.style.display = "";
   tvw.hidden = v !== "table";
   cvw.hidden = v !== "card";
   $("vt").classList.toggle("on", v === "table");

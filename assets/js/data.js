@@ -607,8 +607,8 @@ async function fetchAll(silent) {
     const vt = $("vt");
     const vc = $("vc");
 
-    if (tvw) tvw.style.display = vw === "table" ? "" : "none";
-    if (cvw) cvw.style.display = vw === "card" ? "" : "none";
+    if (tvw) tvw.hidden = vw !== "table";
+    if (cvw) cvw.hidden = vw !== "card";
     if (vt) vt.classList.toggle("on", vw === "table");
     if (vc) vc.classList.toggle("on", vw === "card");
 

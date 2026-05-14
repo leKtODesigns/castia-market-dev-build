@@ -27,15 +27,23 @@ function _shouldLockBodyScroll() {
 function _setBodyScrollLocked(locked) {
   if (!locked) {
     if (!_scrollLockOn) return;
+    const restoreY = _scrollLockY || 0;
     _scrollLockOn = false;
     document.body.classList.remove("scroll-locked");
+    const root = document.documentElement;
+    const prevScrollBehavior = root.style.scrollBehavior;
+    root.style.scrollBehavior = "auto";
     document.body.style.position = "";
     document.body.style.top = "";
     document.body.style.left = "";
     document.body.style.right = "";
     document.body.style.width = "";
     document.body.style.overflow = "";
-    window.scrollTo({ top: _scrollLockY, left: 0, behavior: "auto" });
+    window.scrollTo(0, restoreY);
+    requestAnimationFrame(() => {
+      window.scrollTo(0, restoreY);
+      root.style.scrollBehavior = prevScrollBehavior;
+    });
     return;
   }
   if (_scrollLockOn) return;

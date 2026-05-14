@@ -367,8 +367,17 @@
             .trim()
             .toLowerCase();
 
+          var listingTier = parseInt(l.tier, 10);
+          var prismaticKey =
+            String(l.set_name || "").toLowerCase() === "prismatic" &&
+            [1, 2, 3].includes(listingTier)
+              ? `${l.item_name}|t${listingTier}`
+              : "";
+
           var match = (typeof enriched !== "undefined" ? enriched : []).find(
             (r) =>
+              (prismaticKey &&
+                r.rawKey.toLowerCase() === prismaticKey.toLowerCase()) ||
               r.displayName.toLowerCase() === name ||
               r.rawKey.toLowerCase() === name,
           );
@@ -384,7 +393,7 @@
             if (unitPrice > match.median * 1.4) tag = "over";
             else if (unitPrice < match.median * 0.7) tag = "under";
           }
-          var parsed = parseKey(match?.rawKey || l.item_name || "");
+          var parsed = parseKey(match?.rawKey || prismaticKey || l.item_name || "");
           return {
             raw: l,
             unitPrice: unitPrice,
@@ -414,7 +423,7 @@
         }
 
         var sortActive = _drawerSort[sellerName] || "deals";
-        var sortBar = `<div class="scard__drawer-hdr">Recent Listings
+        var sortBar = `<div class="scard__drawer-hdr">Listings
           <div class="scard__drawer-sort">
             <button class="dsort-btn ${sortActive === "deals" ? "on" : ""}" data-sort="deals" data-seller="${esc(sellerName)}">Best Deals</button>
             <button class="dsort-btn ${sortActive === "price_asc" || sortActive === "price_desc" ? "on" : ""}" data-sort="price_toggle" data-seller="${esc(sellerName)}" data-current="${sortActive}">Price ${sortActive === "price_desc" ? "↓" : "↑"}</button>
