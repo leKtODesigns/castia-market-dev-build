@@ -1551,6 +1551,11 @@ body.overlay-open #scrollTopBtn {
 .pag.pag-hidden {
   display: none;
 }
+.pag.pag-hidden #pmeta {
+  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
 
 /* ── Responsive column hiding ── */
 @media (max-width: 1000px) {

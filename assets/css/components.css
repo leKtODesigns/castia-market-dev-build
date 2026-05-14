@@ -1085,6 +1085,20 @@ td {
   align-items: flex-start;
   gap: 4px;
 }
+.panel-title__line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  min-width: 0;
+  flex-wrap: nowrap;
+}
+@media (max-width: 420px) {
+  .panel-title__line {
+    flex-wrap: wrap;
+    row-gap: 4px;
+  }
+}
 
 .panel-title__inner {
   display: inline-flex;
@@ -1380,10 +1394,21 @@ td {
   margin-bottom: 6px;
   font-family: "Space Mono", monospace;
 }
+.ph-head {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
 .ph-range {
   display: flex;
   gap: 1rem;
   margin-top: 0.75rem;
+}
+@media (max-width: 480px) {
+  .ph-head {
+    gap: 4px;
+  }
 }
 .ph-range-item {
   flex: 1;
@@ -1523,9 +1548,16 @@ td {
 }
 .pctrl .cselect-menu {
   top: 38px;
-  z-index: 220;
+  z-index: 420;
   left: 0;
   right: auto;
+}
+.pctrl .ctoggle {
+  font-family: "Space Mono", monospace;
+  font-size: 11px;
+  line-height: 1.2;
+  min-height: 32px;
+  padding: 5px 10px;
 }
 .pctrl .pcl {
   font-size: 10px;
@@ -2095,6 +2127,13 @@ td {
 @media (max-width: 640px) {
   .cmp-grid {
     grid-template-columns: 1fr;
+  }
+  .cmp-price-row {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .cmp-price-row .copy-price-btn {
+    margin-left: auto;
   }
 
   .cmp-meta {

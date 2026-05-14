@@ -494,7 +494,7 @@ function buildPanelHTML(item, listings, meta = {}) {
   // Price hero section with median price and IQR visualization
   html += `<div class="price-hero">
     <div class="ph-label">Median Unit Price</div>
-    <div style="display:flex;align-items:center;gap:0">
+    <div class="ph-head" style="display:flex;align-items:center;gap:0">
       <div class="ph-median">${fmt(median)}</div>
       <button type="button" class="copy-price-btn" onclick="copyPrice(${median}, this)" title="Copy price" aria-label="Copy price">
         <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><path d="M1.5 7.5V1.5h6"/></svg>

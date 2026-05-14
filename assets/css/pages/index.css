@@ -349,6 +349,15 @@
       max-width: 32px;
       max-height: 32px;
     }
+    @media (max-width: 480px) {
+      .copy-price-btn {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        min-height: 30px;
+        margin-left: 6px;
+      }
+    }
     .copy-price-btn:hover {
       background: var(--bg3);
       color: var(--gold);
@@ -363,7 +372,9 @@
       color: var(--text2);
       padding: 8px 12px;
       cursor: pointer;
-      font-size: 14px;
+      font-family: "Space Mono", monospace;
+      font-size: 11px;
+      line-height: 1.2;
       transition: border-color 0.15s, background 0.15s, color 0.15s;
       display: flex;
       align-items: center;
@@ -626,6 +637,8 @@
       flex: 1 1 10.5rem;
       min-width: 9.5rem;
       max-width: 13rem;
+      position: relative;
+      z-index: 50;
     }
     .listings-toolbar .cselect-btn {
       height: 2.875rem;
@@ -668,6 +681,7 @@
       background: var(--bg2);
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
       overflow: visible;
+      z-index: 260;
     }
     .listings-toolbar .cselect-menu button {
       min-height: 2.25rem;
