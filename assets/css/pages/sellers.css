@@ -1,0 +1,17 @@
+@supports (padding: max(0px)) {
+        header {
+          padding-left: max(1.25rem, env(safe-area-inset-left));
+          padding-right: max(1.25rem, env(safe-area-inset-right));
+        }
+        main {
+          padding-left: max(0.75rem, env(safe-area-inset-left));
+          padding-right: max(0.75rem, env(safe-area-inset-right));
+        }
+        footer {
+          padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+        }
+        #toast {
+          bottom: max(1.25rem, env(safe-area-inset-bottom));
+          right: max(1.25rem, env(safe-area-inset-right));
+        }
+      }

@@ -620,3 +620,35 @@ body {
   animation: scParticleGlitch var(--dur, 0.9s) steps(2, end) var(--delay, 0s)
     forwards;
 }
+
+.is-hidden {
+  display: none;
+}
+
+.sv--small {
+  font-size: 14px;
+}
+
+.spills--flush {
+  margin-left: 0;
+}
+
+.sw--legacy-hidden {
+  pointer-events: none;
+  opacity: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+.panel-body-empty {
+  color: var(--text3);
+  font-family: "Space Mono", monospace;
+  font-size: 12px;
+  text-align: center;
+  padding: 3rem 0;
+}
+
+.cmp-title-icon {
+  margin-right: 7px;
+  vertical-align: -1px;
+}
