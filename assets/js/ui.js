@@ -544,13 +544,13 @@ function updateChips() {
 
   el.innerHTML = "";
   const q = qEl.value.trim(),
-      cat = catEl.value,
-      conf = confEl.value,
-      tier = tierEl.value;
+      cat = catEl?.value || "",
+      conf = confEl?.value || "",
+      tier = tierEl?.value || "";
   if (q)
     addChip("search: " + q, () => {
       qEl.value = "";
-      $("xBtn").classList.remove("on");
+      $("xBtn")?.classList.remove("on");
       applyFilters();
     });
   if (favOnly)
@@ -1510,8 +1510,9 @@ function setView(v) {
  * Clears the search input
  */
 function clearQ() {
+  if (!qEl) return;
   qEl.value = "";
-  $("xBtn").classList.remove("on");
+  $("xBtn")?.classList.remove("on");
   hideSugg();
   applyFilters();
   qEl.focus();
@@ -1521,13 +1522,14 @@ function clearQ() {
  * Clears all filters and resets UI state
  */
 function clearAll() {
+  if (!qEl) return;
   qEl.value = "";
-  catEl.value = "";
-  confEl.value = "";
-  tierEl.value = "";
-  $("xBtn").classList.remove("on");
-  refreshCSelect("catEl");
-  refreshCSelect("confEl");
-  refreshCSelect("tierEl");
+  if (catEl) catEl.value = "";
+  if (confEl) confEl.value = "";
+  if (tierEl) tierEl.value = "";
+  $("xBtn")?.classList.remove("on");
+  if (catEl) refreshCSelect("catEl");
+  if (confEl) refreshCSelect("confEl");
+  if (tierEl) refreshCSelect("tierEl");
   applyFilters();
 }
