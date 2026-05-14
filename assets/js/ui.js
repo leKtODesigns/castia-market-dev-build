@@ -1110,10 +1110,8 @@ function renderCards(rows) {
         const a11yLabel = `Open details for ${r.displayName || r.rawKey || "item"}`;
         return `<div class="pcard ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
         ${imgHTML}
-        <div class="ccard-actions">
-          <button type="button" class="fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
-          <button type="button" class="cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
-        </div>
+        <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
+        <button type="button" class="pcard-act pcard-cmp cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
         <div class="ccard-head">
           <div class="ckey" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${esc(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
         </div>

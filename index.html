@@ -360,6 +360,20 @@
         <div class="listings-toolbar__bottom-left">
           <span class="sort-label">Sort:</span>
           <div class="spills spills--flush">
+            <button
+                    class="spill"
+                    id="sp-lastseen"
+                    data-action="set-sort" data-sort-key="last_seen"
+            >
+              Newest
+            </button>
+            <button
+                    class="spill"
+                    id="sp-confidence"
+                    data-action="set-sort" data-sort-key="confidence"
+            >
+              Confidence
+            </button>
             <button class="spill on" id="sp-median" data-action="set-sort" data-sort-key="median">
               Price
             </button>
@@ -372,20 +386,6 @@
                     data-action="set-sort" data-sort-key="displayName"
             >
               Name A–Z
-            </button>
-            <button
-                    class="spill"
-                    id="sp-confidence"
-                    data-action="set-sort" data-sort-key="confidence"
-            >
-              Confidence
-            </button>
-            <button
-                    class="spill"
-                    id="sp-lastseen"
-                    data-action="set-sort" data-sort-key="last_seen"
-            >
-              Newest
             </button>
             <button class="spill on" id="sp-dir" data-action="flip-sort-dir">↓</button>
           </div>

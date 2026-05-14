@@ -630,7 +630,7 @@ if (cgrid) {
       }
     }
     // Prevent accidental panel open when clicking inside the action cluster container.
-    if (e.target.closest(".ccard-actions")) {
+    if (e.target.closest(".pcard-act")) {
       e.preventDefault();
       e.stopPropagation();
       return;
@@ -995,7 +995,7 @@ if (cgrid) {
     const card = e.target.closest(".pcard[data-key]");
     if (!card) return;
     // Don't show if hovering action buttons
-    if (e.target.closest(".ccard-actions")) return;
+    if (e.target.closest(".pcard-act")) return;
     const r = enriched.find((x) => x.rawKey === card.dataset.key);
     if (!r) return;
     showRowTip(e, r);

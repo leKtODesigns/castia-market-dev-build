@@ -60,6 +60,72 @@
         return map[label] || "av-neutral";
       }
 
+      function sellerAvatarUrls(name) {
+        var safe = encodeURIComponent(name || "");
+        return [
+          "https://render.crafty.gg/3d/bust/" + safe,
+          "https://mc-heads.net/avatar/" + safe + "/96",
+        ];
+      }
+
+      function loadAvatarChain(
+        imgEl,
+        fallbackEl,
+        name,
+        label,
+        avatarContainer,
+        keepStatusClass,
+      ) {
+        if (!imgEl || !fallbackEl) return;
+        var urls = sellerAvatarUrls(name);
+        var idx = 0;
+        var done = false;
+
+        fallbackEl.textContent = avatarInitials(name);
+        fallbackEl.style.display = "none";
+        imgEl.style.display = "block";
+        imgEl.alt = (name || "Seller") + " avatar";
+
+        function showFallback() {
+          if (done) return;
+          done = true;
+          imgEl.style.display = "none";
+          fallbackEl.style.display = "block";
+          if (avatarContainer)
+            avatarContainer.classList.add(avatarCls(label));
+        }
+
+        function next() {
+          if (done) return;
+          if (idx >= urls.length) {
+            showFallback();
+            return;
+          }
+          imgEl.src = urls[idx++];
+        }
+
+        imgEl.onerror = next;
+        imgEl.onload = function () {
+          done = true;
+          imgEl.style.display = "block";
+          fallbackEl.style.display = "none";
+          if (avatarContainer && !keepStatusClass)
+            avatarContainer.classList.remove(avatarCls(label));
+        };
+
+        next();
+      }
+
+      function hydrateSellerAvatars(scope) {
+        (scope || document).querySelectorAll(".scard__avatar").forEach(function (avatarEl) {
+          var imgEl = avatarEl.querySelector(".scard__avatar-img");
+          var fallbackEl = avatarEl.querySelector(".scard__avatar-fallback");
+          var name = avatarEl.getAttribute("data-avatar-name") || "";
+          var label = avatarEl.getAttribute("data-avatar-label") || "Neutral";
+          loadAvatarChain(imgEl, fallbackEl, name, label, avatarEl, true);
+        });
+      }
+
       function cardAnimCls(label) {
         var map = {
           Trustworthy: "scard-trustworthy",
@@ -114,12 +180,11 @@
         var totVal = total != null ? total.toLocaleString() : "—";
         var barPct = Math.min(100, pct || 0);
 
-        var avatarUrl = `https://mc-heads.net/avatar/${encodeURIComponent(name)}/96`;
         return `<button type="button" class="scard ${animCls}" data-seller="${esc(name)}" aria-label="Open seller ${esc(name)}">
           <div class="scard__head">
-            <div class="scard__avatar ${avCls}">
-              <img src="${avatarUrl}" alt="${esc(name)} avatar" class="scard__avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="display: block;">
-              <span class="scard__avatar-fallback" style="display: none;">${esc(initials)}</span>
+            <div class="scard__avatar ${avCls}" data-avatar-name="${esc(name)}" data-avatar-label="${esc(label)}">
+              <img alt="${esc(name)} avatar" class="scard__avatar-img" />
+              <span class="scard__avatar-fallback">${esc(initials)}</span>
             </div>
             <div class="scard__info">
               <div class="scard__name" title="${esc(name)}">${esc(name)}</div>
@@ -167,26 +232,10 @@
         // Update header elements
         title.textContent = name;
 
-        // Set up avatar
-        const avatarUrl = `https://mc-heads.net/avatar/${encodeURIComponent(name)}/96`;
-        avatarImg.src = avatarUrl;
-        avatarImg.alt = `${name} avatar`;
-        avatarImg.style.display = "block";
-        avatarFallback.style.display = "none";
-
-        // Handle avatar load error
-        avatarImg.onerror = function () {
-          avatarImg.style.display = "none";
-          avatarFallback.style.display = "block";
-          avatarFallback.textContent = avatarInitials(name);
-          const avatarEl = document.getElementById("seller-panel-avatar");
-          avatarEl.className = `panel-avatar ${avatarCls(label)}`;
-        };
-
-        avatarImg.onload = function () {
-          const avatarEl = document.getElementById("seller-panel-avatar");
-          avatarEl.className = "panel-avatar";
-        };
+        // Set up avatar with crafted -> mc-heads -> initials fallback
+        const avatarEl = document.getElementById("seller-panel-avatar");
+        if (avatarEl) avatarEl.className = "panel-avatar";
+        loadAvatarChain(avatarImg, avatarFallback, name, label, avatarEl, false);
 
         // Set badges
         const badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${esc(label)}</span>`;
@@ -402,15 +451,22 @@
         if (countEl)
           countEl.textContent =
             sellers.length + " seller" + (sellers.length !== 1 ? "s" : "");
+        if (countEl) countEl.classList.add("ready");
         grid.innerHTML = sellers.length
           ? sellers.map(buildSellerCard).join("")
           : `<div class="sellers-empty">No sellers match filters.</div>`;
+        hydrateSellerAvatars(grid);
         grid.classList.add("loaded");
       }
 
       function showSellersSkeleton() {
         var grid = document.getElementById("sellersGrid");
+        var countEl = document.getElementById("sellersCount");
         if (!grid) return;
+        if (countEl) {
+          countEl.classList.remove("ready");
+          countEl.textContent = "";
+        }
         grid.classList.remove("loaded");
         var skel = "";
         for (var i = 0; i < 10; i++) {

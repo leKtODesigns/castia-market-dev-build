@@ -257,6 +257,19 @@
   background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: 999px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(2px);
+  transition:
+    opacity var(--dur-2),
+    transform var(--dur-2),
+    visibility 0s linear var(--dur-2);
+}
+.sellers-count.ready {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
 }
 
 .sellers-grid {
@@ -531,7 +544,8 @@
     0 8px 32px rgba(0, 0, 0, 0.42),
     0 0 40px rgba(240, 100, 100, 0.09);
 }
-.scard.scard-flagged:hover {
+.scard.scard-flagged:hover,
+.scard.scard-flagged.fx-active {
   animation: scShameShake 0.55s ease-in-out 0.08s;
 }
 .scard.scard-flagged:hover .scard__avatar,
@@ -1368,6 +1382,7 @@
 
   .sellers-toolbar__search {
     max-width: none;
+    margin-inline: auto;
   }
 
   .sellers-toolbar__filter {

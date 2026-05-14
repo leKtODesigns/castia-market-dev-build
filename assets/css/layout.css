@@ -93,6 +93,7 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   justify-content: center;
   color: var(--gold);
   flex-shrink: 0;
+  line-height: 0;
   transition:
     background 0.2s,
     border-color 0.2s;
@@ -481,8 +482,13 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
   flex-shrink: 0;
+  line-height: 0;
+}
+.logo-mark svg {
+  display: block;
+  width: 13px;
+  height: 13px;
 }
 .header-right {
   display: flex;
@@ -1134,10 +1140,11 @@ select option {
   }
   .pag-bar {
     width: 100%;
+    justify-content: center;
   }
   .pag-bar .pbtns {
     flex-wrap: wrap;
-    justify-content: flex-start;
+    justify-content: center;
   }
 }
 .vbtn {
@@ -1441,23 +1448,57 @@ tbody tr:last-child td {
 }
 
 /* ── Scroll-to-top ── */
-/* Desktop: bottom-left */
-@media (min-width: 900px) {
-  #scrollTopBtn {
-    display: flex;
+#scrollTopBtn {
+  position: fixed;
+  bottom: 1.25rem;
+  left: 1rem;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: linear-gradient(
+    180deg,
+    rgba(237, 184, 74, 0.24),
+    rgba(237, 184, 74, 0.1)
+  );
+  border: 1px solid rgba(237, 184, 74, 0.52);
+  color: var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease,
+    border-color 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 320;
+  box-shadow:
+    0 12px 30px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(237, 184, 74, 0.12),
+    0 0 24px rgba(237, 184, 74, 0.18);
+}
+#scrollTopBtn.on {
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: hover) {
+  #scrollTopBtn:hover {
+    background: linear-gradient(
+      180deg,
+      rgba(237, 184, 74, 0.32),
+      rgba(237, 184, 74, 0.14)
+    );
+    border-color: rgba(237, 184, 74, 0.78);
+    color: var(--gold2);
+    transform: translateY(-2px);
   }
 }
-/* Mobile: shown as floating action button, bottom-right (avoids panel) */
 @media (max-width: 899px) {
   #scrollTopBtn {
-    display: flex;
     bottom: 1rem;
     left: 1rem;
-    right: auto;
-    width: 46px;
-    height: 46px;
-    border-radius: 50%;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
 }
 body.overlay-open #scrollTopBtn {
@@ -1541,6 +1582,16 @@ body.overlay-open #scrollTopBtn {
   th:last-child,
   td:last-child {
     min-width: 70px;
+  }
+}
+
+@media (min-width: 480px) and (max-width: 600px) {
+  .twrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  table {
+    min-width: 640px;
   }
 }
 
@@ -1761,15 +1812,17 @@ body.overlay-open #scrollTopBtn {
 @media (max-width: 640px) {
   .sellers-toolbar {
     gap: 1.5rem;
+    align-items: center;
   }
 
   .sellers-toolbar__search {
     max-width: none;
     flex: 1;
+    margin-inline: auto;
   }
 
   .sellers-toolbar__filter {
-    justify-content: flex-start;
+    justify-content: center;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;

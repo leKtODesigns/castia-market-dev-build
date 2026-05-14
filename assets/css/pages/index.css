@@ -350,11 +350,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      -webkit-tap-highlight-color: transparent;
     }
-    .ctoggle:hover {
-      border-color: var(--gold3);
-      background: var(--gold-bg);
-      color: var(--gold);
+    @media (hover: hover) {
+      .ctoggle:hover {
+        border-color: var(--gold3);
+        background: var(--gold-bg);
+        color: var(--gold);
+      }
     }
     .ctoggle.on {
       border-color: var(--gold2);
@@ -1129,17 +1132,26 @@
         align-items: stretch;
         flex-direction: column;
       }
+      .pctrl .ctoggle {
+        min-width: 0;
+        flex: 1 1 auto;
+        padding: 5px 8px;
+        font-size: 11px;
+        justify-content: center;
+        white-space: nowrap;
+      }
       .listings-toolbar .spills,
       .listings-toolbar__bottom-right {
         width: 100%;
       }
       .listings-toolbar .spills {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 0.45rem;
       }
       .listings-toolbar .spill {
-        width: 100%;
+        width: auto;
+        grid-column: span 2;
         min-height: 2.4rem;
         display: inline-flex;
         align-items: center;
@@ -1147,33 +1159,57 @@
         padding: 0.5rem 0.55rem;
         font-size: 0.76rem;
       }
+      .listings-toolbar #sp-samples {
+        grid-column: 2 / span 2;
+      }
+      .listings-toolbar #sp-displayName {
+        grid-column: 4 / span 2;
+      }
+      .listings-toolbar #sp-dir {
+        grid-column: 3 / span 2;
+        width: 2.4rem;
+        height: 2.4rem;
+        min-height: 2.4rem;
+        padding: 0;
+        border-radius: 50%;
+        justify-self: center;
+      }
       .listings-toolbar__bottom {
         gap: 0.65rem;
       }
       .listings-toolbar__bottom-right {
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 0.45rem;
       }
       .listings-toolbar__bottom-right .vbtn {
+        grid-column: span 2;
         justify-content: center;
         min-width: 0;
         min-height: 2.45rem;
-        padding: 0.48rem 0.45rem;
-        font-size: 0.75rem;
+        padding: 0.5rem 0.35rem;
+        font-size: 0.73rem;
+        line-height: 1.1;
+        text-align: center;
       }
-      .listings-toolbar__bottom-right .vbtn:nth-last-child(-n + 2),
-      .listings-toolbar__bottom-right .vbtn {
-        width: 100%;
-        padding-inline: 0.45rem;
+      .listings-toolbar__bottom-right .vbtn:nth-child(4) {
+        grid-column: 2 / span 2;
+      }
+      .listings-toolbar__bottom-right .vbtn:nth-child(5) {
+        grid-column: 4 / span 2;
       }
       .listings-results-row {
         flex-wrap: wrap;
-        align-items: stretch;
+        align-items: center;
+        justify-content: center;
       }
       .listings-results-row .ri,
       .listings-results-row .pag-bar {
         width: 100%;
+        justify-content: center;
+      }
+      .listings-results-row .pag-bar .pbtns {
+        justify-content: center;
       }
     }
 
