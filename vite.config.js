@@ -15,7 +15,9 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: "index.html",
-        sellers: "sellers.html",
+        sellers: "sellers/index.html",
+        sellersLegacy: "sellers.html",
+        listingsAlias: "listings/index.html",
       },
     },
   },

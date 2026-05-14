@@ -1,4 +1,9 @@
 (function () {
+  var BASE_PATH = "/castia-market-dev-build/";
+  function toBasePath(assetPath) {
+    return BASE_PATH + String(assetPath || "").replace(/^\/+/, "");
+  }
+
   function wireInlineActions() {
     document.addEventListener("click", function (event) {
       var target = event.target.closest("[data-action]");
@@ -20,24 +25,24 @@
   }
 
   var sharedScripts = [
-    "./assets/js/card_notes.js",
-    "./assets/js/constants/config.js",
-    "./assets/js/constants/items.js",
-    "./assets/js/constants/ui-constants.js",
-    "./assets/js/state.js",
-    "./assets/js/data.js",
-    "./assets/js/ui.js",
-    "./assets/js/panel.js",
-    "./assets/js/features.js",
+    "assets/js/card_notes.js",
+    "assets/js/constants/config.js",
+    "assets/js/constants/items.js",
+    "assets/js/constants/ui-constants.js",
+    "assets/js/state.js",
+    "assets/js/data.js",
+    "assets/js/ui.js",
+    "assets/js/panel.js",
+    "assets/js/features.js",
   ];
 
-  var pageScripts = ["./assets/js/pages/sellers-page.js"];
+  var pageScripts = ["assets/js/pages/sellers-page.js"];
   var queue = sharedScripts.concat(pageScripts);
 
   function loadNext(index) {
     if (index >= queue.length) return;
     var script = document.createElement("script");
-    script.src = queue[index];
+    script.src = toBasePath(queue[index]);
     script.async = false;
     script.defer = true;
     script.onload = function () {
