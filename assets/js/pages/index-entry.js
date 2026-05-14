@@ -22,6 +22,9 @@
         return window.setSort?.(target.getAttribute("data-sort-key"));
       if (action === "flip-sort-dir") return window.flipDir?.();
       if (action === "toggle-fav-only") return window.toggleFavOnly?.();
+      if (action === "clear-all") return window.clearAll?.();
+      if (action === "go-page")
+        return window.goPg?.(Number(target.getAttribute("data-page")));
       if (action === "open-compare") return window.openCompare?.();
       if (action === "set-view")
         return window.setView?.(target.getAttribute("data-view"));

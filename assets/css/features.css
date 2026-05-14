@@ -874,7 +874,7 @@
   transform: translateX(100%) scale(0.98);
   opacity: 0;
   transition: all 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 1000;
+  z-index: var(--z-panel);
   display: flex;
   flex-direction: column;
   will-change: transform, opacity;
@@ -900,7 +900,7 @@
   transition:
     opacity 0.32s cubic-bezier(0.4, 0, 0.2, 1),
     visibility 0.32s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 999;
+  z-index: var(--z-overlay);
   backdrop-filter: blur(0px);
   -webkit-backdrop-filter: blur(0px);
 }
@@ -1178,6 +1178,36 @@
     transform var(--dur-1);
   animation: listFadeIn 0.25s var(--ease-out) both;
 }
+.listing-section .sl-row:nth-child(1) {
+  animation-delay: 0s;
+}
+.listing-section .sl-row:nth-child(2) {
+  animation-delay: 0.05s;
+}
+.listing-section .sl-row:nth-child(3) {
+  animation-delay: 0.1s;
+}
+.listing-section .sl-row:nth-child(4) {
+  animation-delay: 0.15s;
+}
+.listing-section .sl-row:nth-child(5) {
+  animation-delay: 0.2s;
+}
+.listing-section .sl-row:nth-child(6) {
+  animation-delay: 0.25s;
+}
+.listing-section .sl-row:nth-child(7) {
+  animation-delay: 0.3s;
+}
+.listing-section .sl-row:nth-child(8) {
+  animation-delay: 0.35s;
+}
+.listing-section .sl-row:nth-child(9) {
+  animation-delay: 0.4s;
+}
+.listing-section .sl-row:nth-child(10) {
+  animation-delay: 0.45s;
+}
 
 .sl-row:hover {
   background: var(--bg4);
@@ -1298,6 +1328,12 @@
   border-radius: var(--r-xs);
   animation: skelShimmer 1.6s ease-in-out infinite;
 }
+.skel-line--short {
+  width: 40%;
+}
+.skel-line--medium {
+  width: 60%;
+}
 
 .scard-skel__stats {
   display: grid;
@@ -1323,6 +1359,9 @@
   background-size: 200% 100%;
   border-radius: var(--r-xs);
   animation: skelShimmer 1.6s ease-in-out infinite;
+}
+.skel-mini--half {
+  width: 50%;
 }
 
 /* ==========================================

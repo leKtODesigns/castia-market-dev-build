@@ -455,7 +455,7 @@ function openCompare() {
     cmpBody.innerHTML = `<div class="cmp-empty">
       <div class="eicon">⇄</div>
       <div class="emsg">No items selected for comparison</div>
-      <div class="esub">Open any item’s detail panel and click <strong style="color:var(--text2)">⇄ Compare</strong> to add up to 3 items.</div>
+      <div class="esub">Open any item’s detail panel and click <strong>⇄ Compare</strong> to add up to 3 items.</div>
     </div>`;
   } else {
     const items = compareKeys
@@ -489,9 +489,9 @@ function openCompare() {
         }
         return `<div class="cmp-item">
         <div class="cmp-item-head">
-          <div style="min-width:0;flex:1">
+          <div class="cmp-head-main">
             <div class="cmp-item-name" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
-            <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}</div>
+            <div class="cmp-badge-row">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}</div>
           </div>
           <div class="cmp-item-actions">
             <button type="button" class="fstar ${inFav ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${inFav ? "Remove from favorites" : "Add to favorites"}" aria-label="${inFav ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${inFav ? "true" : "false"}">★</button>
@@ -500,15 +500,15 @@ function openCompare() {
         ${metaHTML}
         <div class="cmp-price-row">
           <div class="cmp-price">${fmt(r.median)}</div>
-          <button type="button" class="copy-price-btn" onclick="copyPriceFromCmp(${r.median}, this)" title="Copy price" aria-label="Copy price">
+          <button type="button" class="copy-price-btn" data-act="copy-price" data-price="${r.median}" title="Copy price" aria-label="Copy price">
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><path d="M1.5 7.5V1.5h6"/></svg>
           </button>
         </div>
         <div class="cmp-range">${fmt(ar.low)} — ${fmt(ar.high)}</div>
         <div class="cmp-row"><span class="rl">Trend</span><span>${trendH(r.trend)}</span></div>
-        <div class="cmp-row"><span class="rl">Confidence</span><span class="conf-b ${confCls(r.confidence)}" style="padding:1px 6px">■ ${r.confidence || "—"}</span></div>
-        <div class="cmp-row"><span class="rl">Samples</span><span style="font-family:'Space Mono',monospace">${r.samples?.toLocaleString() || "—"}</span></div>
-        <div class="cmp-row"><span class="rl">Last seen</span><span style="font-family:'Space Mono',monospace">${fmtT(r.last_seen)}</span></div>
+        <div class="cmp-row"><span class="rl">Confidence</span><span class="conf-b conf-inline ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span></div>
+        <div class="cmp-row"><span class="rl">Samples</span><span class="cmp-mono">${r.samples?.toLocaleString() || "—"}</span></div>
+        <div class="cmp-row"><span class="rl">Last seen</span><span class="cmp-mono">${fmtT(r.last_seen)}</span></div>
         <div class="cmp-footer">
           <button type="button" class="hbtn" data-act="cmp-open" data-key="${esc(r.rawKey)}" aria-label="Open details">Open detail</button>
           <button type="button" class="hbtn" data-act="cmp-remove" data-key="${esc(r.rawKey)}" aria-label="Remove from compare">Remove</button>
@@ -686,6 +686,32 @@ if (panel) {
       toggleCompare(key);
       return;
     }
+    if (act.dataset.act === "copy-price") {
+      e.preventDefault();
+      copyPrice(Number(act.dataset.price || 0), act);
+      return;
+    }
+    if (act.dataset.act === "panel-sort-toggle") {
+      e.preventDefault();
+      togglePanelSortSel();
+      return;
+    }
+    if (act.dataset.act === "panel-sort") {
+      e.preventDefault();
+      setPanelSort(act.dataset.sort);
+      closeAllCSelects();
+      return;
+    }
+    if (act.dataset.act === "panel-include-flagged") {
+      e.preventDefault();
+      setPanelIncludeFlagged(!panelIncludeFlagged);
+      return;
+    }
+    if (act.dataset.act === "panel-scroll-top") {
+      e.preventDefault();
+      $("panel-body")?.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
   });
 }
 
@@ -701,6 +727,11 @@ if (compareModal) {
       if (compareModal.classList.contains("on")) {
         updateCmpTooltip();
       }
+      return;
+    }
+    if (act.dataset.act === "copy-price") {
+      e.preventDefault();
+      copyPriceFromCmp(Number(act.dataset.price || 0), act);
       return;
     }
     if (act.dataset.act === "cmp-open") {
@@ -957,7 +988,7 @@ function showRowTip(e, r) {
   tip.innerHTML = `
     <div class="row-tip-row"><span class="row-tip-label">Range</span><span class="row-tip-val">${fmt(ar.low)} — ${fmt(ar.high)}</span></div>
     <div class="row-tip-row"><span class="row-tip-label">Trend</span><span class="row-tip-val">${trendH(r.trend)}</span></div>
-    <div class="row-tip-row"><span class="row-tip-label">Confidence</span><span class="row-tip-val conf-b ${confCls(r.confidence)}" style="padding:0">■ ${r.confidence || "—"}</span></div>
+    <div class="row-tip-row"><span class="row-tip-label">Confidence</span><span class="row-tip-val row-tip-conf conf-b ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span></div>
     <div class="row-tip-row"><span class="row-tip-label">Samples</span><span class="row-tip-val">${r.samples?.toLocaleString() || "—"}</span></div>`;
   positionRowTip(e);
   tip.classList.add("on");
@@ -1048,11 +1079,11 @@ function showEmptyFavs() {
     <div class="eicon">★</div>
     <div class="emsg">No favorites yet</div>
     <div class="esub">Click the ★ star on any item to add it to your watchlist.</div>
-    <div class="esub" style="margin-top:8px"><button onclick="toggleFavOnly()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:inherit;font-size:12px;text-decoration:underline">Show all items</button></div>
+    <div class="esub esub-action"><button class="empty-action" data-action="toggle-fav-only">Show all items</button></div>
   </div>`;
   if (vw === "table")
     tbody.innerHTML = `<tr><td colspan="7">${inner}</td></tr>`;
-  else cgrid.innerHTML = `<div style="grid-column:1/-1">${inner}</div>`;
+  else cgrid.innerHTML = `<div class="grid-full">${inner}</div>`;
 }
 
 // Application initialization

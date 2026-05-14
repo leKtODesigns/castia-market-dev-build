@@ -237,7 +237,7 @@ function closePanel() {
  * @returns {string} HTML string for the skeleton UI
  */
 function panelSkeleton() {
-  return `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line" style="width:60%"></div><div class="pskel-line" style="width:80%"></div><div class="pskel-line" style="width:50%"></div></div>`;
+  return `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line pskel-line--md"></div><div class="pskel-line pskel-line--lg"></div><div class="pskel-line pskel-line--sm"></div></div>`;
 }
 
 /**
@@ -254,6 +254,11 @@ function panelSortLabel() {
         : "Newest";
 }
 
+function sellerBadgeHTML(label, text) {
+  const cls = String(label || "neutral").toLowerCase();
+  return `<span class="lr-seller-badge ${esc(cls)}">${esc(text || label || "Neutral")}</span>`;
+}
+
 /**
  * Builds HTML for the listings section in the panel.
  * @param {Object} pd - Parsed item data
@@ -265,26 +270,25 @@ function buildPanelListingsHTML(pd, listings) {
     return `<div class="no-listings">No recent listings found</div>`;
   let html = "";
   for (const l of listings) {
-    const info = sellerRatingInfo(l.seller),
-      cols = SELLER_COLORS[info.label] || SELLER_COLORS.Neutral;
+    const info = sellerRatingInfo(l.seller);
     const sellerBadge = info.label
-      ? `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${info.label}</span>`
+      ? sellerBadgeHTML(info.label, info.label)
       : "";
     const blacklistedBadge = info.isBlacklisted
-      ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
+      ? sellerBadgeHTML("blacklisted", "Blacklisted")
       : "";
     let priceClass = "";
     if (pd.iqr_high && l.unit_price > pd.iqr_high * 1.5) priceClass = "over";
     else if (pd.iqr_low && l.unit_price < pd.iqr_low * 0.7)
       priceClass = "under";
     html += `<div class="listing-row">
-      <div style="min-width:0;flex:1">
-        <div style="display:flex;align-items:center;gap:4px;min-width:0;flex-wrap:wrap">
+      <div class="listing-row-main">
+        <div class="listing-row-seller">
           <span class="lr-seller">${esc(l.seller || "Unknown")}</span>${sellerBadge}${blacklistedBadge}
         </div>
         ${l.count > 1 ? `<div class="lr-count">×${l.count.toLocaleString()}</div>` : ""}
       </div>
-      <div style="text-align:right;flex-shrink:0">
+      <div class="listing-row-price">
         <div class="lr-price ${priceClass}">${fmt(l.unit_price)}</div>
         ${l.count > 1 ? `<div class="lr-date">total ${fmt(l.price)}</div>` : ""}
         <div class="lr-date">${fmtT(l.timestamp)}</div>
@@ -316,16 +320,15 @@ function buildPanelTopSellersHTML(listings) {
       sd.is_blacklisted || sd.is_flagged
         ? "Flagged"
         : sd.accuracy_label || "Neutral";
-    const cols = SELLER_COLORS[label] || SELLER_COLORS.Neutral;
-    html += `<div class="seller-rep" style="margin-bottom:8px">
-      <div class="sr-name" style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+    html += `<div class="seller-rep">
+      <div class="sr-name">
         ${esc(sd.seller)}
-        <span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${label}</span>
-        ${sd.is_blacklisted ? '<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>' : ""}
+        ${sellerBadgeHTML(label, label)}
+        ${sd.is_blacklisted ? sellerBadgeHTML("blacklisted", "Blacklisted") : ""}
       </div>
       <div class="sr-row"><span class="sr-label">Total Listings</span><span class="sr-value">${sd.total_listings?.toLocaleString() || "—"}</span></div>
       <div class="sr-row"><span class="sr-label">Avg Markup</span><span class="sr-value">${sd.avg_markup_percent != null ? sd.avg_markup_percent.toFixed(1) + "%" : "—"}</span></div>
-      <div class="sr-row"><span class="sr-label">Overpriced Ratio</span><span class="sr-value" style="${(sd.overpriced_ratio || 0) > 30 ? "color:var(--red)" : ""}">${sd.overpriced_ratio != null ? sd.overpriced_ratio.toFixed(1) + "%" : "—"}</span></div>
+      <div class="sr-row"><span class="sr-label">Overpriced Ratio</span><span class="sr-value ${(sd.overpriced_ratio || 0) > 30 ? "warn" : ""}">${sd.overpriced_ratio != null ? sd.overpriced_ratio.toFixed(1) + "%" : "—"}</span></div>
       <div class="sr-row"><span class="sr-label">Listings for this item</span><span class="sr-value">${sellerCounts[sellerName] || "—"}</span></div>
     </div>`;
   }
@@ -396,10 +399,10 @@ function renderPanelFromCtx(opts = {}) {
     const note = $("panelRemovedNote");
     if (note) {
       if (removed && !panelIncludeFlagged) {
-        note.style.display = "";
+        note.classList.remove("u-hidden");
         note.innerHTML = `Filtered out ${removed} listing${removed === 1 ? "" : "s"} from flagged/blacklisted sellers`;
       } else {
-        note.style.display = "none";
+        note.classList.add("u-hidden");
         note.innerHTML = "";
       }
     }
@@ -485,18 +488,18 @@ function buildPanelHTML(item, listings, meta = {}) {
     n >= 30
       ? ""
       : n >= 10
-        ? `<div style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;margin-top:5px">⚠ Range estimated — fewer than 30 samples</div>`
+        ? `<div class="range-note">⚠ Range estimated — fewer than 30 samples</div>`
         : n >= 3
-          ? `<div style="font-size:10px;color:var(--gold2);font-family:'Space Mono',monospace;margin-top:5px">⚠ Low sample count — range is approximate</div>`
-          : `<div style="font-size:10px;color:var(--red);font-family:'Space Mono',monospace;margin-top:5px">⚠ Very few samples — treat range as indicative only</div>`;
+          ? `<div class="range-note range-note-warn">⚠ Low sample count — range is approximate</div>`
+          : `<div class="range-note range-note-danger">⚠ Very few samples — treat range as indicative only</div>`;
   let html = "";
 
   // Price hero section with median price and IQR visualization
   html += `<div class="price-hero">
     <div class="ph-label">Median Unit Price</div>
-    <div class="ph-head" style="display:flex;align-items:center;gap:0">
+    <div class="ph-head">
       <div class="ph-median">${fmt(median)}</div>
-      <button type="button" class="copy-price-btn" onclick="copyPrice(${median}, this)" title="Copy price" aria-label="Copy price">
+      <button type="button" class="copy-price-btn" data-act="copy-price" data-price="${median}" title="Copy price" aria-label="Copy price">
         <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><path d="M1.5 7.5V1.5h6"/></svg>
       </button>
     </div>
@@ -509,7 +512,7 @@ function buildPanelHTML(item, listings, meta = {}) {
       <div class="iqr-labels"><span>${fmt(displayLow)}</span><span>${fmt(displayHigh)}</span></div>
     </div>
     ${rangeNote}
-    <div class="ph-range" style="margin-top:.75rem">
+    <div class="ph-range">
       <div class="ph-range-item"><div class="ph-rl">${n >= 10 ? "IQR Low" : "Est. Low"}</div><div class="ph-rv">${fmt(displayLow)}</div></div>
       <div class="ph-range-item"><div class="ph-rl">${n >= 10 ? "IQR High" : "Est. High"}</div><div class="ph-rv">${fmt(displayHigh)}</div></div>
       <div class="ph-range-item"><div class="ph-rl">Spread</div><div class="ph-rv">${fmt(iqrSpan)}</div></div>
@@ -518,7 +521,7 @@ function buildPanelHTML(item, listings, meta = {}) {
 
   // Meta pills row 1: Confidence, Trend, Samples, Tier, Last seen
   html += `<div class="meta-pills">
-    <div class="mpill"><span class="mplabel">Confidence</span> <span class="conf-b ${confCls(pd.confidence)}" style="padding:1px 5px">■ ${pd.confidence || "—"}</span></div>
+    <div class="mpill"><span class="mplabel">Confidence</span> <span class="conf-b conf-inline ${confCls(pd.confidence)}">■ ${pd.confidence || "—"}</span></div>
     <div class="mpill"><span class="mplabel">Trend</span> ${trendH(pd.trend)}</div>
     <div class="mpill"><span class="mplabel">Samples</span> ${pd.samples?.toLocaleString() || "—"}</div>
     ${pd.tier ? `<div class="mpill"><span class="mplabel">Tier</span> ${tierBadge(pd.tier)}</div>` : ""}
@@ -536,26 +539,26 @@ function buildPanelHTML(item, listings, meta = {}) {
   html += `<div class="pctrl">
     <span class="pcl">Sort</span>
     <div class="cselect" id="panelSortSel">
-      <button type="button" class="cselect-btn" onclick="togglePanelSortSel()" aria-haspopup="listbox" aria-expanded="false">
+      <button type="button" class="cselect-btn" data-act="panel-sort-toggle" aria-haspopup="listbox" aria-expanded="false">
         <span class="cval" id="panelSortVal">${panelSortLabel()}</span>
       </button>
       <div class="cselect-menu" id="panelSortMenu" role="listbox" aria-label="Sort listings">
-        <button type="button" class="copt ${panelSort === "newest" ? "on" : ""}" data-sort="newest" onclick="setPanelSort('newest');closeAllCSelects();">Newest</button>
-        <button type="button" class="copt ${panelSort === "price_asc" ? "on" : ""}" data-sort="price_asc" onclick="setPanelSort('price_asc');closeAllCSelects();">Price ↑</button>
-        <button type="button" class="copt ${panelSort === "price_desc" ? "on" : ""}" data-sort="price_desc" onclick="setPanelSort('price_desc');closeAllCSelects();">Price ↓</button>
-        <button type="button" class="copt ${panelSort === "seller" ? "on" : ""}" data-sort="seller" onclick="setPanelSort('seller');closeAllCSelects();">Seller rating</button>
+        <button type="button" class="copt ${panelSort === "newest" ? "on" : ""}" data-act="panel-sort" data-sort="newest">Newest</button>
+        <button type="button" class="copt ${panelSort === "price_asc" ? "on" : ""}" data-act="panel-sort" data-sort="price_asc">Price ↑</button>
+        <button type="button" class="copt ${panelSort === "price_desc" ? "on" : ""}" data-act="panel-sort" data-sort="price_desc">Price ↓</button>
+        <button type="button" class="copt ${panelSort === "seller" ? "on" : ""}" data-act="panel-sort" data-sort="seller">Seller rating</button>
       </div>
     </div>
-    <button type="button" class="ctoggle ${panelIncludeFlagged ? "on" : ""}" id="panelFlagTog" onclick="setPanelIncludeFlagged(!panelIncludeFlagged)" role="switch" aria-checked="${panelIncludeFlagged ? "true" : "false"}">
+    <button type="button" class="ctoggle ${panelIncludeFlagged ? "on" : ""}" id="panelFlagTog" data-act="panel-include-flagged" role="switch" aria-checked="${panelIncludeFlagged ? "true" : "false"}">
       <span class="ctog" aria-hidden="true">Include flagged</span>
     </button>
   </div>`;
 
   // Note about filtered listings from flagged/blacklisted sellers
   if (removed && !panelIncludeFlagged) {
-    html += `<div id="panelRemovedNote" style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;margin:-4px 0 10px">Filtered out ${removed} listing${removed === 1 ? "" : "s"} from flagged/blacklisted sellers</div>`;
+    html += `<div id="panelRemovedNote" class="panel-removed-note">Filtered out ${removed} listing${removed === 1 ? "" : "s"} from flagged/blacklisted sellers</div>`;
   } else {
-    html += `<div id="panelRemovedNote" style="display:none"></div>`;
+    html += `<div id="panelRemovedNote" class="panel-removed-note u-hidden"></div>`;
   }
 
   // Recent listings and top sellers sections
@@ -563,7 +566,7 @@ function buildPanelHTML(item, listings, meta = {}) {
   html += `<div id="panelTopSellers">${buildPanelTopSellersHTML(listings)}</div>`;
 
   // Panel scroll-to-top button
-  html += `<button type="button" class="panel-scroll-top" onclick="$('panel-body').scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top">
+  html += `<button type="button" class="panel-scroll-top" data-act="panel-scroll-top" aria-label="Back to top">
     <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,7 5.5,3.5 9,7"/></svg>
     Back to top
   </button>`;

@@ -52,6 +52,17 @@
   --shadow-1: 0 8px 28px rgba(0, 0, 0, 0.35);
   --shadow-2: 0 18px 60px rgba(0, 0, 0, 0.55);
   --shadow-3: 0 28px 90px rgba(0, 0, 0, 0.6);
+
+  /* Shared stacking layers */
+  --z-base: 1;
+  --z-raised: 4;
+  --z-sticky: 20;
+  --z-header: 200;
+  --z-dropdown: 500;
+  --z-overlay: 900;
+  --z-panel: 1000;
+  --z-modal: 1100;
+  --z-toast: 10000;
 }
 html {
   scroll-behavior: smooth;
@@ -78,6 +89,9 @@ body {
   color-scheme: dark;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
+}
+.u-hidden {
+  display: none !important;
 }
 ::-webkit-scrollbar {
   width: 6px;

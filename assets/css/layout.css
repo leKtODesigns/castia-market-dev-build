@@ -11,7 +11,7 @@
 .site-header {
   position: sticky;
   top: 0;
-  z-index: 200;
+  z-index: var(--z-header);
   width: 100%;
   background: rgba(11, 13, 18, 0.96);
   backdrop-filter: blur(18px);
@@ -597,7 +597,7 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
     ),
     rgba(11, 13, 18, 0.92);
   backdrop-filter: blur(14px);
-  z-index: 5000;
+  z-index: var(--z-modal);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.28s ease;
@@ -794,7 +794,7 @@ main {
   margin-bottom: 10px;
   align-items: end;
   position: relative;
-  z-index: 100;
+  z-index: var(--z-sticky);
 }
 @media (max-width: 900px) {
   .ctrl-row {
@@ -824,7 +824,7 @@ main {
 }
 .sw {
   position: relative;
-  z-index: 50;
+  z-index: var(--z-sticky);
   isolation: isolate;
 }
 .sw > svg {
@@ -986,7 +986,7 @@ select option {
   margin-bottom: 10px;
   flex-wrap: wrap;
   position: relative;
-  z-index: 90;
+  z-index: var(--z-sticky);
 }
 .fchips {
   display: flex;
@@ -1128,7 +1128,7 @@ select option {
   gap: 4px;
   margin-bottom: 8px;
   position: relative;
-  z-index: 80;
+  z-index: var(--z-sticky);
 }
 
 /* Row 1: result count only */
@@ -1404,7 +1404,7 @@ footer a {
     opacity 0.2s,
     transform 0.2s;
   pointer-events: none;
-  z-index: 9999;
+  z-index: var(--z-toast);
   max-width: 320px;
   line-height: 1.4;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
@@ -1445,7 +1445,7 @@ footer a {
 
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
 
-    z-index: 10000;
+    z-index: var(--z-toast);
   }
 
   #toast.on {
@@ -1513,7 +1513,7 @@ tbody tr:last-child td {
     border-color 0.2s ease;
   opacity: 0;
   pointer-events: none;
-  z-index: 320;
+  z-index: var(--z-header);
   box-shadow:
     0 12px 30px rgba(0, 0, 0, 0.45),
     0 0 0 1px rgba(237, 184, 74, 0.12),
@@ -1594,7 +1594,7 @@ body.overlay-open #scrollTopBtn {
   inset: 0;
   border-radius: var(--r);
   border: 1px solid var(--border);
-  z-index: 30;
+  z-index: var(--z-raised);
 }
 /* On mobile, allow horizontal scroll and keep sticky header working */
 @media (max-width: 599px) {
@@ -1813,7 +1813,7 @@ body.overlay-open #scrollTopBtn {
     overscroll-behavior: contain;
     border-radius: 0 0 14px 14px;
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
-    z-index: 500;
+    z-index: var(--z-dropdown);
   }
 
   /* Better table readability */

@@ -45,9 +45,9 @@ let favSet = new Set();
 /** @type {string[]} Up to 3 item raw keys selected for comparison */
 let compareKeys = [];
 
-const UI_STATE_KEY = "castia_ui_state_v3";
-const UI_STATE_LEGACY_KEY = "castia_ui_state_v2";
-const UI_STATE_SCHEMA = 3;
+const UI_STATE_KEY = "castia_ui_state_v4";
+const UI_STATE_LEGACY_KEY = "castia_ui_state_v3";
+const UI_STATE_SCHEMA = 4;
 const UI_STATE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 const PRISM_CACHE_KEY = "castia_prismatic_tiers_v1";
 const PRISM_CACHE_TTL = 60 * 60 * 1000; // 1 hour
@@ -125,16 +125,12 @@ function scheduleSaveUIState() {
 
 /**
  * Saves current UI state to localStorage.
- * Persists: search query, filters, view mode, toggles, favorites, comparisons.
+ * Persists durable preferences only. Search, filters, and page are transient.
  */
 function saveUIState() {
   _writeLS(UI_STATE_KEY, {
     schema: UI_STATE_SCHEMA,
     ts: Date.now(),
-    q: qEl?.value || "",
-    cat: catEl?.value || "", // Search and category filters
-    conf: confEl?.value || "",
-    tier: tierEl?.value || "", // Confidence and tier filters
     vw,
     sc,
     sd,
@@ -148,26 +144,10 @@ function saveUIState() {
 
 /**
  * Applies loaded UI state from localStorage to the application.
- * Restores all persisted UI settings.
+ * Restores durable UI settings without reviving stale search/filter/page state.
  */
 function applyLoadedUIState() {
   const st = _loadedUIState || {};
-  if (qEl && typeof st.q === "string") {
-    qEl.value = st.q;
-    if (st.q) $("xBtn")?.classList.add("on");
-  }
-  if (catEl && typeof st.cat === "string") {
-    catEl.value = st.cat;
-    catEl.dataset.restore = st.cat;
-  }
-  if (confEl && typeof st.conf === "string") {
-    confEl.value = st.conf;
-    confEl.dataset.restore = st.conf;
-  }
-  if (tierEl && typeof st.tier === "string") {
-    tierEl.value = st.tier;
-    tierEl.dataset.restore = st.tier;
-  }
   if (st.vw === "card" || st.vw === "table") vw = st.vw;
   if (typeof st.sc === "string") sc = st.sc;
   if (st.sd === "asc" || st.sd === "desc") sd = st.sd;

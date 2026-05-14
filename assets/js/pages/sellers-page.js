@@ -165,6 +165,11 @@
         return map[label] || map.Neutral;
       }
 
+      function trustBadgeH(label, text) {
+        var cls = String(label || "Neutral").toLowerCase();
+        return `<span class="lr-seller-badge ${esc(cls)}">${trustIconH(label)}<span>${esc(text || label || "Neutral")}</span></span>`;
+      }
+
       function barCls(pct) {
         if (pct == null) return "fill-ok";
         if (pct < 15) return "fill-good";
@@ -189,16 +194,15 @@
         var label = sd.is_blacklisted
           ? "Flagged"
           : sd.accuracy_label || "Neutral";
-        var cols = SELLER_COLORS[label] || SELLER_COLORS.Neutral;
         var avCls = avatarCls(label);
         var animCls = cardAnimCls(label);
         var initials = avatarInitials(name);
         var pct = sd.overpriced_ratio;
         var markup = sd.avg_markup_percent;
         var total = sd.total_listings;
-        var badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${trustIconH(label)}<span>${esc(label)}</span></span>`;
+        var badge = trustBadgeH(label, label);
         var blackBadge = sd.is_blacklisted
-          ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
+          ? trustBadgeH("blacklisted", "Blacklisted")
           : "";
         var pctVal = pct != null ? pct.toFixed(1) + "%" : "—";
         var mrkVal =
@@ -255,7 +259,6 @@
         const label = sellerData?.is_blacklisted
           ? "Flagged"
           : sellerData?.accuracy_label || "Neutral";
-        const cols = SELLER_COLORS[label] || SELLER_COLORS.Neutral;
 
         // Update header elements
         title.textContent = name;
@@ -266,9 +269,9 @@
         loadAvatarChain(avatarImg, avatarFallback, name, label, avatarEl, false);
 
         // Set badges
-        const badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${trustIconH(label)}<span>${esc(label)}</span></span>`;
+        const badge = trustBadgeH(label, label);
         const blackBadge = sellerData?.is_blacklisted
-          ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
+          ? trustBadgeH("blacklisted", "Blacklisted")
           : "";
         badgesEl.innerHTML = badge + blackBadge;
 
@@ -295,7 +298,7 @@
           closeBtn.focus({ preventScroll: true });
         }
 
-        body.innerHTML = `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line" style="width:60%"></div><div class="pskel-line" style="width:80%"></div></div>`;
+        body.innerHTML = `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line pskel-line--md"></div><div class="pskel-line pskel-line--lg"></div></div>`;
         try {
           if (_drawerCache[sellerName]) {
             renderSellerPanelListings(sellerName, _drawerCache[sellerName]);
@@ -329,7 +332,7 @@
         window.overlayFocusPop?.(panel);
       }
 
-      function rowHTML(r, idx) {
+      function rowHTML(r) {
         var priceStr = fmt(r.unitPrice);
         var tagMap = { over: "Overpriced", under: "Good deal", fair: "" };
         var tagEl =
@@ -341,9 +344,7 @@
             ? `<span class="sl-item-count">×${r.raw.count}</span>`
             : "";
         var date = r.raw.timestamp ? fmtT(r.raw.timestamp) : "";
-        var delay = (idx * 0.05).toFixed(2);
-
-        return `<div class="sl-row" style="animation-delay: ${delay}s;">
+        return `<div class="sl-row">
           <span class="sl-item" title="${esc(r.raw.item_name || "")}">${formatItemNameH(r.displayName || "—")}</span>
           ${countEl}
           <span class="sl-price ${r.tag}">${priceStr}</span>
@@ -423,7 +424,7 @@
 
         var content = `<div class="listing-section">${enrichedRows
           .map(function (row, idx) {
-            return rowHTML(row, idx);
+            return rowHTML(row);
           })
           .join("")}</div>`;
 
@@ -502,7 +503,7 @@
         grid.classList.remove("loaded");
         var skel = "";
         for (var i = 0; i < 10; i++) {
-          skel += `<div class="scard-skel"><div class="scard-skel__head"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line" style="width:60%"></div><div class="skel-line" style="width:40%"></div></div></div><div class="scard-skel__stats"><div class="scard-skel__stat"><div class="skel-mini" style="width:50%"></div></div><div class="scard-skel__stat"><div class="skel-mini" style="width:50%"></div></div><div class="scard-skel__stat"><div class="skel-mini" style="width:50%"></div></div></div></div>`;
+          skel += `<div class="scard-skel"><div class="scard-skel__head"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line skel-line--medium"></div><div class="skel-line skel-line--short"></div></div></div><div class="scard-skel__stats"><div class="scard-skel__stat"><div class="skel-mini skel-mini--half"></div></div><div class="scard-skel__stat"><div class="skel-mini skel-mini--half"></div></div><div class="scard-skel__stat"><div class="skel-mini skel-mini--half"></div></div></div></div>`;
         }
         grid.innerHTML = skel;
       }

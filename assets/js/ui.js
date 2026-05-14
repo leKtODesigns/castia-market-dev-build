@@ -1038,7 +1038,7 @@ function renderTbl(rows) {
         <button type="button" class="fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
         <button type="button" class="cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
       </span>`;
-        return `<tr data-key="${esc(r.rawKey)}" class="${isActive ? "active-row" : ""}" style="animation-delay: ${i * 0.02}s">
+        return `<tr data-key="${esc(r.rawKey)}" class="${isActive ? "active-row" : ""}">
         <td class="item-col"><span class="iname-wrap" title="${esc(r.rawKey)}">${actions}<span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></td>
         <td class="hsm hpanel">${catBadge(r.category)}${r.tier ? "&nbsp;" + tierBadge(r.tier) : ""}</td>
         <td><div class="price-main">${fmt(r.median)}</div><div class="price-range hmd">${fmt(ar.low)} — ${fmt(ar.high)}</div></td>
@@ -1250,20 +1250,20 @@ function showEmpty(hasF) {
   const pagEl = document.querySelector(".pag");
   if (pagEl) pagEl.classList.add("pag-hidden");
   if (favOnly && !favSet.size) {
-    const inner = `<div class="estate"><div class="eicon">★</div><div class="emsg">No favorites yet</div><div class="esub">Click the ★ star on any item to add it to your watchlist.</div><div class="esub" style="margin-top:8px"><button onclick="toggleFavOnly()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:inherit;font-size:12px;text-decoration:underline">Show all items</button></div></div>`;
+    const inner = `<div class="estate"><div class="eicon">★</div><div class="emsg">No favorites yet</div><div class="esub">Click the ★ star on any item to add it to your watchlist.</div><div class="esub esub-action"><button class="empty-action" data-action="toggle-fav-only">Show all items</button></div></div>`;
     if (vw === "table")
       tbody.innerHTML = `<tr><td colspan="7">${inner}</td></tr>`;
-    else cgrid.innerHTML = `<div style="grid-column:1/-1">${inner}</div>`;
+    else cgrid.innerHTML = `<div class="grid-full">${inner}</div>`;
     return;
   }
   const msg = hasF ? "No items match your filters" : "No data loaded";
   const sub = hasF
-      ? `<div class="esub"><button onclick="clearAll()" style="background:none;border:none;color:var(--gold);cursor:pointer;font-family:inherit;font-size:12px;text-decoration:underline">Clear all filters</button></div>`
+      ? `<div class="esub esub-action"><button class="empty-action" data-action="clear-all">Clear all filters</button></div>`
       : "";
   const inner = `<div class="estate"><div class="eicon">⊘</div><div class="emsg">${msg}</div>${sub}</div>`;
   if (vw === "table")
     tbody.innerHTML = `<tr><td colspan="7">${inner}</td></tr>`;
-  else cgrid.innerHTML = `<div style="grid-column:1/-1">${inner}</div>`;
+  else cgrid.innerHTML = `<div class="grid-full">${inner}</div>`;
 }
 
 /**
@@ -1271,10 +1271,11 @@ function showEmpty(hasF) {
  */
 function showSkel() {
   if (!tbody) return; // Guard: only run if we are on index.html
+  const ragged = ["sbar-w-rag-1", "sbar-w-rag-2", "sbar-w-rag-3"];
   tbody.innerHTML = Array.from(
       { length: 14 },
-      () =>
-          `<tr class="skel"><td><div class="sbar" style="width:${(50 + Math.random() * 100) | 0}px"></div></td><td class="hsm hpanel"><div class="sbar" style="width:60px"></div></td><td><div class="sbar" style="width:55px"></div></td><td class="hmd hpanel"><div class="sbar" style="width:90px"></div></td><td class="hsm hpanel"><div class="sbar" style="width:60px"></div></td><td class="hmd hpanel"><div class="sbar" style="width:50px"></div></td><td><div class="sbar" style="width:70px;margin-left:auto"></div></tr>`,
+      (_, i) =>
+          `<tr class="skel"><td><div class="sbar ${ragged[i % ragged.length]}"></div></td><td class="hsm hpanel"><div class="sbar sbar-w-md"></div></td><td><div class="sbar sbar-w-sm"></div></td><td class="hmd hpanel"><div class="sbar sbar-w-xl"></div></td><td class="hsm hpanel"><div class="sbar sbar-w-md"></div></td><td class="hmd hpanel"><div class="sbar sbar-w-xs"></div></td><td><div class="sbar sbar-w-lg sbar-align-end"></div></tr>`,
   ).join("");
 }
 
@@ -1284,7 +1285,7 @@ function showSkel() {
  */
 function showErr(msg) {
   if (!tbody) return; // Guard: only run if we are on index.html
-  tbody.innerHTML = `<tr><td colspan="7"><div class="estate"><div class="eicon" style="color:var(--red)">✕</div><div class="emsg" style="color:var(--red)">Failed to load</div><div class="esub">${esc(msg)}S</div></div></td></tr>`;
+  tbody.innerHTML = `<tr><td colspan="7"><div class="estate"><div class="eicon estate-error">✕</div><div class="emsg estate-error">Failed to load</div><div class="esub">${esc(msg)}S</div></div></td></tr>`;
 }
 
 /**
@@ -1344,7 +1345,7 @@ function renderPag(pages) {
   if (pages > 1) {
     // ← Previous page
     b.push(
-        `<button class="pb" onclick="goPg(${pg - 1})" ${pg === 1 ? "disabled" : ""}>←</button>`,
+        `<button class="pb" data-action="go-page" data-page="${pg - 1}" ${pg === 1 ? "disabled" : ""}>←</button>`,
     );
 
     // Page numbers
@@ -1355,7 +1356,7 @@ function renderPag(pages) {
       // Add 'on' class to the button that matches the current page
       const activeCls = i === pg ? "on" : "";
       b.push(
-          `<button class="pb ${activeCls}" onclick="goPg(${i})">${i}</button>`,
+          `<button class="pb ${activeCls}" data-action="go-page" data-page="${i}">${i}</button>`,
       );
     }
 
@@ -1363,15 +1364,15 @@ function renderPag(pages) {
     if (e < pages) {
       if (e < pages - 1) {
         b.push(
-            `<span style="padding:0 3px;color:var(--text3);font-size:12px">…</span>`,
+            `<span class="pagination-ellipsis">…</span>`,
         );
       }
-      b.push(`<button class="pb" onclick="goPg(${pages})">${pages}</button>`);
+      b.push(`<button class="pb" data-action="go-page" data-page="${pages}">${pages}</button>`);
     }
 
     // → Next page button
     b.push(
-        `<button class="pb" onclick="goPg(${pg + 1})" ${pg === pages ? "disabled" : ""}>→</button>`,
+        `<button class="pb" data-action="go-page" data-page="${pg + 1}" ${pg === pages ? "disabled" : ""}>→</button>`,
     );
   }
 
@@ -1500,8 +1501,8 @@ function setView(v) {
   vw = v;
   const tvw = $("tvw"),
       cvw = $("cvw");
-  tvw.style.display = v === "table" ? "" : "none";
-  cvw.style.display = v === "card" ? "" : "none";
+  tvw.hidden = v !== "table";
+  cvw.hidden = v !== "card";
   $("vt").classList.toggle("on", v === "table");
   $("vc").classList.toggle("on", v === "card");
   const entering = v === "table" ? tvw : cvw;

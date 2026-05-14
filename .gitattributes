@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+*.ico binary
+*.gif binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.svg text eol=lf
