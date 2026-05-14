@@ -630,7 +630,7 @@ function showSugg(items) {
   suggEl.innerHTML = suggItems
       .map(
           (it, i) =>
-              `<button type="button" role="option" aria-selected="false" data-i="${i}"><span class="sname">${esc(it.displayName)}</span><span class="smeta">${esc(it.categoryLabel || "")}</span></button>`,
+              `<button type="button" role="option" aria-selected="false" data-i="${i}"><span class="sname">${formatItemNameH(it.displayName)}</span><span class="smeta">${esc(it.categoryLabel || "")}</span></button>`,
       )
       .join("");
   suggEl.classList.add("on");
@@ -1039,7 +1039,7 @@ function renderTbl(rows) {
         <button type="button" class="cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
       </span>`;
         return `<tr data-key="${esc(r.rawKey)}" class="${isActive ? "active-row" : ""}" style="animation-delay: ${i * 0.02}s">
-        <td class="item-col"><span class="iname-wrap" title="${esc(r.rawKey)}">${actions}<span class="iname-txt">${esc(r.displayName)}</span>${skillTagH(r.skillTag)}</span></td>
+        <td class="item-col"><span class="iname-wrap" title="${esc(r.rawKey)}">${actions}<span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></td>
         <td class="hsm hpanel">${catBadge(r.category)}${r.tier ? "&nbsp;" + tierBadge(r.tier) : ""}</td>
         <td><div class="price-main">${fmt(r.median)}</div><div class="price-range hmd">${fmt(ar.low)} — ${fmt(ar.high)}</div></td>
         <td class="hmd hpanel"><span class="price-range">${fmt(ar.low)} — ${fmt(ar.high)}</span></td>
@@ -1113,7 +1113,7 @@ function renderCards(rows) {
         <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
         <button type="button" class="pcard-act pcard-cmp cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
         <div class="ccard-head">
-          <div class="ckey" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${esc(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
+          <div class="ckey" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
         </div>
         ${cardExtraH(r)}
         <div class="cprice">${fmt(r.median)}</div>

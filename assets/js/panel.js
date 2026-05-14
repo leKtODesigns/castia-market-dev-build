@@ -166,7 +166,7 @@ async function openPanel(key) {
   const swap = () => {
     const titleInner = `
       <span class="panel-title__inner">
-        <span class="iname-txt">${esc(item.displayName)}</span>${skillTagH(item.skillTag)}
+        <span class="iname-txt">${formatItemNameH(item.displayName)}</span>${skillTagH(item.skillTag)}
       </span>
     `;
     const badgeLine = `

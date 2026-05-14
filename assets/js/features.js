@@ -468,7 +468,7 @@ function openCompare() {
         return `<div class="cmp-item">
         <div class="cmp-item-head">
           <div style="min-width:0;flex:1">
-            <div class="cmp-item-name" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${esc(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
+            <div class="cmp-item-name" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
             <div style="margin-top:4px;display:flex;gap:4px;flex-wrap:wrap">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}</div>
           </div>
           <div class="cmp-item-actions">

@@ -53,6 +53,15 @@ function esc(s) {
 }
 
 /**
+ * Formats item display names with emphasized tier-star glyphs.
+ * @param {string|null} s - Display name text
+ * @returns {string} Escaped HTML with styled star runs
+ */
+function formatItemNameH(s) {
+  return esc(s || "").replace(/(★+)/g, '<span class="iname-tier-stars">$1</span>');
+}
+
+/**
  * Converts a string to title case with special handling for Roman numerals and lowercase words
  * @param {string} str - String to convert
  * @returns {string} Title-cased string

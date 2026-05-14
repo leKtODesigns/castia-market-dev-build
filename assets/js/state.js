@@ -45,7 +45,10 @@ let favSet = new Set();
 /** @type {string[]} Up to 3 item raw keys selected for comparison */
 let compareKeys = [];
 
-const UI_STATE_KEY = "castia_ui_state_v2";
+const UI_STATE_KEY = "castia_ui_state_v3";
+const UI_STATE_LEGACY_KEY = "castia_ui_state_v2";
+const UI_STATE_SCHEMA = 3;
+const UI_STATE_TTL = 7 * 24 * 60 * 60 * 1000; // 7 days
 const PRISM_CACHE_KEY = "castia_prismatic_tiers_v1";
 const PRISM_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
@@ -75,8 +78,41 @@ function _writeLS(key, val) {
 }
 
 /**
+ * Removes a key from localStorage.
+ * @param {string} key - The storage key
+ */
+function _removeLS(key) {
+  try {
+    localStorage.removeItem(key);
+  } catch (_e) {}
+}
+
+/**
+ * Reads UI state with schema + TTL validation and legacy fallback.
+ * @returns {Object} Validated UI state object
+ */
+function _readUIState() {
+  const now = Date.now();
+  const current = _readLS(UI_STATE_KEY);
+  if (
+    current &&
+    current.schema === UI_STATE_SCHEMA &&
+    typeof current.ts === "number" &&
+    now - current.ts <= UI_STATE_TTL
+  ) {
+    return current;
+  }
+
+  const legacy = _readLS(UI_STATE_LEGACY_KEY);
+  if (legacy && typeof legacy === "object") {
+    return legacy;
+  }
+  return {};
+}
+
+/**
  * Loads UI state from localStorage and applies it to the application.
- * Restores filters, view state, favorites, comparisons, and panel state.
+ * Restores filters, view state, favorites, and comparisons.
  */
 let _loadedUIState = null;
 let _saveUIT = null;
@@ -89,11 +125,12 @@ function scheduleSaveUIState() {
 
 /**
  * Saves current UI state to localStorage.
- * Persists: search query, filters, view mode, toggles, favorites, comparisons,
- * active item and panel state.
+ * Persists: search query, filters, view mode, toggles, favorites, comparisons.
  */
 function saveUIState() {
   _writeLS(UI_STATE_KEY, {
+    schema: UI_STATE_SCHEMA,
+    ts: Date.now(),
     q: qEl?.value || "",
     cat: catEl?.value || "", // Search and category filters
     conf: confEl?.value || "",
@@ -106,9 +143,6 @@ function saveUIState() {
     dataSaver: !!dataSaver, // UI toggle states
     fav: [...favSet],
     cmp: [...compareKeys], // Persist favorites and comparison selections
-    activeKey: activeKey || "", // Persist currently selected item
-    panelSort,
-    panelIncludeFlagged: !!panelIncludeFlagged, // Detail panel state
   });
 }
 
@@ -146,8 +180,6 @@ function applyLoadedUIState() {
   dataSaver = !!st.dataSaver;
   favSet = new Set(Array.isArray(st.fav) ? st.fav : []);
   compareKeys = Array.isArray(st.cmp) ? st.cmp.slice(0, 3) : [];
-  if (typeof st.panelSort === "string") panelSort = st.panelSort;
-  panelIncludeFlagged = !!st.panelIncludeFlagged;
 }
 
 /**
@@ -209,8 +241,9 @@ function setHashItemKey(key) {
  */
 function initApp() {
   if (typeof render === "function") {
-    _loadedUIState = _readLS(UI_STATE_KEY) || {};
+    _loadedUIState = _readUIState();
     applyLoadedUIState();
+    _removeLS(UI_STATE_LEGACY_KEY);
     fetchAll(false);
     scheduleRefresh();
     setInterval(() => {

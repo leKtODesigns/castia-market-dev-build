@@ -137,6 +137,16 @@
         return map[label] || "scard-neutral";
       }
 
+      function trustIconH(label) {
+        var map = {
+          Trustworthy: '<span class="lbl-ico" aria-hidden="true">◆</span>',
+          Neutral: '<span class="lbl-ico" aria-hidden="true">◌</span>',
+          Suspicious: '<span class="lbl-ico" aria-hidden="true">△</span>',
+          Flagged: '<span class="lbl-ico" aria-hidden="true">✕</span>',
+        };
+        return map[label] || map.Neutral;
+      }
+
       function barCls(pct) {
         if (pct == null) return "fill-ok";
         if (pct < 15) return "fill-good";
@@ -168,7 +178,7 @@
         var pct = sd.overpriced_ratio;
         var markup = sd.avg_markup_percent;
         var total = sd.total_listings;
-        var badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${esc(label)}</span>`;
+        var badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${trustIconH(label)}<span>${esc(label)}</span></span>`;
         var blackBadge = sd.is_blacklisted
           ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
           : "";
@@ -238,7 +248,7 @@
         loadAvatarChain(avatarImg, avatarFallback, name, label, avatarEl, false);
 
         // Set badges
-        const badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${esc(label)}</span>`;
+        const badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${trustIconH(label)}<span>${esc(label)}</span></span>`;
         const blackBadge = sellerData?.is_blacklisted
           ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
           : "";
@@ -316,7 +326,7 @@
         var delay = (idx * 0.05).toFixed(2);
 
         return `<div class="sl-row" style="animation-delay: ${delay}s;">
-          <span class="sl-item" title="${esc(r.raw.item_name || "")}">${esc(r.raw.item_name || "—")}</span>
+          <span class="sl-item" title="${esc(r.raw.item_name || "")}">${formatItemNameH(r.raw.item_name || "—")}</span>
           ${countEl}
           <span class="sl-price ${r.tag}">${priceStr}</span>
           ${tagEl}
@@ -493,6 +503,7 @@
       var _particleCleaners = new WeakMap();
       var _particlePhase   = new WeakMap(); // active conf per card
       var _cardFxTimeouts = new WeakMap();
+      var _flaggedShakeTimers = new WeakMap();
 
       var TRUST_PARTICLES = {
         trustworthy: [
@@ -730,6 +741,18 @@
         var t = _cardFxTimeouts.get(card);
         if (t) clearTimeout(t);
         card.classList.add("fx-active");
+        if (card.classList.contains("scard-flagged")) {
+          card.classList.remove("fx-shake");
+          card.offsetWidth;
+          card.classList.add("fx-shake");
+          var st = _flaggedShakeTimers.get(card);
+          if (st) clearTimeout(st);
+          st = setTimeout(function () {
+            card.classList.remove("fx-shake");
+            _flaggedShakeTimers.delete(card);
+          }, 660);
+          _flaggedShakeTimers.set(card, st);
+        }
         startParticles(card);
       }
 
