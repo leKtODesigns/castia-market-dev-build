@@ -315,16 +315,20 @@
       color: var(--red);
     }
     .copy-price-btn {
-      background: none;
-      border: none;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--border);
       color: var(--text3);
       cursor: pointer;
-      padding: 4px;
-      border-radius: var(--r-sm);
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      border-radius: 10px;
       transition: background 0.15s, color 0.15s;
       display: flex;
       align-items: center;
       justify-content: center;
+      flex-shrink: 0;
     }
     .copy-price-btn:hover {
       background: var(--bg3);
@@ -829,6 +833,16 @@
       display: flex;
       align-items: center;
       flex-wrap: wrap;
+      max-width: 100%;
+    }
+    .listings-results-row .pag-bar .pbtns {
+      max-width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      flex-wrap: nowrap;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
     }
 
     /* ── Data Saver Banner ── */
@@ -1115,12 +1129,29 @@
       .listings-toolbar__bottom-right {
         width: 100%;
       }
+      .listings-toolbar__bottom {
+        gap: 0.65rem;
+      }
+      .listings-toolbar__bottom-right {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.45rem;
+      }
       .listings-toolbar__bottom-right .vbtn {
         justify-content: center;
+        min-width: 0;
       }
       .listings-toolbar__bottom-right .vbtn:nth-last-child(-n + 2) {
-        width: 2.5rem;
-        padding-inline: 0;
+        width: 100%;
+        padding-inline: 0.45rem;
+      }
+      .listings-results-row {
+        flex-wrap: wrap;
+        align-items: stretch;
+      }
+      .listings-results-row .ri,
+      .listings-results-row .pag-bar {
+        width: 100%;
       }
     }
 

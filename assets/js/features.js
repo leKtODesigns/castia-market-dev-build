@@ -7,6 +7,7 @@
 // Overlay state management
 let _scrollLockY = 0;
 let _scrollLockOn = false;
+let _compareOpenScrollY = 0;
 /**
  * Determines if body scroll should be locked based on screen size and pointer type.
  * @returns {boolean} True if scroll should be locked (mobile/coarse pointer)
@@ -97,6 +98,7 @@ function updateOverlayUI() {
     cmpBtn.setAttribute("aria-haspopup", "dialog");
     cmpBtn.setAttribute("aria-expanded", cmpOpen ? "true" : "false");
   }
+  _updateScrollTopBtnVisibility?.();
 }
 
 // Overlay focus management
@@ -425,6 +427,7 @@ function updateTopButtons() {
  */
 function openCompare() {
   if (!compareModal || !cmpBody) return;
+  _compareOpenScrollY = window.scrollY || 0;
   const wasOpen = compareModal.classList.contains("on");
   if (!compareKeys.length) {
     cmpBody.innerHTML = `<div class="cmp-empty">
@@ -513,11 +516,17 @@ function openCompare() {
  */
 function closeCompare() {
   if (!compareModal) return;
+  const restoreY = _compareOpenScrollY;
   const card = compareModal.querySelector(".cmp-card");
   compareModal.classList.remove("on");
   compareModal.setAttribute("aria-hidden", "true");
   updateOverlayUI();
   window.overlayFocusPop?.(card || compareModal);
+  if (typeof restoreY === "number" && restoreY >= 0) {
+    requestAnimationFrame(() =>
+      window.scrollTo({ top: restoreY, left: 0, behavior: "auto" }),
+    );
+  }
   // If the detail panel is still open behind the modal but wasn't trapped yet, trap it (mobile only).
   if (panel && panel.classList.contains("open") && _shouldLockBodyScroll()) {
     const top = window.overlayFocusTop?.();
@@ -549,6 +558,27 @@ function copyPriceFromCmp(n, btn) {
  * Clears all items from comparison.
  */
 function clearCompare() {
+  if (compareModal && compareModal.classList.contains("on")) {
+    const items = [...compareModal.querySelectorAll(".cmp-item")];
+    if (items.length) {
+      items.forEach((item, i) => {
+        item.style.transition =
+          "opacity 220ms ease, transform 260ms cubic-bezier(.2,.8,.2,1)";
+        item.style.transitionDelay = `${i * 28}ms`;
+        item.style.opacity = "0";
+        item.style.transform = "translateY(-10px) scale(0.98)";
+      });
+      setTimeout(() => {
+        compareKeys = [];
+        updateTopButtons();
+        updateCmpTooltip();
+        syncCompareButtons();
+        scheduleSaveUIState();
+        openCompare();
+      }, Math.min(380, 220 + items.length * 28));
+      return;
+    }
+  }
   compareKeys = [];
   updateTopButtons();
   updateCmpTooltip();
@@ -834,13 +864,18 @@ setInterval(() => {
 
 // Scroll-to-top button
 const scrollTopBtn = $("scrollTopBtn");
-window.addEventListener(
-  "scroll",
-  () => {
-    if (scrollTopBtn) scrollTopBtn.classList.toggle("on", window.scrollY > 300);
-  },
-  { passive: true },
-);
+function _updateScrollTopBtnVisibility() {
+  if (!scrollTopBtn) return;
+  const hasOverlayOpen = !!document.body.classList.contains("overlay-open");
+  const shouldShow = !hasOverlayOpen && window.scrollY > 300;
+  scrollTopBtn.classList.toggle("on", shouldShow);
+}
+window.addEventListener("scroll", _updateScrollTopBtnVisibility, {
+  passive: true,
+});
+window.addEventListener("resize", _updateScrollTopBtnVisibility, {
+  passive: true,
+});
 
 // Compare tooltip
 /**

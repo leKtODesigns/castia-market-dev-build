@@ -1401,13 +1401,22 @@ function renderPag(pages) {
 function goPg(n) {
   pg = n;
   render();
-  const rlsb = $("rlsb");
-  if (rlsb) {
-    const rect = rlsb.getBoundingClientRect();
-    window.scrollTo({ top: window.scrollY + rect.top, behavior: "smooth" });
-  } else {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const isMobile = (() => {
+    try {
+      return window.matchMedia("(max-width: 768px)").matches;
+    } catch (_e) {
+      return window.innerWidth <= 768;
+    }
+  })();
+  const targetEl = isMobile ? $("pbtns-top") : $("rlsb");
+  if (targetEl) {
+    const rect = targetEl.getBoundingClientRect();
+    const headerOffset = isMobile ? 80 : 0;
+    const top = Math.max(0, window.scrollY + rect.top - headerOffset);
+    window.scrollTo({ top, behavior: "smooth" });
+    return;
   }
+  window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
 /**

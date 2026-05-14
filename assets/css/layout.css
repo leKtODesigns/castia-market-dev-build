@@ -1452,13 +1452,18 @@ tbody tr:last-child td {
   #scrollTopBtn {
     display: flex;
     bottom: 1rem;
-    right: 1rem;
-    left: auto;
+    left: 1rem;
+    right: auto;
     width: 46px;
     height: 46px;
     border-radius: 50%;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
   }
+}
+body.overlay-open #scrollTopBtn {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(8px);
 }
 
 /* ── Pagination — hide when empty ── */

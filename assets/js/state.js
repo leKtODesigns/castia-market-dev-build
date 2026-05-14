@@ -45,7 +45,7 @@ let favSet = new Set();
 /** @type {string[]} Up to 3 item raw keys selected for comparison */
 let compareKeys = [];
 
-const UI_STATE_KEY = "castia_ui_state_v1";
+const UI_STATE_KEY = "castia_ui_state_v2";
 const PRISM_CACHE_KEY = "castia_prismatic_tiers_v1";
 const PRISM_CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
@@ -90,7 +90,7 @@ function scheduleSaveUIState() {
 /**
  * Saves current UI state to localStorage.
  * Persists: search query, filters, view mode, toggles, favorites, comparisons,
- * active item, panel state, and scroll position.
+ * active item and panel state.
  */
 function saveUIState() {
   _writeLS(UI_STATE_KEY, {
@@ -109,7 +109,6 @@ function saveUIState() {
     activeKey: activeKey || "", // Persist currently selected item
     panelSort,
     panelIncludeFlagged: !!panelIncludeFlagged, // Detail panel state
-    scrollY: window.scrollY || 0, // Persist scroll position
   });
 }
 

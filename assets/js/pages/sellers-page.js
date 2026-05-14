@@ -435,6 +435,7 @@
       var _particleTimers  = new WeakMap();
       var _particleCleaners = new WeakMap();
       var _particlePhase   = new WeakMap(); // active conf per card
+      var _cardFxTimeouts = new WeakMap();
 
       var TRUST_PARTICLES = {
         trustworthy: [
@@ -653,17 +654,35 @@
       }
 
       function stopParticles(card) {
-        var timer = _particleTimers.get(card);
-        if (timer != null) clearInterval(timer);
-        _particleTimers.delete(card);
-        _particlePhase.delete(card);
-        var container = _particleCleaners.get(card);
-        if (container) {
-          setTimeout(function () {
-            if (!_particleTimers.has(card) && container.parentNode)
-              container.innerHTML = "";
-          }, 2200);
-        }
+        setTimeout(function () {
+          var timer = _particleTimers.get(card);
+          if (timer != null) clearInterval(timer);
+          _particleTimers.delete(card);
+          _particlePhase.delete(card);
+          var container = _particleCleaners.get(card);
+          if (container) {
+            setTimeout(function () {
+              if (!_particleTimers.has(card) && container.parentNode)
+                container.innerHTML = "";
+            }, 2200);
+          }
+        }, 420);
+      }
+
+      function startCardFx(card) {
+        var t = _cardFxTimeouts.get(card);
+        if (t) clearTimeout(t);
+        card.classList.add("fx-active");
+        startParticles(card);
+      }
+
+      function stopCardFx(card) {
+        stopParticles(card);
+        var t = setTimeout(function () {
+          card.classList.remove("fx-active");
+          _cardFxTimeouts.delete(card);
+        }, 650);
+        _cardFxTimeouts.set(card, t);
       }
 
       /* ── attach listeners ── */
@@ -671,12 +690,12 @@
         grid.querySelectorAll(".scard").forEach(function (card) {
           if (card._particlesWired) return;
           card._particlesWired = true;
-          card.addEventListener("mouseenter", function () { startParticles(card); });
-          card.addEventListener("mouseleave", function () { stopParticles(card);  });
+          card.addEventListener("mouseenter", function () { startCardFx(card); });
+          card.addEventListener("mouseleave", function () { stopCardFx(card);  });
           /* Touch: brief burst on tap */
           card.addEventListener("touchstart", function () {
-            startParticles(card);
-            setTimeout(function () { stopParticles(card); }, 1600);
+            startCardFx(card);
+            setTimeout(function () { stopCardFx(card); }, 1600);
           }, { passive: true });
         });
       }

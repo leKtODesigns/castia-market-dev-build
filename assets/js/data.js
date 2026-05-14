@@ -616,8 +616,6 @@ async function fetchAll(silent) {
     }
     if (!silent) {
       updateTopButtons();
-      const sy = Number(_loadedUIState?.scrollY || 0);
-      if (sy > 0) setTimeout(() => window.scrollTo(0, sy), 0);
       const targetKey = getHashItemKey() || _loadedUIState?.activeKey || "";
       if (targetKey) _idle(() => openPanel(targetKey));
     }

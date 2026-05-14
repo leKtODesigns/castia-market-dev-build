@@ -383,7 +383,8 @@
   z-index: 3;
   opacity: 0;
 }
-.scard:hover::after {
+.scard:hover::after,
+.scard.fx-active::after {
   opacity: 1;
   transform: skewX(-15deg) translateX(600%);
   transition:
@@ -392,12 +393,14 @@
 }
 
 /* Base card hover states */
-.scard:hover {
+.scard:hover,
+.scard.fx-active {
   border-color: var(--border2);
   transform: translateY(-3px);
   box-shadow: var(--shadow-1);
 }
-.scard:hover::before {
+.scard:hover::before,
+.scard.fx-active::before {
   opacity: 1;
 }
 .scard:active {
@@ -421,7 +424,8 @@
     transparent 70%
   );
 }
-.scard.scard-trustworthy:hover {
+.scard.scard-trustworthy:hover,
+.scard.scard-trustworthy.fx-active {
   border-color: rgba(70, 214, 121, 0.5);
   transform: translateY(-4px);
   box-shadow:
@@ -429,14 +433,17 @@
     0 8px 32px rgba(0, 0, 0, 0.38),
     0 0 36px rgba(70, 214, 121, 0.07);
 }
-.scard.scard-trustworthy:hover .scard__avatar {
+.scard.scard-trustworthy:hover .scard__avatar,
+.scard.scard-trustworthy.fx-active .scard__avatar {
   animation: scTrustAvatarGlow 2s ease-in-out infinite;
   border-color: rgba(70, 214, 121, 0.8) !important;
 }
-.scard.scard-trustworthy:hover .scard__name {
+.scard.scard-trustworthy:hover .scard__name,
+.scard.scard-trustworthy.fx-active .scard__name {
   color: #78f0aa;
 }
-.scard.scard-trustworthy:hover .scard__chevron {
+.scard.scard-trustworthy:hover .scard__chevron,
+.scard.scard-trustworthy.fx-active .scard__chevron {
   color: var(--green);
   transform: translateX(3px);
 }
@@ -449,12 +456,14 @@
     transparent 70%
   );
 }
-.scard.scard-neutral:hover {
+.scard.scard-neutral:hover,
+.scard.scard-neutral.fx-active {
   border-color: var(--border3);
   transform: translateY(-3px);
   box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
 }
-.scard.scard-neutral:hover .scard__avatar {
+.scard.scard-neutral:hover .scard__avatar,
+.scard.scard-neutral.fx-active .scard__avatar {
   animation: scNeutralBreath 2.5s ease-in-out infinite;
 }
 
@@ -474,7 +483,8 @@
     transparent 70%
   );
 }
-.scard.scard-suspicious:hover {
+.scard.scard-suspicious:hover,
+.scard.scard-suspicious.fx-active {
   border-color: rgba(240, 162, 75, 0.5);
   transform: translateY(-2px) rotate(0.25deg);
   box-shadow:
@@ -482,13 +492,16 @@
     0 8px 32px rgba(0, 0, 0, 0.38),
     0 0 36px rgba(240, 162, 75, 0.07);
 }
-.scard.scard-suspicious:hover .scard__avatar {
+.scard.scard-suspicious:hover .scard__avatar,
+.scard.scard-suspicious.fx-active .scard__avatar {
   animation: scSuspiciousShift 2.8s ease-in-out infinite;
 }
-.scard.scard-suspicious:hover .scard__name {
+.scard.scard-suspicious:hover .scard__name,
+.scard.scard-suspicious.fx-active .scard__name {
   color: var(--orange);
 }
-.scard.scard-suspicious:hover .scard__chevron {
+.scard.scard-suspicious:hover .scard__chevron,
+.scard.scard-suspicious.fx-active .scard__chevron {
   color: var(--orange);
   transform: translateX(2px);
 }
@@ -509,7 +522,8 @@
     transparent 65%
   );
 }
-.scard.scard-flagged:hover {
+.scard.scard-flagged:hover,
+.scard.scard-flagged.fx-active {
   border-color: rgba(240, 100, 100, 0.55);
   transform: translateY(-2px);
   box-shadow:
@@ -518,13 +532,16 @@
     0 0 40px rgba(240, 100, 100, 0.09);
   animation: scShameShake 0.55s ease-in-out 0.08s;
 }
-.scard.scard-flagged:hover .scard__avatar {
+.scard.scard-flagged:hover .scard__avatar,
+.scard.scard-flagged.fx-active .scard__avatar {
   animation: scFlaggedPulse 1.4s ease-in-out infinite;
 }
-.scard.scard-flagged:hover .scard__name {
+.scard.scard-flagged:hover .scard__name,
+.scard.scard-flagged.fx-active .scard__name {
   color: var(--red);
 }
-.scard.scard-flagged:hover .scard__chevron {
+.scard.scard-flagged:hover .scard__chevron,
+.scard.scard-flagged.fx-active .scard__chevron {
   color: var(--red);
   transform: translateX(2px);
 }
