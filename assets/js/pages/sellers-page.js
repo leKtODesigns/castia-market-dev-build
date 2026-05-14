@@ -37,8 +37,26 @@
       }
 
       function filterSellers() {
+        updateSellerSearchClear();
         renderSellers();
       }
+
+      function updateSellerSearchClear() {
+        var qEl = document.getElementById("qEl");
+        var xBtn = document.getElementById("sellerXBtn");
+        if (!qEl || !xBtn) return;
+        xBtn.classList.toggle("on", !!qEl.value.trim().length);
+      }
+
+      function clearSellerSearch() {
+        var qEl = document.getElementById("qEl");
+        if (!qEl) return;
+        qEl.value = "";
+        updateSellerSearchClear();
+        renderSellers();
+        qEl.focus();
+      }
+      window.clearSellerSearch = clearSellerSearch;
 
       function avatarInitials(name) {
         if (!name) return "??";
@@ -140,8 +158,8 @@
       function trustIconH(label) {
         var map = {
           Trustworthy: '<span class="lbl-ico" aria-hidden="true">◆</span>',
-          Neutral: '<span class="lbl-ico" aria-hidden="true">◌</span>',
-          Suspicious: '<span class="lbl-ico" aria-hidden="true">△</span>',
+          Neutral: '<span class="lbl-ico" aria-hidden="true">◇</span>',
+          Suspicious: '<span class="lbl-ico" aria-hidden="true">⟁</span>',
           Flagged: '<span class="lbl-ico" aria-hidden="true">✕</span>',
         };
         return map[label] || map.Neutral;
@@ -458,6 +476,7 @@
             (b.total_listings || 0) - (a.total_listings || 0),
         );
         var countEl = document.getElementById("sellersCount");
+        updateSellerSearchClear();
         if (countEl)
           countEl.textContent =
             sellers.length + " seller" + (sellers.length !== 1 ? "s" : "");

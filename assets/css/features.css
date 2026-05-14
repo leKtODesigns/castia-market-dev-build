@@ -128,7 +128,7 @@
 
 .sellers-toolbar__search input {
   width: 100%;
-  padding: 0.875rem 0.875rem 0.875rem 2.75rem;
+  padding: 0.875rem 2.8rem 0.875rem 2.75rem;
   background: var(--bg3);
   border: 1px solid var(--border);
   border-radius: var(--r);
@@ -136,6 +136,16 @@
   font-size: 0.875rem;
   transition: all var(--dur-1);
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+.sellers-toolbar__search .xbtn {
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  transform: translateY(-50%) scale(0.8);
+}
+.sellers-toolbar__search .xbtn.on {
+  transform: translateY(-50%) scale(1);
 }
 
 .sellers-toolbar__search input:focus {
@@ -184,6 +194,7 @@
   position: relative;
   overflow: hidden;
   letter-spacing: 0.01em;
+  min-height: 38px;
 }
 .sf-btn .sf-ico {
   font-size: 0.82em;
@@ -1402,11 +1413,36 @@
 
   .sellers-toolbar__filter {
     gap: 0.375rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, max-content));
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
   }
 
   .sf-btn {
     padding: 0.5rem 0.75rem;
     font-size: 0.8125rem;
+  }
+  #sf-all {
+    grid-column: 1;
+    justify-self: center;
+  }
+  #sf-trustworthy {
+    grid-column: 2;
+    justify-self: center;
+  }
+  #sf-neutral {
+    grid-column: 3;
+    justify-self: center;
+  }
+  #sf-suspicious {
+    grid-column: 1 / span 2;
+    justify-self: end;
+  }
+  #sf-flagged {
+    grid-column: 3;
+    justify-self: start;
   }
 
   .scard__drawer-sort {

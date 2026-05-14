@@ -88,9 +88,8 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   background: var(--gold-bg2);
   border: 1px solid var(--gold3);
   border-radius: 7px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   color: var(--gold);
   flex-shrink: 0;
   line-height: 0;
@@ -479,9 +478,8 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   background: var(--gold-bg2);
   border: 1px solid var(--gold3);
   border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   flex-shrink: 0;
   line-height: 0;
 }
@@ -489,6 +487,7 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   display: block;
   width: 13px;
   height: 13px;
+  margin: 0;
 }
 .header-right {
   display: flex;
@@ -826,6 +825,7 @@ main {
 .sw {
   position: relative;
   z-index: 50;
+  isolation: isolate;
 }
 .sw > svg {
   position: absolute;
@@ -834,6 +834,11 @@ main {
   transform: translateY(-50%);
   pointer-events: none;
   color: var(--text3);
+  z-index: 3;
+}
+.sw input {
+  position: relative;
+  z-index: 2;
 }
 
 /* Inputs & selects — 16px font prevents iOS auto-zoom, scaled back on desktop */
@@ -873,6 +878,23 @@ select:focus {
   background: var(--bg3);
 }
 
+button,
+a,
+input,
+select,
+textarea,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (pointer: coarse) {
+  button:focus,
+  a:focus,
+  [role="button"]:focus {
+    outline: none !important;
+  }
+}
+
 /* Clear (×) button */
 .xbtn {
   position: absolute;
@@ -899,6 +921,7 @@ select:focus {
     color 0.15s;
   padding: 0;
   line-height: 0;
+  z-index: 4;
 }
 .xbtn svg {
   display: block;
@@ -907,6 +930,14 @@ select:focus {
   left: auto;
   top: auto;
   transform: none;
+}
+@media (max-width: 640px) {
+  .xbtn {
+    width: 32px;
+    height: 32px;
+    right: 7px;
+    border-radius: 10px;
+  }
 }
 @media (hover: hover) {
   .xbtn:hover {
@@ -1837,46 +1868,45 @@ body.overlay-open #scrollTopBtn {
     flex-shrink: 0;
   }
 }
-.item-col .iname-txt,
-.ckey .iname-txt,
-td.item-col {
-  white-space: normal !important;
-  overflow: visible !important;
-  text-overflow: unset !important;
-  word-break: break-word;
-  line-height: 1.35;
-}
+@media (max-width: 640px) {
+  td.item-col,
+  .item-col .iname-txt {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: break-word;
+    line-height: 1.35;
+  }
 
-.item-col .iname-wrap {
-  width: 100%;
-}
+  .item-col .iname-wrap {
+    width: 100%;
+  }
 
-.item-col .stag,
-.ckey .stag {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+  .item-col .stag {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 
-/* Better mobile cards */
-.cgrid {
-  gap: 10px;
-}
+  .cgrid {
+    gap: 10px;
+  }
 
-.pcard {
-  min-width: 0;
-  overflow: hidden;
-  padding: 10px;
-}
+  .pcard {
+    min-width: 0;
+    overflow: hidden;
+    padding: 10px;
+  }
 
-.ccard-head {
-  align-items: flex-start;
-  gap: 8px;
-}
+  .ccard-head {
+    align-items: flex-start;
+    gap: 8px;
+  }
 
-.cimgwrap {
-  width: 72px;
-  height: 72px;
+  .cimgwrap {
+    width: 72px;
+    height: 72px;
+  }
 }
 
 /* Toast safety */

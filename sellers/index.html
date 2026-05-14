@@ -246,6 +246,12 @@
               placeholder="Search sellers…"
               data-action="filter-sellers"
             />
+            <button class="xbtn" id="sellerXBtn" data-action="clear-sellers-search" title="Clear search" aria-label="Clear search">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+                <line x1="2" y1="2" x2="8" y2="8"></line>
+                <line x1="8" y1="2" x2="2" y2="8"></line>
+              </svg>
+            </button>
           </div>
           <div class="sellers-toolbar__filter">
             <button class="sf-btn on" id="sf-all" data-action="set-seller-filter" data-filter="all">
@@ -259,14 +265,14 @@
               <span class="sf-ico" aria-hidden="true">◆</span><span>Trustworthy</span>
             </button>
             <button class="sf-btn" id="sf-neutral" data-action="set-seller-filter" data-filter="neutral">
-              <span class="sf-ico" aria-hidden="true">◌</span><span>Neutral</span>
+              <span class="sf-ico" aria-hidden="true">◇</span><span>Neutral</span>
             </button>
             <button
               class="sf-btn"
               id="sf-suspicious"
               data-action="set-seller-filter" data-filter="suspicious"
             >
-              <span class="sf-ico" aria-hidden="true">△</span><span>Suspicious</span>
+              <span class="sf-ico" aria-hidden="true">⟁</span><span>Suspicious</span>
             </button>
             <button class="sf-btn" id="sf-flagged" data-action="set-seller-filter" data-filter="flagged">
               <span class="sf-ico" aria-hidden="true">✕</span><span>Flagged</span>

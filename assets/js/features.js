@@ -267,6 +267,28 @@ function overlayFocusPop(container) {
 // Expose focus management helpers for other modules
 window.overlayFocusPush = overlayFocusPush;
 window.overlayFocusPop = overlayFocusPop;
+
+/**
+ * Removes native title tooltips on touch devices to avoid long-press overlays.
+ */
+function stripTitlesOnTouch() {
+  const scrub = (root) => {
+    (root || document).querySelectorAll?.("[title]").forEach((el) => {
+      if (el.hasAttribute("title")) el.removeAttribute("title");
+    });
+  };
+  try {
+    if (!window.matchMedia("(pointer: coarse)").matches) return;
+  } catch (_e) {
+    return;
+  }
+  scrub(document);
+  const obs = new MutationObserver((muts) => {
+    muts.forEach((m) => m.addedNodes.forEach((n) => scrub(n)));
+  });
+  obs.observe(document.documentElement, { childList: true, subtree: true });
+}
+stripTitlesOnTouch();
 window.overlayFocusTop = overlayFocusTop;
 window.overlayFocusHas = overlayFocusHas;
 
