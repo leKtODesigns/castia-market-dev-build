@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <title>Sellers — Castia Market</title>
+    <meta name="theme-color" content="#0b0d12" />
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./assets/css/base.css" />
+    <link rel="stylesheet" href="./assets/css/layout.css" />
+    <link rel="stylesheet" href="./assets/css/components.css" />
+    <link rel="stylesheet" href="./assets/css/features.css" />
+    <style>
+      @supports (padding: max(0px)) {
+        header {
+          padding-left: max(1.25rem, env(safe-area-inset-left));
+          padding-right: max(1.25rem, env(safe-area-inset-right));
+        }
+        main {
+          padding-left: max(0.75rem, env(safe-area-inset-left));
+          padding-right: max(0.75rem, env(safe-area-inset-right));
+        }
+        footer {
+          padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+        }
+        #toast {
+          bottom: max(1.25rem, env(safe-area-inset-bottom));
+          right: max(1.25rem, env(safe-area-inset-right));
+        }
+      }
+    </style>
+
+    <script defer src="./assets/js/card_notes.js"></script>
+    <script defer src="./assets/js/constants/config.js"></script>
+    <script defer src="./assets/js/constants/items.js"></script>
+    <script defer src="./assets/js/constants/ui-constants.js"></script>
+    <script defer src="./assets/js/state.js"></script>
+    <script defer src="./assets/js/data.js"></script>
+    <script defer src="./assets/js/ui.js"></script>
+    <script defer src="./assets/js/panel.js"></script>
+    <script defer src="./assets/js/features.js"></script>
+  </head>
+  <body class="page-sellers">
+    <header class="site-header" aria-label="Site header">
+      <div class="site-header__inner">
+        <a href="index.html" class="logo" aria-label="Castia Market home">
+          <div class="logo-mark" aria-hidden="true">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M7 1.5L8.8 5.2L13 5.8L10 8.7L10.7 12.8L7 10.8L3.3 12.8L4 8.7L1 5.8L5.2 5.2Z"
+              />
+            </svg>
+          </div>
+          <div class="logo-wordmark">
+            <span class="logo-name">CASTIA</span
+            ><span class="logo-tag">MARKET</span>
+          </div>
+        </a>
+        <nav class="site-header__nav" aria-label="Main navigation">
+          <a href="index.html" class="site-header__nav-link">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <rect x="1" y="1" width="10" height="2.5" rx=".75" />
+              <rect x="1" y="5" width="10" height="2.5" rx=".75" />
+              <rect x="1" y="9" width="10" height="2" rx=".75" />
+            </svg>
+            Listings
+          </a>
+          <a href="sellers.html" class="site-header__nav-link active">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <circle cx="6" cy="4" r="2.5" />
+              <path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" />
+            </svg>
+            Sellers
+          </a>
+          <span class="site-header__nav-link nav-soon" aria-disabled="true">
+            <svg
+              width="11"
+              height="11"
+              viewBox="0 0 12 12"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              aria-hidden="true"
+            >
+              <circle cx="6" cy="6" r="4.5" />
+              <path d="M6 3.5v3l2 1.5" />
+            </svg>
+            Coming Soon
+          </span>
+        </nav>
+        <div class="header-right">
+          <div id="sync-status">
+            <div class="dot loading" id="sdot"></div>
+            <span id="stxt">Loading...</span>
+          </div>
+          <button
+            class="hbtn mob-menu-btn"
+            id="mobMenuBtn"
+            aria-label="Toggle navigation"
+            aria-expanded="false"
+            aria-controls="mob-nav"
+            onclick="toggleMobMenu()"
+          >
+            <div class="burger-line burger-line-1"></div>
+            <div class="burger-line burger-line-2"></div>
+            <div class="burger-line burger-line-3"></div>
+          </button>
+        </div>
+      </div>
+      <nav
+        class="mob-nav"
+        id="mob-nav"
+        aria-hidden="true"
+        aria-label="Mobile navigation"
+      >
+        <a href="index.html" class="mob-nav__link" onclick="closeMobMenu()">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <rect x="1" y="1" width="10" height="2.5" rx=".75" />
+            <rect x="1" y="5" width="10" height="2.5" rx=".75" />
+            <rect x="1" y="9" width="10" height="2" rx=".75" />
+          </svg>
+          Listings
+        </a>
+        <a
+          href="sellers.html"
+          class="mob-nav__link active"
+          onclick="closeMobMenu()"
+        >
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <circle cx="6" cy="4" r="2.5" />
+            <path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" />
+          </svg>
+          Sellers
+        </a>
+        <span class="mob-nav__link nav-soon" aria-disabled="true">
+          <svg
+            width="13"
+            height="13"
+            viewBox="0 0 12 12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            aria-hidden="true"
+          >
+            <circle cx="6" cy="6" r="4.5" />
+            <path d="M6 3.5v3l2 1.5" />
+          </svg>
+          Coming Soon
+        </span>
+      </nav>
+    </header>
+
+    <!-- THE SELLER PANEL -->
+    <div
+      id="seller-panel-backdrop"
+      aria-hidden="true"
+      onclick="closeSellerPanel()"
+    ></div>
+    <div
+      id="seller-panel"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Seller details"
+      aria-hidden="true"
+      tabindex="-1"
+    >
+      <div class="panel-header">
+        <div class="panel-top">
+          <div class="panel-seller-info">
+            <div class="panel-avatar" id="seller-panel-avatar">
+              <img
+                src=""
+                alt=""
+                id="seller-panel-avatar-img"
+                style="display: none"
+              />
+              <span id="seller-panel-avatar-fallback">—</span>
+            </div>
+            <div class="panel-seller-details">
+              <div class="panel-seller-name" id="seller-panel-title">—</div>
+              <div class="panel-seller-badges" id="seller-panel-badges"></div>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="panel-close"
+            aria-label="Close seller details"
+            onclick="closeSellerPanel()"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+      <div class="panel-body" id="seller-panel-body"></div>
+    </div>
+
+    <div id="app">
+      <main>
+        <div class="sellers-hero">
+          <div class="sellers-hero__label">Directory</div>
+          <h1 class="sellers-hero__title">Auction <span>Sellers</span></h1>
+          <p class="sellers-hero__sub">
+            Reputation scores based on pricing accuracy.<br>Click any card to see
+            history.
+          </p>
+        </div>
+
+        <div class="sellers-toolbar">
+          <div class="sellers-toolbar__search">
+            <svg
+              width="13"
+              height="13"
+              viewBox="0 0 14 14"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <circle cx="6" cy="6" r="4.5" />
+              <line x1="9.5" y1="9.5" x2="13" y2="13" />
+            </svg>
+            <input
+              type="text"
+              id="qEl"
+              placeholder="Search sellers…"
+              oninput="filterSellers()"
+            />
+          </div>
+          <div class="sellers-toolbar__filter">
+            <button class="sf-btn on" id="sf-all" onclick="setSf('all')">
+              All
+            </button>
+            <button
+              class="sf-btn"
+              id="sf-trustworthy"
+              onclick="setSf('trustworthy')"
+            >
+              ✓ Trustworthy
+            </button>
+            <button class="sf-btn" id="sf-neutral" onclick="setSf('neutral')">
+              ⊙ Neutral
+            </button>
+            <button
+              class="sf-btn"
+              id="sf-suspicious"
+              onclick="setSf('suspicious')"
+            >
+              ⚠ Suspicious
+            </button>
+            <button class="sf-btn" id="sf-flagged" onclick="setSf('flagged')">
+              ✕ Flagged
+            </button>
+          </div>
+          <span class="sellers-count" id="sellersCount"></span>
+        </div>
+
+        <div class="sellers-grid" id="sellersGrid" aria-live="polite"></div>
+      </main>
+    </div>
+
+    <footer>Castia Market &mdash; auto-refreshes every 5 min</footer>
+    <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <script>
+      /* ── Mobile menu ── */
+      function toggleMobMenu() {
+        var nav = document.getElementById("mob-nav");
+        var btn = document.getElementById("mobMenuBtn");
+        var open = nav.getAttribute("aria-hidden") === "false";
+        nav.setAttribute("aria-hidden", open ? "true" : "false");
+        nav.classList.toggle("open", !open);
+        if (btn) {
+          btn.setAttribute("aria-expanded", (!open).toString());
+          btn.classList.toggle("open", !open);
+        }
+      }
+      function closeMobMenu() {
+        var nav = document.getElementById("mob-nav");
+        var btn = document.getElementById("mobMenuBtn");
+        if (nav) {
+          nav.classList.remove("open");
+          nav.setAttribute("aria-hidden", "true");
+        }
+        if (btn) btn.setAttribute("aria-expanded", "false");
+      }
+
+      /* ── Sellers page state ── */
+      var _sfFilter = "all";
+      var _drawerCache = {};
+      var _drawerSort = {};
+
+      function setSf(f) {
+        _sfFilter = f;
+        ["all", "trustworthy", "neutral", "suspicious", "flagged"].forEach(
+          (k) => {
+            var el = document.getElementById("sf-" + k);
+            if (el) el.classList.toggle("on", k === f);
+          },
+        );
+        renderSellers();
+      }
+
+      function filterSellers() {
+        renderSellers();
+      }
+
+      function avatarInitials(name) {
+        if (!name) return "??";
+        var cleaned = String(name)
+          .trim()
+          .replace(/^_+|_+$/g, "");
+        var parts = cleaned.split(/[\s_]+/).filter(Boolean);
+        if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return cleaned.slice(0, 2).toUpperCase();
+      }
+
+      function avatarCls(label) {
+        var map = {
+          Trustworthy: "av-trustworthy",
+          Neutral: "av-neutral",
+          Suspicious: "av-suspicious",
+          Flagged: "av-flagged",
+        };
+        return map[label] || "av-neutral";
+      }
+
+      function cardAnimCls(label) {
+        var map = {
+          Trustworthy: "scard-trustworthy",
+          Neutral:     "scard-neutral",
+          Suspicious:  "scard-suspicious",
+          Flagged:     "scard-flagged",
+          Fair:        "scard-neutral",
+        };
+        return map[label] || "scard-neutral";
+      }
+
+      function barCls(pct) {
+        if (pct == null) return "fill-ok";
+        if (pct < 15) return "fill-good";
+        if (pct < 35) return "fill-warn";
+        return "fill-bad";
+      }
+      function valueCls(pct) {
+        if (pct == null) return "";
+        if (pct < 15) return "good";
+        if (pct < 35) return "warn";
+        return "bad";
+      }
+      function markupCls(m) {
+        if (m == null) return "";
+        if (m < 5) return "good";
+        if (m < 20) return "warn";
+        return "bad";
+      }
+
+      function buildSellerCard(sd) {
+        var name = sd.seller || "—";
+        var label = sd.is_blacklisted
+          ? "Flagged"
+          : sd.accuracy_label || "Neutral";
+        var cols = SELLER_COLORS[label] || SELLER_COLORS.Neutral;
+        var avCls = avatarCls(label);
+        var animCls = cardAnimCls(label);
+        var initials = avatarInitials(name);
+        var pct = sd.overpriced_ratio;
+        var markup = sd.avg_markup_percent;
+        var total = sd.total_listings;
+        var badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${esc(label)}</span>`;
+        var blackBadge = sd.is_blacklisted
+          ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
+          : "";
+        var pctVal = pct != null ? pct.toFixed(1) + "%" : "—";
+        var mrkVal =
+          markup != null
+            ? (markup > 0 ? "+" : "") + markup.toFixed(1) + "%"
+            : "—";
+        var totVal = total != null ? total.toLocaleString() : "—";
+        var barPct = Math.min(100, pct || 0);
+
+        return `<button type="button" class="scard ${animCls}" data-seller="${esc(name)}" aria-label="Open seller ${esc(name)}">
+          <div class="scard__head">
+            <div class="scard__avatar ${avCls}">
+              <img src="https://render.crafty.gg/3d/bust/${esc(name)}" alt="${esc(name)} avatar" class="scard__avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" style="display: block;">
+              <span class="scard__avatar-fallback" style="display: none;">${esc(initials)}</span>
+            </div>
+            <div class="scard__info">
+              <div class="scard__name" title="${esc(name)}">${esc(name)}</div>
+              <div class="scard__badges">${badge}${blackBadge}</div>
+            </div>
+            <svg class="scard__chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5,3 9,7 5,11"/></svg>
+          </div>
+          <div class="scard__stats">
+            <div class="scard__stat"><div class="scard__stat-label">Listings</div><div class="scard__stat-value">${totVal}</div></div>
+            <div class="scard__stat"><div class="scard__stat-label">Overpriced</div><div class="scard__stat-value ${valueCls(pct)}">${pctVal}</div></div>
+            <div class="scard__stat"><div class="scard__stat-label">Avg Markup</div><div class="scard__stat-value ${markupCls(markup)}">${mrkVal}</div></div>
+          </div>
+          <div class="scard__bar-wrap">
+            <div class="scard__bar-label"><span>Overpriced ratio</span><span>${pctVal}</span></div>
+            <div class="scard__bar-track"><div class="scard__bar-fill ${barCls(pct)}" style="width:${barPct}%"></div></div>
+          </div>
+        </button>`;
+      }
+
+      function toggleSellerCard(cardEl, sellerName) {
+        openSellerPanel(sellerName);
+      }
+
+      async function openSellerPanel(sellerName) {
+        const panel = document.getElementById("seller-panel");
+        const backdropEl = document.getElementById("seller-panel-backdrop");
+        const body = document.getElementById("seller-panel-body");
+        const title = document.getElementById("seller-panel-title");
+        const badgesEl = document.getElementById("seller-panel-badges");
+        const avatarImg = document.getElementById("seller-panel-avatar-img");
+        const avatarFallback = document.getElementById(
+          "seller-panel-avatar-fallback",
+        );
+        const app = document.getElementById("app");
+        const wasOpen = panel.classList.contains("open");
+
+        // Get seller data
+        const sellerData = allSellers?.[sellerName.toLowerCase()];
+        const name = sellerData?.seller || sellerName;
+        const label = sellerData?.is_blacklisted
+          ? "Flagged"
+          : sellerData?.accuracy_label || "Neutral";
+        const cols = SELLER_COLORS[label] || SELLER_COLORS.Neutral;
+
+        // Update header elements
+        title.textContent = name;
+
+        // Set up avatar
+        const avatarUrl = `https://render.crafty.gg/3d/bust/${encodeURIComponent(name)}`;
+        avatarImg.src = avatarUrl;
+        avatarImg.alt = `${name} avatar`;
+        avatarImg.style.display = "block";
+        avatarFallback.style.display = "none";
+
+        // Handle avatar load error
+        avatarImg.onerror = function () {
+          avatarImg.style.display = "none";
+          avatarFallback.style.display = "block";
+          avatarFallback.textContent = avatarInitials(name);
+          const avatarEl = document.getElementById("seller-panel-avatar");
+          avatarEl.className = `panel-avatar ${avatarCls(label)}`;
+        };
+
+        avatarImg.onload = function () {
+          const avatarEl = document.getElementById("seller-panel-avatar");
+          avatarEl.className = "panel-avatar";
+        };
+
+        // Set badges
+        const badge = `<span class="lr-seller-badge" style="background:${cols.bg};color:${cols.color};border-color:${cols.border}">${esc(label)}</span>`;
+        const blackBadge = sellerData?.is_blacklisted
+          ? `<span class="lr-seller-badge" style="background:rgba(240,100,100,.1);color:#f06464;border-color:rgba(240,100,100,.25)">Blacklisted</span>`
+          : "";
+        badgesEl.innerHTML = badge + blackBadge;
+
+        panel.classList.add("open");
+        backdropEl.classList.add("on");
+        panel.setAttribute("aria-hidden", "false");
+        backdropEl.setAttribute("aria-hidden", "false");
+        if (app) app.classList.add("panel-open");
+        panel.scrollTop = 0;
+        window.updateOverlayUI?.();
+
+        const lock = (() => {
+          try {
+            return window.matchMedia("(max-width: 600px), (pointer: coarse)")
+              .matches;
+          } catch (_e) {
+            return window.innerWidth <= 600;
+          }
+        })();
+        const closeBtn = panel.querySelector(".panel-close");
+        if (!wasOpen && lock) {
+          window.overlayFocusPush?.(panel, closeBtn || panel);
+        } else if (closeBtn && closeBtn.focus) {
+          closeBtn.focus({ preventScroll: true });
+        }
+
+        body.innerHTML = `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line" style="width:60%"></div><div class="pskel-line" style="width:80%"></div></div>`;
+        try {
+          if (_drawerCache[sellerName]) {
+            renderSellerPanelListings(sellerName, _drawerCache[sellerName]);
+          } else {
+            const rows = await sbGet(
+              "auctions",
+              `?select=item_name,unit_price,price,count,timestamp&seller=eq.${encodeURIComponent(sellerName)}&order=timestamp.desc&limit=100`,
+            );
+            _drawerCache[sellerName] = rows;
+            renderSellerPanelListings(sellerName, rows);
+          }
+        } catch (e) {
+          body.innerHTML = `<div class="drawer-empty">Could not load listings.</div>`;
+        }
+      }
+
+      function closeSellerPanel() {
+        const panel = document.getElementById("seller-panel");
+        const backdropEl = document.getElementById("seller-panel-backdrop");
+        const app = document.getElementById("app");
+        if (panel) {
+          panel.classList.remove("open");
+          panel.setAttribute("aria-hidden", "true");
+        }
+        if (backdropEl) {
+          backdropEl.classList.remove("on");
+          backdropEl.setAttribute("aria-hidden", "true");
+        }
+        if (app) app.classList.remove("panel-open");
+        window.updateOverlayUI?.();
+        window.overlayFocusPop?.(panel);
+      }
+
+      function rowHTML(r, idx) {
+        var priceStr = fmt(r.unitPrice);
+        var tagMap = { over: "Overpriced", under: "Good deal", fair: "" };
+        var tagEl =
+          r.tag && r.tag !== "fair"
+            ? `<span class="sl-price-tag ${r.tag}">${tagMap[r.tag]}</span>`
+            : "";
+        var countEl =
+          r.raw.count > 1
+            ? `<span class="sl-item-count">×${r.raw.count}</span>`
+            : "";
+        var date = r.raw.timestamp ? fmtT(r.raw.timestamp) : "";
+        var delay = (idx * 0.05).toFixed(2);
+
+        return `<div class="sl-row" style="animation-delay: ${delay}s;">
+          <span class="sl-item" title="${esc(r.raw.item_name || "")}">${esc(r.raw.item_name || "—")}</span>
+          ${countEl}
+          <span class="sl-price ${r.tag}">${priceStr}</span>
+          ${tagEl}
+          <span class="sl-date">${esc(date)}</span>
+        </div>`;
+      }
+
+      function renderSellerPanelListings(sellerName, rows) {
+        const body = document.getElementById("seller-panel-body");
+        if (!body) return;
+        if (!rows || !rows.length) {
+          body.innerHTML = `<div class="drawer-empty">No recent listings found.</div>`;
+          return;
+        }
+
+        var sort = _drawerSort[sellerName] || "deals";
+        var enrichedRows = rows.map(function (l) {
+          var name = String(l.item_name || "")
+            .trim()
+            .toLowerCase();
+
+          var match = (typeof enriched !== "undefined" ? enriched : []).find(
+            (r) =>
+              r.displayName.toLowerCase() === name ||
+              r.rawKey.toLowerCase() === name,
+          );
+
+          var unitPrice =
+            l.unit_price != null
+              ? +l.unit_price
+              : l.count
+                ? Math.round(l.price / l.count)
+                : +l.price;
+          var tag = "fair";
+          if (match && match.median) {
+            if (unitPrice > match.median * 1.4) tag = "over";
+            else if (unitPrice < match.median * 0.7) tag = "under";
+          }
+          return {
+            raw: l,
+            unitPrice: unitPrice,
+            tag: tag,
+            ts: l.timestamp ? new Date(l.timestamp).getTime() : 0,
+            match: match,
+          };
+        });
+
+        // --- SORTING LOGIC ---
+        if (sort === "price_asc") {
+          enrichedRows.sort((a, b) => a.unitPrice - b.unitPrice);
+        } else if (sort === "price_desc") {
+          enrichedRows.sort((a, b) => b.unitPrice - a.unitPrice);
+        } else if (sort === "deals") {
+          const order = { under: 0, fair: 1, over: 2 };
+          enrichedRows.sort((a, b) => {
+            if (order[a.tag] !== order[b.tag])
+              return order[a.tag] - order[b.tag];
+            // Within each category, sort by price descending (highest price first)
+            return b.unitPrice - a.unitPrice;
+          });
+        } else {
+          enrichedRows.sort((a, b) => b.ts - a.ts);
+        }
+
+        var sortActive = _drawerSort[sellerName] || "deals";
+        var sortBar = `<div class="scard__drawer-hdr">Recent Listings
+          <div class="scard__drawer-sort">
+            <button class="dsort-btn ${sortActive === "deals" ? "on" : ""}" data-sort="deals" data-seller="${esc(sellerName)}">Best Deals</button>
+            <button class="dsort-btn ${sortActive === "price_asc" || sortActive === "price_desc" ? "on" : ""}" data-sort="price_toggle" data-seller="${esc(sellerName)}" data-current="${sortActive}">Price ${sortActive === "price_desc" ? "↓" : "↑"}</button>
+            <button class="dsort-btn ${sortActive === "newest" ? "on" : ""}" data-sort="newest" data-seller="${esc(sellerName)}">Newest</button>
+          </div>
+        </div>`;
+
+        var content = `<div class="listing-section">${enrichedRows
+          .map(function (row, idx) {
+            return rowHTML(row, idx);
+          })
+          .join("")}</div>`;
+
+        body.innerHTML = sortBar + content;
+      }
+
+      function setDrawerSort(sellerName, sort) {
+        if (sort === "price_toggle") {
+          var currentSort = _drawerSort[sellerName] || "deals";
+          if (currentSort === "price_asc") {
+            sort = "price_desc";
+          } else if (currentSort === "price_desc") {
+            sort = "price_asc";
+          } else {
+            sort = "price_asc";
+          }
+        }
+        _drawerSort[sellerName] = sort;
+        if (_drawerCache[sellerName])
+          renderSellerPanelListings(sellerName, _drawerCache[sellerName]);
+      }
+
+      function renderSellers() {
+        var grid = document.getElementById("sellersGrid");
+        if (!grid) return;
+        var q = (document.getElementById("qEl")?.value || "")
+          .trim()
+          .toLowerCase();
+        var sellers = Object.values(allSellers || {});
+        if (q)
+          sellers = sellers.filter((s) =>
+            String(s.seller || "")
+              .toLowerCase()
+              .includes(q),
+          );
+        if (_sfFilter === "trustworthy")
+          sellers = sellers.filter(
+            (s) => s.accuracy_label === "Trustworthy" && !s.is_blacklisted,
+          );
+        else if (_sfFilter === "neutral")
+          sellers = sellers.filter(
+            (s) => s.accuracy_label === "Neutral" && !s.is_blacklisted,
+          );
+        else if (_sfFilter === "suspicious")
+          sellers = sellers.filter((s) => s.accuracy_label === "Suspicious");
+        else if (_sfFilter === "flagged")
+          sellers = sellers.filter(
+            (s) => s.is_blacklisted || s.accuracy_label === "Flagged",
+          );
+        sellers.sort(
+          (a, b) =>
+            (a.is_blacklisted ? 1 : 0) - (b.is_blacklisted ? 1 : 0) ||
+            (b.total_listings || 0) - (a.total_listings || 0),
+        );
+        var countEl = document.getElementById("sellersCount");
+        if (countEl)
+          countEl.textContent =
+            sellers.length + " seller" + (sellers.length !== 1 ? "s" : "");
+        grid.innerHTML = sellers.length
+          ? sellers.map(buildSellerCard).join("")
+          : `<div class="sellers-empty">No sellers match filters.</div>`;
+        grid.classList.add("loaded");
+      }
+
+      function showSellersSkeleton() {
+        var grid = document.getElementById("sellersGrid");
+        if (!grid) return;
+        grid.classList.remove("loaded");
+        var skel = "";
+        for (var i = 0; i < 10; i++) {
+          skel += `<div class="scard-skel"><div class="scard-skel__head"><div class="skel-circle"></div><div class="skel-lines"><div class="skel-line" style="width:60%"></div><div class="skel-line" style="width:40%"></div></div></div><div class="scard-skel__stats"><div class="scard-skel__stat"><div class="skel-mini" style="width:50%"></div></div><div class="scard-skel__stat"><div class="skel-mini" style="width:50%"></div></div><div class="scard-skel__stat"><div class="skel-mini" style="width:50%"></div></div></div></div>`;
+        }
+        grid.innerHTML = skel;
+      }
+
+      window.onMarketDataLoaded = function () {
+        renderSellers();
+      };
+      showSellersSkeleton();
+
+      /* ════════════════════════════════════════════════════════
+         Seller card particle system  (enhanced v2)
+         ════════════════════════════════════════════════════════
+         Each trust tier now has TWO phases (arrays of configs).
+         On every hover we randomly pick one phase so consecutive
+         hovers feel different.  Trustworthy uses "rise" OR "burst",
+         suspicious uses "glitch" OR a jittery "burst", etc.
+         ════════════════════════════════════════════════════════ */
+
+      var _particleTimers  = new WeakMap();
+      var _particleCleaners = new WeakMap();
+      var _particlePhase   = new WeakMap(); // active conf per card
+
+      var TRUST_PARTICLES = {
+        trustworthy: [
+          /* Phase A — coins / stars rising upward */
+          {
+            emojis:  ["💰", "🪙", "✨", "⭐", "💛", "🌟"],
+            anim:    "rise",
+            sizePx:  [20, 20, 14, 16, 18, 14],
+            count:   9,
+            interval: 175,
+          },
+          /* Phase B — money bursting outward */
+          {
+            emojis:  ["💵", "🤑", "💸", "💫", "🏆", "✨"],
+            anim:    "burst",
+            sizePx:  [22, 24, 22, 16, 20, 14],
+            count:   8,
+            interval: 190,
+          },
+        ],
+
+        neutral: [
+          /* Phase A — quiet balance symbols drifting */
+          {
+            emojis:  ["⚖️", "◆", "○", "·", "–", "•"],
+            anim:    "drift",
+            sizePx:  [14, 10, 11, 10, 12, 10],
+            count:   5,
+            interval: 310,
+          },
+          /* Phase B — subtle question marks rising */
+          {
+            emojis:  ["❔", "💭", "〰️", "…", "◇", "·"],
+            anim:    "rise",
+            sizePx:  [13, 12, 12, 12, 10, 10],
+            count:   5,
+            interval: 330,
+          },
+        ],
+
+        suspicious: [
+          /* Phase A — eyes and warnings glitching */
+          {
+            emojis:  ["👀", "⚠️", "❓", "🕵️", "💭", "🧐", "❗", "🤔"],
+            anim:    "glitch",
+            sizePx:  [18, 14, 14, 14, 14, 14, 14, 16],
+            count:   8,
+            interval: 210,
+          },
+          /* Phase B — chaotic burst of question marks */
+          {
+            emojis:  ["❓", "⚠️", "👁️", "💢", "❗", "🔍"],
+            anim:    "burst",
+            sizePx:  [16, 14, 14, 14, 14, 13],
+            count:   7,
+            interval: 230,
+          },
+        ],
+
+        flagged: [
+          /* Phase A — skulls and trash falling */
+          {
+            emojis:  ["💀", "🗑️", "😵", "🚫", "☠️", "💩", "🤮", "😤"],
+            anim:    "fall",
+            sizePx:  [18, 16, 16, 16, 18, 18, 16, 14],
+            count:   9,
+            interval: 155,
+          },
+          /* Phase B — glitch corruption effect */
+          {
+            emojis:  ["☠️", "🛑", "💢", "😈", "🩸", "💀", "🚩"],
+            anim:    "glitch",
+            sizePx:  [18, 18, 14, 16, 14, 16, 18],
+            count:   8,
+            interval: 165,
+          },
+        ],
+      };
+
+      /* ── helpers ── */
+      function _rnd(min, max) { return min + Math.random() * (max - min); }
+
+      function _pickPhase(type) {
+        var phases = TRUST_PARTICLES[type];
+        if (!phases) return null;
+        return phases[Math.floor(Math.random() * phases.length)];
+      }
+
+      /* ── spawn a single particle ── */
+      function spawnParticle(card, container, conf) {
+        var w = card.offsetWidth, h = card.offsetHeight;
+        var idx  = Math.floor(Math.random() * conf.emojis.length);
+        var emoji = conf.emojis[idx];
+        var sz   = conf.sizePx[idx] || 16;
+
+        var el = document.createElement("span");
+        el.className    = "scard-particle";
+        el.textContent  = emoji;
+        el.dataset.anim = conf.anim;
+        el.style.fontSize = sz + "px";
+
+        var x0, y0, x1, y1, x2, dist, rot;
+
+        if (conf.anim === "rise") {
+          x0   = _rnd(0.05, 0.95) * w;
+          y0   = _rnd(0.35, 0.88) * h;
+          x1   = x0 + _rnd(-35, 35);
+          dist = _rnd(55, h * 0.82);
+          rot  = _rnd(-200, 200);
+          el.style.setProperty("--x0",   x0   + "px");
+          el.style.setProperty("--y0",   y0   + "px");
+          el.style.setProperty("--x1",   x1   + "px");
+          el.style.setProperty("--dist", dist + "px");
+          el.style.setProperty("--rot",  rot  + "deg");
+
+        } else if (conf.anim === "burst") {
+          x0  = _rnd(0.15, 0.85) * w;
+          y0  = _rnd(0.25, 0.75) * h;
+          x1  = x0 + _rnd(-85, 85);
+          y1  = y0 + _rnd(-85, 20);
+          rot = _rnd(-300, 300);
+          el.style.setProperty("--x0",  x0  + "px");
+          el.style.setProperty("--y0",  y0  + "px");
+          el.style.setProperty("--x1",  x1  + "px");
+          el.style.setProperty("--y1",  y1  + "px");
+          el.style.setProperty("--rot", rot + "deg");
+
+        } else if (conf.anim === "fall") {
+          x0   = _rnd(0.04, 0.96) * w;
+          y0   = _rnd(-0.05, 0.18) * h;
+          x1   = x0 + _rnd(-22, 22);
+          dist = _rnd(60, h * 0.92);
+          rot  = _rnd(80, 290);
+          el.style.setProperty("--x0",   x0   + "px");
+          el.style.setProperty("--y0",   y0   + "px");
+          el.style.setProperty("--x1",   x1   + "px");
+          el.style.setProperty("--dist", dist + "px");
+          el.style.setProperty("--rot",  rot  + "deg");
+
+        } else if (conf.anim === "drift") {
+          x0 = _rnd(0.1, 0.9) * w;
+          y0 = _rnd(0.3, 0.8) * h;
+          x1 = x0 + _rnd(-48, 48);
+          x2 = x0 + _rnd(-28, 28);
+          el.style.setProperty("--x0", x0 + "px");
+          el.style.setProperty("--y0", y0 + "px");
+          el.style.setProperty("--x1", x1 + "px");
+          el.style.setProperty("--x2", x2 + "px");
+
+        } else if (conf.anim === "glitch") {
+          x0 = _rnd(0.04, 0.92) * w;
+          y0 = _rnd(0.15, 0.85) * h;
+          el.style.setProperty("--x0", x0 + "px");
+          el.style.setProperty("--y0", y0 + "px");
+        }
+
+        /* Slightly wider duration range for more organic feel */
+        var dur   = _rnd(0.85, 2.1);
+        var delay = _rnd(0, 0.12);
+        el.style.setProperty("--dur",   dur   + "s");
+        el.style.setProperty("--delay", delay + "s");
+
+        container.appendChild(el);
+
+        /* Self-cleanup */
+        setTimeout(function () {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, (dur + delay) * 1000 + 80);
+      }
+
+      /* ── start / stop ── */
+      function startParticles(card) {
+        if (_particleTimers.has(card)) return;
+
+        var cls  = card.classList;
+        var type = cls.contains("scard-trustworthy") ? "trustworthy"
+                 : cls.contains("scard-flagged")     ? "flagged"
+                 : cls.contains("scard-suspicious")  ? "suspicious"
+                 : cls.contains("scard-neutral")     ? "neutral"
+                 : null;
+        if (!type) return;
+
+        /* Pick (and cache) a random phase for this hover session */
+        var conf = _pickPhase(type);
+        if (!conf) return;
+        _particlePhase.set(card, conf);
+
+        var container = card.querySelector(".scard-particles");
+        if (!container) {
+          container = document.createElement("div");
+          container.className = "scard-particles";
+          card.appendChild(container);
+        }
+
+        /* Initial staggered burst */
+        var burst = Math.ceil(conf.count * 0.55);
+        for (var i = 0; i < burst; i++) {
+          (function (offset) {
+            setTimeout(function () {
+              if (_particleTimers.has(card))
+                spawnParticle(card, container, _particlePhase.get(card) || conf);
+            }, offset * 52 + Math.random() * 25);
+          })(i);
+        }
+
+        /* Continuous drip — occasionally double-spawn for extra life */
+        var timer = setInterval(function () {
+          if (!_particleTimers.has(card)) return;
+          var c = _particlePhase.get(card) || conf;
+          spawnParticle(card, container, c);
+          if (Math.random() < 0.25) spawnParticle(card, container, c);
+        }, conf.interval);
+
+        _particleTimers.set(card, timer);
+        _particleCleaners.set(card, container);
+      }
+
+      function stopParticles(card) {
+        var timer = _particleTimers.get(card);
+        if (timer != null) clearInterval(timer);
+        _particleTimers.delete(card);
+        _particlePhase.delete(card);
+        var container = _particleCleaners.get(card);
+        if (container) {
+          setTimeout(function () {
+            if (!_particleTimers.has(card) && container.parentNode)
+              container.innerHTML = "";
+          }, 2200);
+        }
+      }
+
+      /* ── attach listeners ── */
+      function attachParticleListeners(grid) {
+        grid.querySelectorAll(".scard").forEach(function (card) {
+          if (card._particlesWired) return;
+          card._particlesWired = true;
+          card.addEventListener("mouseenter", function () { startParticles(card); });
+          card.addEventListener("mouseleave", function () { stopParticles(card);  });
+          /* Touch: brief burst on tap */
+          card.addEventListener("touchstart", function () {
+            startParticles(card);
+            setTimeout(function () { stopParticles(card); }, 1600);
+          }, { passive: true });
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var grid = document.getElementById("sellersGrid");
+        if (!grid) return;
+
+        var obs = new MutationObserver(function () { attachParticleListeners(grid); });
+        obs.observe(grid, { childList: true });
+
+        grid.addEventListener("click", function (e) {
+          var card = e.target.closest(".scard");
+          if (card) toggleSellerCard(card, card.getAttribute("data-seller"));
+        });
+        document.addEventListener("click", function (e) {
+          var sortBtn = e.target.closest(".dsort-btn");
+          if (sortBtn) {
+            e.preventDefault();
+            setDrawerSort(
+              sortBtn.getAttribute("data-seller"),
+              sortBtn.getAttribute("data-sort"),
+            );
+          }
+        });
+        document.addEventListener("click", function (e) {
+          var nav = document.getElementById("mob-nav");
+          if (!nav || nav.getAttribute("aria-hidden") === "true") return;
+          if (!e.target.closest(".mob-nav") && !e.target.closest("#mobMenuBtn"))
+            closeMobMenu();
+        });
+      });
+    </script>
+  </body>
+</html>

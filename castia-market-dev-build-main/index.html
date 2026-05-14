@@ -1,0 +1,1862 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  />
+  <title>Castia Market — Price Tracker</title>
+  <meta
+          name="description"
+          content="Live auction house price data for the Castia server, powered by CastiaScrapper."
+  />
+  <meta name="theme-color" content="#0b0d12" />
+  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+          href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap"
+          rel="stylesheet"
+  />
+
+  <!-- Styles (split for maintainability) -->
+  <link rel="stylesheet" href="./assets/css/base.css" />
+  <link rel="stylesheet" href="./assets/css/layout.css" />
+  <link rel="stylesheet" href="./assets/css/components.css" />
+  <link rel="stylesheet" href="./assets/css/features.css" />
+  <style>
+    /* Safe area insets for notched/rounded phones */
+    @supports (padding: max(0px)) {
+      header {
+        padding-left: max(1.25rem, env(safe-area-inset-left));
+        padding-right: max(1.25rem, env(safe-area-inset-right));
+      }
+      main {
+        padding-left: max(0.75rem, env(safe-area-inset-left));
+        padding-right: max(0.75rem, env(safe-area-inset-right));
+      }
+      #detail-panel {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
+      footer {
+        padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+      }
+      #toast {
+        bottom: max(1.25rem, env(safe-area-inset-bottom));
+        right: max(1.25rem, env(safe-area-inset-right));
+      }
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: var(--bg2);
+      background-image:
+              radial-gradient(circle at 12% 10%, rgba(237, 184, 74, 0.14), transparent 18%),
+              radial-gradient(circle at 85% 20%, rgba(84, 204, 255, 0.08), transparent 18%),
+              radial-gradient(circle at 80% 90%, rgba(255, 255, 255, 0.04), transparent 12%);
+      background-attachment: fixed;
+    }
+
+    main {
+      padding-bottom: 3rem;
+    }
+
+    .listings-hero {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding: 2rem 1rem 0;
+      position: relative;
+    }
+    .listings-hero::before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      max-width: 100vw;
+      height: 220px;
+      background: radial-gradient(
+        ellipse 55% 65% at 50% 45%,
+        rgba(237, 184, 74, 0.07),
+        transparent 70%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+    .listings-hero > * {
+      position: relative;
+      z-index: 1;
+    }
+    .listings-hero__label {
+      font-family: "Space Mono", monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--gold);
+      margin-bottom: 0.5rem;
+    }
+    .listings-hero__title {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 0;
+      line-height: 1.1;
+    }
+    .listings-hero__title span {
+      background: linear-gradient(
+        135deg,
+        var(--gold) 0%,
+        #f5d58d 45%,
+        var(--gold2) 100%
+      );
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 18px rgba(237, 184, 74, 0.25));
+    }
+    .listings-hero__sub {
+      font-size: 0.95rem;
+      color: var(--text3);
+      max-width: 500px;
+      margin: 0.75rem auto 0;
+      line-height: 1.6;
+    }
+    .listings-hero__panels {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, max-content));
+      gap: 0.75rem;
+      justify-content: center;
+      margin-top: 1.75rem;
+      padding: 0 0.5rem 0.5rem;
+    }
+    .hero-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1rem;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text3);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+    .hero-chip strong {
+      color: var(--text);
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      padding: 1.15rem;
+      border-radius: var(--r-lg);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      box-shadow: 0 24px 50px rgba(0, 0, 0, 0.16);
+      backdrop-filter: blur(12px);
+      margin-bottom: 2rem !important;
+    }
+    .sc {
+      background: rgba(17, 19, 27, 0.85) !important;
+      padding: 1rem 1.05rem !important;
+      border: 1px solid rgba(255, 255, 255, 0.06) !important;
+      border-radius: calc(var(--r-lg) - 4px);
+      transition: transform 0.25s ease, background 0.2s ease;
+    }
+    .sc:hover {
+      transform: translateY(-1px);
+      background: rgba(255, 255, 255, 0.05) !important;
+    }
+    .sl {
+      display: block;
+      font-size: 0.72rem !important;
+      letter-spacing: 0.16em !important;
+      color: var(--text3) !important;
+      margin-bottom: 0.45rem !important;
+      text-transform: uppercase;
+    }
+    .sv {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #ffffff;
+      letter-spacing: -0.02em;
+    }
+    .sv.a {
+      color: var(--gold);
+    }
+    .ss {
+      font-size: 0.78rem;
+      color: var(--text3);
+      margin-top: 0.3rem;
+    }
+    #sMaxN {
+      display: block;
+      color: var(--text3);
+      margin-top: 0.35rem;
+    }
+
+    .listings-toolbar {
+      display: flex;
+      flex-direction: column;
+      gap: 0.85rem;
+      margin-bottom: 2rem;
+      padding: 0 1rem;
+    }
+    .listings-toolbar__top {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .listings-toolbar__search {
+      flex: 1 1 24rem;
+      min-width: min(100%, 21rem);
+    }
+    .listings-toolbar .sw {
+      position: relative;
+      z-index: 80;
+      width: 100%;
+    }
+    .listings-toolbar .sw > svg {
+      position: absolute;
+      left: 0.875rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 1rem;
+      height: 1rem;
+      color: var(--text3);
+      pointer-events: none;
+    }
+    .listings-toolbar .sw input {
+      width: 100%;
+      height: 2.875rem;
+      border: 1px solid var(--border);
+      background: var(--bg3);
+      padding: 0.875rem 3rem 0.875rem 2.75rem;
+      color: var(--text);
+      font-size: 0.9rem;
+      min-width: 0;
+      border-radius: var(--r);
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.12);
+      transition:
+        border-color var(--dur-1),
+        background var(--dur-1),
+        box-shadow var(--dur-1);
+    }
+    .listings-toolbar .sw input:focus {
+      outline: none;
+      border-color: rgba(237, 184, 74, 0.7);
+      background: var(--bg2);
+      box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.12),
+        0 0 0 3px rgba(237, 184, 74, 0.08),
+        0 0 16px rgba(237, 184, 74, 0.06);
+    }
+    .listings-toolbar .sw input::placeholder {
+      color: var(--text3);
+    }
+    .xbtn {
+      position: absolute;
+      right: 0.45rem;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 2rem;
+      height: 2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s ease;
+    }
+    .xbtn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+    }
+    .listings-toolbar__filters {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: flex-start;
+      flex: 1 1 24rem;
+    }
+    .listings-toolbar__filter-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+      min-width: 180px;
+    }
+    .listings-toolbar__filter-field .fl {
+      color: var(--text3);
+      font-size: 0.76rem;
+      letter-spacing: 0.12em;
+      font-family: "Space Mono", monospace;
+      text-transform: uppercase;
+    }
+    .fchips .chip {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 0.4rem 0.75rem;
+      font-size: 0.75rem;
+      color: var(--text2);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      line-height: 1;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .fchips .chip:hover {
+      border-color: var(--gold3);
+      background: var(--gold-bg);
+      color: var(--gold);
+    }
+    .fchips .chipx {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text3);
+      font-size: 16px;
+      line-height: 1;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      transition: color 0.1s;
+      min-width: 20px;
+      min-height: 20px;
+      justify-content: center;
+    }
+    .fchips .chipx:hover {
+      color: var(--red);
+    }
+    .copy-price-btn {
+      background: none;
+      border: none;
+      color: var(--text3);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: var(--r-sm);
+      transition: background 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .copy-price-btn:hover {
+      background: var(--bg3);
+      color: var(--gold);
+    }
+    .copy-price-btn:active {
+      transform: scale(0.95);
+    }
+    .ctoggle {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      color: var(--text2);
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ctoggle:hover {
+      border-color: var(--gold3);
+      background: var(--gold-bg);
+      color: var(--gold);
+    }
+    .ctoggle.on {
+      border-color: var(--gold2);
+      background: var(--gold-bg);
+      color: var(--gold);
+    }
+    .panel-scroll-top {
+      position: static;
+      gap: 4px;
+      background: rgba(237, 184, 74, 0.08);
+      border: 1px solid rgba(237, 184, 74, 0.28);
+      width: 100%;
+      height: 40px;
+      color: var(--gold);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      margin: 20px 0 0;
+    }
+    .panel-scroll-top:hover {
+      background: var(--gold-bg);
+      border-color: var(--gold3);
+      color: var(--gold);
+    }
+    .cmp-card {
+      background: var(--bg2);
+      border-radius: var(--r);
+      padding: 1.5rem;
+      max-width: min(1160px, calc(100vw - 32px));
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    }
+    .cmp-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cmp-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .cmp-body {
+      /* styles for body */
+    }
+    
+    /* Compare card styling - inspired by pcards */
+    .compare-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 1rem;
+      margin-bottom: 1rem;
+      transition: border-color 0.2s ease;
+    }
+    .compare-card:hover {
+      border-color: var(--gold3);
+    }
+    .compare-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border2);
+    }
+    .compare-card-img {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--r-sm);
+      background: var(--bg3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .compare-card-title {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+    .compare-card-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1rem;
+    }
+    .compare-stat {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .compare-stat-label {
+      font-size: 0.75rem;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .compare-stat-value {
+      font-weight: 600;
+      color: var(--text);
+      font-size: 1.1rem;
+    }
+    .compare-stat-value.gold {
+      color: var(--gold);
+    }
+    .compare-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border2);
+    }
+    .compare-action-btn {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid var(--border2);
+      background: var(--bg3);
+      border-radius: var(--r-sm);
+      color: var(--text2);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .compare-action-btn:hover {
+      background: var(--bg4);
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .compare-action-btn.primary {
+      background: var(--gold-bg);
+      border-color: var(--gold3);
+      color: var(--gold);
+    }
+    .compare-action-btn.primary:hover {
+      background: rgba(237, 184, 74, 0.2);
+    }
+    .cselect {
+      position: relative;
+      width: 100%;
+    }
+    .cselect-btn {
+      width: 100%;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      font-size: 16px;
+      padding: 8px 11px;
+      height: var(--touch-target);
+      outline: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    @media (min-width: 600px) {
+      .cselect-btn {
+        font-size: 14px;
+        height: 38px;
+      }
+    }
+    .cselect-btn:focus {
+      border-color: var(--gold2);
+      background: var(--bg3);
+    }
+    .cselect-btn::after {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 4px solid var(--text3);
+      transition: transform 0.2s;
+    }
+    .cselect.open .cselect-btn::after {
+      transform: rotate(180deg);
+    }
+    .cselect-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      z-index: 100;
+      max-height: none;
+      overflow: visible;
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      visibility: hidden;
+      transform: translateY(-6px) scale(0.98);
+      transform-origin: top center;
+      transition:
+        opacity 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        transform 140ms cubic-bezier(0.2, 0.8, 0.2, 1),
+        visibility 0s linear 140ms;
+    }
+    .cselect.open .cselect-menu {
+      opacity: 1;
+      pointer-events: auto;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+      transition-delay: 0s;
+    }
+    .cselect-menu button {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: "DM Sans", sans-serif;
+      font-size: 14px;
+      padding: 8px 11px;
+      text-align: left;
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .cselect-menu button:hover {
+      background: var(--bg3);
+    }
+    .cselect-menu button.on {
+      background: var(--gold-bg);
+      color: var(--gold);
+    }
+    .listings-toolbar .cselect {
+      flex: 1 1 10.5rem;
+      min-width: 9.5rem;
+      max-width: 13rem;
+    }
+    .listings-toolbar .cselect-btn {
+      height: 2.875rem;
+      padding: 0.75rem 0.875rem;
+      border-color: var(--border);
+      background: var(--bg3);
+      border-radius: var(--r);
+      font-size: 0.875rem;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+      transition:
+        border-color var(--dur-1),
+        background var(--dur-1),
+        color var(--dur-1),
+        box-shadow var(--dur-1);
+    }
+    .listings-toolbar .cselect-btn::after {
+      display: none;
+    }
+    .listings-toolbar .cselect-btn svg {
+      flex: 0 0 auto;
+      color: var(--text3);
+      transition: transform var(--dur-1), color var(--dur-1);
+    }
+    .listings-toolbar .cselect.open .cselect-btn svg {
+      color: var(--gold);
+      transform: rotate(180deg);
+    }
+    .listings-toolbar .cselect-btn:hover,
+    .listings-toolbar .cselect-btn:focus {
+      border-color: rgba(237, 184, 74, 0.55);
+      background: var(--bg2);
+      box-shadow:
+        inset 0 1px 2px rgba(0, 0, 0, 0.12),
+        0 0 0 3px rgba(237, 184, 74, 0.06);
+    }
+    .listings-toolbar .cselect-menu {
+      top: calc(100% + 0.4rem);
+      border-color: var(--border);
+      border-radius: var(--r);
+      background: var(--bg2);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+      overflow: visible;
+    }
+    .listings-toolbar .cselect-menu button {
+      min-height: 2.25rem;
+      padding: 0.55rem 0.75rem;
+      font-size: 0.85rem;
+    }
+    /* Compare tooltip */
+    .cmp-tip {
+      position: absolute;
+      top: 100%;
+      margin-top: 4px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text2);
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 100;
+      margin-bottom: 4px;
+    }
+    .cmp-tip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 4px solid transparent;
+      border-top-color: var(--bg3);
+    }
+    #cmpBtn:hover .cmp-tip {
+      opacity: 1;
+    }
+    .cmp-tip-item {
+      margin-bottom: 4px;
+    }
+    .cmp-tip-item:last-child {
+      margin-bottom: 0;
+    }
+    .cmp-tip-empty {
+      color: var(--text3);
+    }
+    /* Row tooltip */
+    .row-tip {
+      position: fixed;
+      background: var(--bg3);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-sm);
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text2);
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .row-tip.on {
+      opacity: 1;
+    }
+    .row-tip-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+    .row-tip-row:last-child {
+      margin-bottom: 0;
+    }
+    .row-tip-label {
+      color: var(--text3);
+      font-family: "Space Mono", monospace;
+      text-transform: uppercase;
+      font-size: 10px;
+      letter-spacing: 0.05em;
+    }
+    .row-tip-val {
+      font-family: "Space Mono", monospace;
+      font-weight: 600;
+    }
+
+    .listings-toolbar__filter-field select:focus {
+      outline: none;
+      border-color: rgba(237, 184, 74, 0.75);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .fchips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      padding: 0.2rem 0 0;
+    }
+    .fchips:empty {
+      display: none;
+    }
+    .listings-toolbar__bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem 1rem;
+      flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+      padding-top: 0.875rem;
+    }
+    .listings-toolbar__bottom-left,
+    .listings-toolbar__bottom-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .listings-toolbar__bottom-left {
+      flex: 1 1 35rem;
+      min-width: 0;
+    }
+    .listings-toolbar__bottom-right {
+      justify-content: flex-end;
+      flex: 1 1 20rem;
+    }
+
+    .sort-label {
+      font-size: 0.72rem;
+      font-family: "Space Mono", monospace;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      padding-right: 0.1rem;
+    }
+    .listings-toolbar .spills {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-left: 0 !important;
+      min-width: 0;
+    }
+    .listings-toolbar .spills::after {
+      display: none;
+    }
+    .spill {
+      padding: 0.4rem 0.875rem;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      color: var(--text2);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition:
+        background var(--dur-1),
+        border-color var(--dur-1),
+        color var(--dur-1),
+        transform var(--dur-1),
+        box-shadow var(--dur-2);
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: 0.01em;
+    }
+    .spill:hover {
+      background: var(--bg4);
+      border-color: var(--border2);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .spill.on {
+      background: var(--gold-bg);
+      border-color: var(--gold3);
+      color: var(--gold);
+      box-shadow: 0 0 8px rgba(237, 184, 74, 0.2);
+    }
+
+    .listings-results-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      padding: 0 1rem;
+      color: var(--text3);
+    }
+    .listings-results-row .ri {
+      font-size: 0.9rem;
+    }
+    .listings-results-row .pag-bar {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    /* ── Data Saver Banner ── */
+    .ds-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      color: var(--text3);
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+      box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.04);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .ds-banner.on {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .ds-banner svg {
+      flex-shrink: 0;
+      color: var(--text3);
+    }
+    .ds-banner-off {
+      background: rgba(237, 184, 74, 0.1);
+      border: 1px solid rgba(237, 184, 74, 0.3);
+      color: var(--gold);
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .ds-banner-off:hover {
+      background: rgba(237, 184, 74, 0.15);
+    }
+
+    /* ── Compare Modal ── */
+    .cmp-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(8px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .cmp-modal.on {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .cmp-backdrop {
+      position: absolute;
+      inset: 0;
+    }
+    .cmp-card {
+      position: relative;
+      width: min(1160px, calc(100vw - 2rem));
+      max-height: calc(100vh - 2rem);
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: var(--r-lg);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .cmp-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .cmp-heading {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      min-width: 0;
+    }
+    .cmp-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+    }
+    .cmp-clear-btn {
+      border-color: rgba(240, 100, 100, 0.22);
+      color: var(--text2);
+    }
+    .cmp-clear-btn:hover {
+      border-color: rgba(240, 100, 100, 0.5);
+      background: rgba(240, 100, 100, 0.08);
+      color: #f06464;
+    }
+    .cmp-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1.25rem;
+    }
+    @media (max-width: 640px) {
+      .cmp-top {
+        align-items: flex-start;
+      }
+      .cmp-heading {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+    }
+
+    /* ── Scroll to Top Button ── */
+    #scrollTopBtn {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      width: 3rem;
+      height: 3rem;
+      border-radius: 50%;
+      background: linear-gradient(180deg, rgba(237, 184, 74, 0.2), rgba(237, 184, 74, 0.08));
+      border: 1px solid rgba(237, 184, 74, 0.5);
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: opacity 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 300;
+      box-shadow:
+        0 12px 30px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(237, 184, 74, 0.12),
+        0 0 24px rgba(237, 184, 74, 0.18);
+    }
+    #scrollTopBtn.on {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #scrollTopBtn:hover {
+      background: linear-gradient(180deg, rgba(237, 184, 74, 0.28), rgba(237, 184, 74, 0.12));
+      border-color: rgba(237, 184, 74, 0.75);
+      color: var(--gold2);
+      transform: translateY(-2px);
+    }
+
+    /* ── Tooltips for buttons ── */
+    .vbtn[title] {
+      position: relative;
+    }
+    .vbtn[title]:hover::after {
+      content: attr(title);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg3);
+      color: var(--text);
+      padding: 0.5rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      z-index: 1000;
+      margin-bottom: 0.5rem;
+    }
+    .vbtn[title]:hover::before {
+      content: "";
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: var(--bg3);
+      margin-bottom: -5px;
+    }
+    .listings-toolbar .vbtn {
+      min-height: 2.25rem;
+      height: auto;
+      padding: 0.45rem 0.75rem;
+      border-radius: 999px;
+      background: var(--bg3);
+      border-color: var(--border);
+      color: var(--text2);
+      font-size: 0.8125rem;
+      font-family: "DM Sans", sans-serif;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      box-shadow: none;
+      transition:
+        background var(--dur-1),
+        border-color var(--dur-1),
+        color var(--dur-1),
+        transform var(--dur-1),
+        box-shadow var(--dur-2);
+    }
+    .listings-toolbar .vbtn:hover {
+      background: var(--bg4);
+      border-color: var(--border2);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    .listings-toolbar .vbtn.on {
+      background: var(--gold-bg);
+      border-color: var(--gold3);
+      color: var(--gold);
+      box-shadow: 0 0 8px rgba(237, 184, 74, 0.2);
+    }
+    .listings-toolbar .vbtn svg {
+      flex: 0 0 auto;
+    }
+
+    @media (min-width: 769px) {
+      .listings-toolbar {
+        gap: 1.15rem;
+      }
+      .listings-toolbar__top {
+        align-items: center;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .listings-toolbar__top {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .listings-toolbar__search,
+      .listings-toolbar__filters,
+      .listings-toolbar__bottom-left,
+      .listings-toolbar__bottom-right {
+        flex-basis: auto;
+        width: 100%;
+      }
+      .listings-toolbar__filters {
+        justify-content: flex-start;
+      }
+      .listings-toolbar__bottom {
+        align-items: stretch;
+      }
+      .listings-toolbar__bottom-right {
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .listings-hero__title {
+        font-size: 2.5rem;
+      }
+      .listings-hero__panels {
+        grid-template-columns: 1fr;
+      }
+      .listings-toolbar__filter-field {
+        min-width: 0;
+        width: 100%;
+      }
+      .listings-toolbar {
+        padding: 0 0.75rem;
+      }
+      .listings-toolbar__filters {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .listings-toolbar .cselect {
+        max-width: none;
+        min-width: 0;
+      }
+      .listings-toolbar__bottom-left {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .listings-toolbar .spills,
+      .listings-toolbar__bottom-right {
+        width: 100%;
+      }
+      .listings-toolbar__bottom-right .vbtn {
+        justify-content: center;
+      }
+      .listings-toolbar__bottom-right .vbtn:nth-last-child(-n + 2) {
+        width: 2.5rem;
+        padding-inline: 0;
+      }
+    }
+
+    /* ── Remove old ctrl-row / ctrl-row2 / rbar from view ── */
+    .ctrl-row,
+    .ctrl-row2,
+    .rbar {
+      display: none !important;
+    }
+  </style>
+
+  <!-- Scripts (load order matters: constants → state → data → ui → panel → features) -->
+  <script defer src="./assets/js/card_notes.js"></script>
+  <script defer src="./assets/js/constants/config.js"></script>
+  <script defer src="./assets/js/constants/items.js"></script>
+  <script defer src="./assets/js/constants/ui-constants.js"></script>
+  <script defer src="./assets/js/state.js"></script>
+  <script defer src="./assets/js/data.js"></script>
+  <script defer src="./assets/js/ui.js"></script>
+  <script defer src="./assets/js/panel.js"></script>
+  <script defer src="./assets/js/features.js"></script>
+</head>
+<body>
+<header class="site-header" aria-label="Site header">
+  <div class="site-header__inner">
+    <a href="index.html" class="logo" aria-label="Castia Market home">
+      <div class="logo-mark" aria-hidden="true">
+        <svg
+          width="13"
+          height="13"
+          viewBox="0 0 14 14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.7"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path
+            d="M7 1.5L8.8 5.2L13 5.8L10 8.7L10.7 12.8L7 10.8L3.3 12.8L4 8.7L1 5.8L5.2 5.2Z"
+          />
+        </svg>
+      </div>
+      <div class="logo-wordmark">
+        <span class="logo-name">CASTIA</span
+        ><span class="logo-tag">MARKET</span>
+      </div>
+    </a>
+
+    <nav class="site-header__nav" aria-label="Main navigation">
+      <a href="index.html" class="site-header__nav-link active">
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <rect x="1" y="1" width="10" height="2.5" rx=".75" />
+          <rect x="1" y="5" width="10" height="2.5" rx=".75" />
+          <rect x="1" y="9" width="10" height="2" rx=".75" />
+        </svg>
+        Listings
+      </a>
+      <a href="sellers.html" class="site-header__nav-link">
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <circle cx="6" cy="4" r="2.5" />
+          <path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" />
+        </svg>
+        Sellers
+      </a>
+      <span class="site-header__nav-link nav-soon" aria-disabled="true">
+        <svg
+          width="11"
+          height="11"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          aria-hidden="true"
+        >
+          <circle cx="6" cy="6" r="4.5" />
+          <path d="M6 3.5v3l2 1.5" />
+        </svg>
+        Coming Soon
+      </span>
+    </nav>
+
+    <div class="header-right">
+      <div id="sync-status">
+        <div class="dot loading" id="sdot"></div>
+        <span id="stxt">Loading...</span>
+      </div>
+      <button
+        class="hbtn"
+        id="rBtn"
+        onclick="manualRefresh()"
+        title="Refresh data"
+        aria-label="Refresh market data"
+      >
+        <svg
+          id="rIco"
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+        >
+          <path d="M10.5 6A4.5 4.5 0 1 1 8.5 2.2M10.5 1v3h-3" />
+        </svg>
+        Refresh
+      </button>
+      <button
+        class="hbtn mob-menu-btn"
+        id="mobMenuBtn"
+        aria-label="Toggle navigation"
+        aria-expanded="false"
+        aria-controls="mob-nav"
+        onclick="toggleMobMenu()"
+      >
+        <div class="burger-line burger-line-1"></div>
+        <div class="burger-line burger-line-2"></div>
+        <div class="burger-line burger-line-3"></div>
+      </button>
+    </div>
+  </div>
+
+  <nav
+    class="mob-nav"
+    id="mob-nav"
+    aria-hidden="true"
+    aria-label="Mobile navigation"
+  >
+    <a href="index.html" class="mob-nav__link active" onclick="closeMobMenu()">
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <rect x="1" y="1" width="10" height="2.5" rx=".75" />
+        <rect x="1" y="5" width="10" height="2.5" rx=".75" />
+        <rect x="1" y="9" width="10" height="2" rx=".75" />
+      </svg>
+      Listings
+    </a>
+    <a href="sellers.html" class="mob-nav__link" onclick="closeMobMenu()">
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <circle cx="6" cy="4" r="2.5" />
+        <path d="M1.5 11c0-2.5 2-4 4.5-4s4.5 1.5 4.5 4" />
+      </svg>
+      Sellers
+    </a>
+    <span class="mob-nav__link nav-soon" aria-disabled="true">
+      <svg
+        width="13"
+        height="13"
+        viewBox="0 0 12 12"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        aria-hidden="true"
+      >
+        <circle cx="6" cy="6" r="4.5" />
+        <path d="M6 3.5v3l2 1.5" />
+      </svg>
+      Coming Soon
+    </span>
+  </nav>
+</header>
+
+<div
+        id="boot-preloader"
+        class="boot-preloader on"
+        aria-hidden="false"
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+>
+  <div class="boot-card">
+    <div class="boot-brand">
+      <div class="logo-mark" aria-hidden="true">⚔</div>
+      <div class="boot-title">CASTIA MARKET</div>
+    </div>
+    <div class="boot-spinner" aria-hidden="true"></div>
+    <div class="boot-text" id="boot-text">Loading market data…</div>
+    <div class="boot-sub">Optimized loading for slower connections</div>
+  </div>
+</div>
+
+<div id="panel-backdrop" onclick="closePanel()" aria-hidden="true"></div>
+
+<div id="app">
+  <main>
+
+    <!-- ── Hero section (mirrors sellers.html) ── -->
+    <div class="listings-hero">
+      <div class="listings-hero__label">Price Tracker</div>
+      <h1 class="listings-hero__title">Auction <span>Listings</span></h1>
+      <p class="listings-hero__sub">
+        Live median prices from the auction house, updated every 5 minutes.<br>
+        Click any item to see detailed pricing history.
+      </p>
+    </div>
+
+    <!-- ── RLS error banner ── -->
+    <div class="rlsb" id="rlsb">
+      ⚠ Could not load data — check Supabase RLS allows anon SELECT on
+      price_data.
+    </div>
+
+    <!-- ── Data saver notice ── -->
+    <div class="ds-banner" id="dsBanner">
+      <svg
+              width="13"
+              height="13"
+              viewBox="0 0 13 13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.4"
+      >
+        <rect x="1" y="3" width="11" height="8" rx="1.5" />
+        <path d="M4 3V2a.5.5 0 0 1 .5-.5h4A.5.5 0 0 1 9 2v1" />
+        <line x1="4" y1="6.5" x2="9" y2="6.5" />
+      </svg>
+      Data saver is on — images are hidden to reduce bandwidth.
+      <button class="ds-banner-off" onclick="toggleDataSaver()">
+        Turn off
+      </button>
+    </div>
+
+    <!-- ── Stats bar ── -->
+    <div class="stats-bar">
+      <div class="sc">
+        <div class="sl">Total items</div>
+        <div class="sv" id="sTot">—</div>
+      </div>
+      <div class="sc">
+        <div class="sl">Categories</div>
+        <div class="sv" id="sCat">—</div>
+      </div>
+      <div class="sc">
+        <div class="sl">Highest price</div>
+        <div class="sv a" id="sMax">—</div>
+        <div class="ss" id="sMaxN"></div>
+      </div>
+      <div class="sc">
+        <div class="sl">Avg median</div>
+        <div class="sv a" id="sAvg">—</div>
+      </div>
+      <div class="sc">
+        <div class="sl">Last updated</div>
+        <div class="sv" id="sUpd" style="font-size: 14px">—</div>
+      </div>
+    </div>
+
+    <div class="listings-toolbar">
+
+      <!-- Row 1: Search + filters -->
+      <div class="listings-toolbar__top">
+        <div class="listings-toolbar__search">
+          <div class="sw">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="6" cy="6" r="4.5" />
+              <line x1="9.5" y1="9.5" x2="13" y2="13" />
+            </svg>
+            <input
+              type="text"
+              id="qEl"
+              placeholder="Search items, Book: Fire Aspect, Prismatic…"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Search items"
+              oninput="applyFilters()"
+            />
+            <button class="xbtn" id="xBtn" onclick="clearQ()" title="Clear search" aria-label="Clear search">
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6">
+                <line x1="2" y1="2" x2="10" y2="10" />
+                <line x1="10" y1="2" x2="2" y2="10" />
+              </svg>
+            </button>
+            <div class="sugg" id="suggEl" role="listbox" aria-label="Search suggestions"></div>
+          </div>
+        </div>
+        <div class="listings-toolbar__filters">
+          <div class="cselect" id="catElWrap">
+            <button type="button" class="cselect-btn" onclick="toggleCSelect('catEl')" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cval" id="catElVal">Category</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,4 6,8 10,4"/></svg>
+            </button>
+            <div class="cselect-menu" id="catElMenu" role="listbox" aria-label="Filter by category"></div>
+          </div>
+          <div class="cselect" id="confElWrap">
+            <button type="button" class="cselect-btn" onclick="toggleCSelect('confEl')" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cval" id="confElVal">Confidence</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,4 6,8 10,4"/></svg>
+            </button>
+            <div class="cselect-menu" id="confElMenu" role="listbox" aria-label="Filter by confidence"></div>
+          </div>
+          <div class="cselect" id="tierElWrap">
+            <button type="button" class="cselect-btn" onclick="toggleCSelect('tierEl')" aria-haspopup="listbox" aria-expanded="false">
+              <span class="cval" id="tierElVal">Tier</span>
+              <svg width="11" height="11" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,4 6,8 10,4"/></svg>
+            </button>
+            <div class="cselect-menu" id="tierElMenu" role="listbox" aria-label="Filter by tier"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active filter chips -->
+      <div class="fchips" id="chips"></div>
+
+      <!-- Row 2: Sort + view toggle + action buttons -->
+      <div class="listings-toolbar__bottom">
+        <div class="listings-toolbar__bottom-left">
+          <span class="sort-label">Sort:</span>
+          <div class="spills" style="margin-left:0;">
+            <button class="spill on" id="sp-median" onclick="setSort('median')">
+              Price
+            </button>
+            <button class="spill" id="sp-samples" onclick="setSort('samples')">
+              Samples
+            </button>
+            <button
+                    class="spill"
+                    id="sp-displayName"
+                    onclick="setSort('displayName')"
+            >
+              Name A–Z
+            </button>
+            <button
+                    class="spill"
+                    id="sp-confidence"
+                    onclick="setSort('confidence')"
+            >
+              Confidence
+            </button>
+            <button
+                    class="spill"
+                    id="sp-lastseen"
+                    onclick="setSort('last_seen')"
+            >
+              Newest
+            </button>
+            <button class="spill on" id="sp-dir" onclick="flipDir()">↓</button>
+          </div>
+        </div>
+
+        <div class="listings-toolbar__bottom-right">
+          <button
+                  class="vbtn"
+                  id="favOnlyBtn"
+                  onclick="toggleFavOnly()"
+                  title="Show favorites only"
+          >
+            <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    fill="currentColor"
+            >
+              <polygon
+                      points="6,1 7.5,4.2 11,4.7 8.5,7.1 9.1,10.6 6,9 2.9,10.6 3.5,7.1 1,4.7 4.5,4.2"
+              />
+            </svg>
+            Favs
+          </button>
+          <button
+                  class="vbtn"
+                  id="cmpBtn"
+                  onclick="openCompare()"
+                  title="Compare selected items"
+          >
+            <svg
+                    width="13"
+                    height="12"
+                    viewBox="0 0 13 12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+            >
+              <line x1="1" y1="6" x2="12" y2="6" />
+              <polyline points="9,3 12,6 9,9" />
+              <polyline points="4,3 1,6 4,9" opacity=".5" />
+            </svg>
+            Compare
+            <span class="vbadge off" id="cmpCount">0</span>
+          </button>
+          <button
+                  class="vbtn"
+                  id="dsBtn"
+                  onclick="toggleDataSaver()"
+                  title="Data saver — disable images"
+          >
+            <svg
+                    width="13"
+                    height="12"
+                    viewBox="0 0 13 12"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+            >
+              <rect x="1" y="2.5" width="11" height="8" rx="1.5" />
+              <path d="M4 2.5V1.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v1" />
+              <line x1="4" y1="6.5" x2="9" y2="6.5" />
+            </svg>
+            Data saver
+          </button>
+          <button
+                  class="vbtn on"
+                  id="vt"
+                  onclick="setView('table')"
+                  title="Table view"
+          >
+            <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 13 13"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+            >
+              <rect x="1" y="1" width="11" height="3" rx="1" />
+              <rect x="1" y="6" width="11" height="3" rx="1" />
+              <rect x="1" y="11" width="11" height="1.5" rx=".75" />
+            </svg>
+          </button>
+          <button
+                  class="vbtn"
+                  id="vc"
+                  onclick="setView('card')"
+                  title="Card view"
+          >
+            <svg
+                    width="13"
+                    height="13"
+                    viewBox="0 0 13 13"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.4"
+            >
+              <rect x="1" y="1" width="4.5" height="4.5" rx="1" />
+              <rect x="7.5" y="1" width="4.5" height="4.5" rx="1" />
+              <rect x="1" y="7.5" width="4.5" height="4.5" rx="1" />
+              <rect x="7.5" y="7.5" width="4.5" height="4.5" rx="1" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Results + top pagination row ── -->
+    <div class="listings-results-row">
+      <div class="ri" id="ri"></div>
+      <div class="pag-bar">
+        <div class="pbtns" id="pbtns-top"></div>
+      </div>
+    </div>
+
+    <!-- ════════════════════
+          Hidden legacy wrappers — JS still populates these,
+          the new toolbar duplicates their visual presentation
+          ════════════════════ -->
+    <div class="ctrl-row" aria-hidden="true">
+      <div class="field">
+        <div class="fl">Search</div>
+        <div class="sw" style="pointer-events:none;opacity:0;height:0;overflow:hidden;">
+          <input type="text" id="_qEl_legacy" tabindex="-1" aria-hidden="true" />
+        </div>
+      </div>
+      <div class="field">
+        <div class="fl">Category</div>
+        <select id="catEl" tabindex="-1" aria-hidden="true"></select>
+      </div>
+      <div class="field">
+        <div class="fl">Confidence</div>
+        <select id="confEl" tabindex="-1" aria-hidden="true"></select>
+      </div>
+      <div class="field">
+        <div class="fl">Tier (Prismatic)</div>
+        <select id="tierEl" tabindex="-1" aria-hidden="true"></select>
+      </div>
+    </div>
+    <div class="ctrl-row2" aria-hidden="true">
+      <div class="fchips" id="_chips_legacy"></div>
+      <div class="spills" id="_spills_legacy"></div>
+    </div>
+    <div class="rbar" aria-hidden="true">
+      <div class="results-row"><div class="ri" id="_ri_legacy"></div></div>
+      <div class="controls-row">
+        <div class="pag-bar"><div class="pbtns" id="_pbtns_legacy"></div></div>
+        <div class="action-bar"></div>
+      </div>
+    </div>
+
+    <!-- ── Table view ── -->
+    <div id="tvw">
+      <div class="twrap">
+        <table>
+          <thead>
+          <tr>
+            <th onclick="setSort('displayName')" id="th-displayName">
+              <div class="ti">
+                Item <span class="ar" id="ar-displayName"></span>
+              </div>
+            </th>
+            <th class="hsm hpanel"><div class="ti">Category</div></th>
+            <th onclick="setSort('median')" id="th-median" class="on">
+              <div class="ti">
+                Median <span class="ar" id="ar-median">↓</span>
+              </div>
+            </th>
+            <th class="hmd hpanel"><div class="ti">IQR Range</div></th>
+            <th
+                    onclick="setSort('confidence')"
+                    id="th-confidence"
+                    class="hsm hpanel"
+            >
+              <div class="ti">
+                Conf. <span class="ar" id="ar-confidence"></span>
+              </div>
+            </th>
+            <th
+                    onclick="setSort('trend')"
+                    id="th-trend"
+                    class="hmd hpanel"
+            >
+              <div class="ti">
+                Trend <span class="ar" id="ar-trend"></span>
+              </div>
+            </th>
+            <th onclick="setSort('samples')" id="th-samples">
+              <div class="ti">
+                Samples <span class="ar" id="ar-samples"></span>
+              </div>
+            </th>
+          </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="cvw" style="display: none">
+      <div class="cgrid" id="cgrid"></div>
+    </div>
+
+    <div class="pag">
+      <span class="pmeta" id="pmeta"></span>
+      <div class="pbtns" id="pbtns"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Detail Panel -->
+<div
+        id="detail-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Item details"
+        aria-hidden="true"
+        tabindex="-1"
+>
+  <div class="panel-drag"></div>
+  <div class="panel-header">
+    <div class="panel-top">
+      <div class="panel-title" id="panel-title">—</div>
+      <button
+              class="panel-close"
+              id="panelCloseBtn"
+              type="button"
+              onclick="closePanel()"
+              title="Close"
+              aria-label="Close item details"
+      >
+        ✕
+      </button>
+    </div>
+    <div id="panel-meta"></div>
+  </div>
+  <div class="panel-body" id="panel-body">
+    <div
+            style="
+            color: var(--text3);
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            text-align: center;
+            padding: 3rem 0;
+          "
+    >
+      Select an item to view details
+    </div>
+  </div>
+</div>
+
+<footer>Castia Market &mdash; auto-refreshes every 5 min</footer>
+
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<!-- Scroll to top -->
+<button
+        id="scrollTopBtn"
+        onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
+        title="Back to top"
+        aria-label="Back to top"
+>
+  <svg
+          width="12"
+          height="12"
+          viewBox="0 0 12 12"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.6"
+  >
+    <polyline points="2,8 6,4 10,8" />
+  </svg>
+</button>
+
+<!-- Compare modal -->
+<div class="cmp-modal" id="compareModal" aria-hidden="true">
+  <div class="cmp-backdrop" onclick="closeCompare()"></div>
+  <div
+          class="cmp-card"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="compareTitle"
+  >
+    <div class="cmp-top">
+      <div class="cmp-heading">
+        <div class="cmp-title" id="compareTitle">
+          <svg
+                  width="13"
+                  height="12"
+                  viewBox="0 0 13 12"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.4"
+                  style="margin-right: 7px; vertical-align: -1px"
+          >
+            <line x1="1" y1="6" x2="12" y2="6" />
+            <polyline points="9,3 12,6 9,9" />
+            <polyline points="4,3 1,6 4,9" opacity=".5" />
+          </svg>
+          Compare Items
+        </div>
+        <button class="hbtn cmp-clear-btn" type="button" onclick="clearCompare()">
+          Clear all
+        </button>
+      </div>
+      <button
+              class="panel-close"
+              id="cmpCloseBtn"
+              type="button"
+              onclick="closeCompare()"
+              title="Close"
+              aria-label="Close compare dialog"
+      >
+        ✕
+      </button>
+    </div>
+    <div class="cmp-body" id="cmpBody"></div>
+  </div>
+</div>
+
+<script>
+  function toggleMobMenu() {
+    var nav = document.getElementById("mob-nav");
+    var btn = document.getElementById("mobMenuBtn");
+    var open = nav.getAttribute("aria-hidden") === "false";
+    nav.setAttribute("aria-hidden", open ? "true" : "false");
+    nav.classList.toggle("open", !open);
+    btn.setAttribute("aria-expanded", (!open).toString());
+    if (btn) btn.classList.toggle("open", !open);
+  }
+  function closeMobMenu() {
+    var nav = document.getElementById("mob-nav");
+    var btn = document.getElementById("mobMenuBtn");
+    nav.setAttribute("aria-hidden", "true");
+    nav.classList.remove("open");
+    btn.setAttribute("aria-expanded", "false");
+    if (btn) btn.classList.remove("open");
+  }
+  document.addEventListener("click", function (e) {
+    var nav = document.getElementById("mob-nav");
+    if (!nav || nav.getAttribute("aria-hidden") === "true") return;
+    if (!e.target.closest(".mob-nav") && !e.target.closest("#mobMenuBtn"))
+      closeMobMenu();
+  });
+</script>
+</body>
+</html>

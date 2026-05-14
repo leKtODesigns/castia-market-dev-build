@@ -1,0 +1,16 @@
+node_modules/
+.clinerules/
+.env
+.idea/
+.vscode/
+dist/
+build/
+*.log
+*.local
+sprite-downloader/
+.DS_Store
+Thumbs.db
+claude.txt
+temp-index.html
+PROJECT-ANALYSIS.md
+.prettierrc

@@ -1,0 +1,622 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+:root {
+  --bg: #0b0d12;
+  --bg2: #11141b;
+  --bg3: #181c26;
+  --bg4: #1f2433;
+  --bg5: #252a3a;
+  --border: rgba(255, 255, 255, 0.06);
+  --border2: rgba(255, 255, 255, 0.11);
+  --border3: rgba(255, 255, 255, 0.18);
+  --text: #e4e6ef;
+  --text2: #9ca3af;
+  --text3: #868a9c;
+  --gold: #edb84a;
+  --gold2: #c4922a;
+  --gold3: #7a5516;
+  --gold-bg: rgba(237, 184, 74, 0.07);
+  --gold-bg2: rgba(237, 184, 74, 0.14);
+  --green: #46d679;
+  --green-bg: rgba(70, 214, 121, 0.08);
+  --red: #f06464;
+  --red-bg: rgba(240, 100, 100, 0.08);
+  --blue: #5ba3f5;
+  --blue-bg: rgba(91, 163, 245, 0.08);
+  --purple: #c07cf5;
+  --purple-bg: rgba(192, 124, 245, 0.08);
+  --cyan: #3fe3e8;
+  --cyan-bg: rgba(63, 227, 232, 0.1);
+  --orange: #f0a24b;
+  --orange-bg: rgba(240, 162, 75, 0.1);
+  --r: 10px;
+  --r-sm: 6px;
+  --r-xs: 4px;
+  --r-lg: 14px;
+  --panel-w: 480px;
+  /* Mobile-specific */
+  --header-h: 52px;
+  --touch-target: 44px;
+
+  /* Motion + elevation */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-soft: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --dur-1: 120ms;
+  --dur-2: 180ms;
+  --dur-3: 260ms;
+  --shadow-1: 0 8px 28px rgba(0, 0, 0, 0.35);
+  --shadow-2: 0 18px 60px rgba(0, 0, 0, 0.55);
+  --shadow-3: 0 28px 90px rgba(0, 0, 0, 0.6);
+}
+html {
+  scroll-behavior: smooth;
+  overflow-x: hidden;
+}
+body {
+  font-family: "DM Sans", sans-serif;
+  background:
+    radial-gradient(
+      900px 560px at 22% 10%,
+      rgba(237, 184, 74, 0.065),
+      transparent 62%
+    ),
+    radial-gradient(
+      760px 520px at 78% 88%,
+      rgba(91, 163, 245, 0.055),
+      transparent 62%
+    ),
+    var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+  overflow-x: hidden;
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg2);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--bg5);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text3);
+}
+
+/* ── Keyframes ── */
+@keyframes blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.25;
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes shimmer {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+@keyframes menuOpen {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scaleY(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scaleY(1);
+  }
+}
+@keyframes tipIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes cmpIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rowIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes statPop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes badgePop {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes panelSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+  }
+}
+@keyframes headerGlow {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes chipIn {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes favPulse {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.35);
+  }
+  65% {
+    transform: scale(0.88);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes badgeCount {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.3);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── Burger Menu Animation ── */
+@keyframes burgerToX {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(0deg) scale(0.8);
+  }
+  100% {
+    transform: rotate(45deg) scale(0.8);
+  }
+}
+
+@keyframes burgerToXReverse {
+  0% {
+    transform: rotate(45deg) scale(0.8);
+  }
+  50% {
+    transform: rotate(0deg) scale(0.8);
+  }
+  100% {
+    transform: rotate(0deg) scale(1);
+  }
+}
+
+@keyframes burgerLine1 {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(6px) rotate(45deg);
+  }
+}
+
+@keyframes burgerLine1Reverse {
+  0% {
+    transform: translateY(6px) rotate(45deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes burgerLine3 {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+}
+
+@keyframes burgerLine3Reverse {
+  0% {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+@keyframes burgerLine2 {
+  0% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+}
+
+@keyframes burgerLine2Reverse {
+  0% {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+/* ── Slow Blink Animation ── */
+@keyframes slowBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+/* ── Button Click Animation ── */
+@keyframes buttonPress {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* ── List Update Animation ── */
+@keyframes listFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Seller Card Keyframes ── */
+
+/* Avatar glows */
+@keyframes scTrustAvatarGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 8px rgba(237, 184, 74, 0.4),
+      0 0 0 2px rgba(237, 184, 74, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(237, 184, 74, 0.7),
+      0 0 0 3px rgba(237, 184, 74, 0.3);
+  }
+}
+@keyframes scNeutralBreath {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px rgba(156, 163, 175, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 8px rgba(156, 163, 175, 0.25),
+      0 0 0 2px rgba(156, 163, 175, 0.2);
+  }
+}
+@keyframes scSuspiciousShift {
+  0%,
+  100% {
+    transform: translateX(0);
+    box-shadow: 0 0 8px rgba(240, 162, 75, 0.35);
+  }
+  20% {
+    transform: translateX(-1px);
+  }
+  40% {
+    transform: translateX(1px);
+  }
+  60% {
+    transform: translateX(0);
+    box-shadow: 0 0 14px rgba(240, 162, 75, 0.55);
+  }
+}
+@keyframes scFlaggedPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 6px rgba(240, 100, 100, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(240, 100, 100, 0.7);
+  }
+}
+
+/* Card shake on hover for flagged */
+@keyframes scShameShake {
+  0% {
+    transform: translateX(0) translateY(-2px);
+  }
+  15% {
+    transform: translateX(-5px) translateY(-2px) rotate(-1deg);
+  }
+  30% {
+    transform: translateX(5px) translateY(-2px) rotate(1deg);
+  }
+  45% {
+    transform: translateX(-4px) translateY(-2px) rotate(-0.5deg);
+  }
+  60% {
+    transform: translateX(4px) translateY(-2px) rotate(0.5deg);
+  }
+  75% {
+    transform: translateX(-2px) translateY(-2px);
+  }
+  100% {
+    transform: translateX(0) translateY(-2px);
+  }
+}
+
+/* Particle animations */
+@keyframes scParticleRise {
+  0% {
+    transform: translate(var(--x0, 0px), var(--y0, 0px)) scale(0.4) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translate(
+        var(--x1, 0px),
+        calc(var(--y0, 0px) - var(--dist, 80px))
+      )
+      scale(1) rotate(var(--rot, 120deg));
+    opacity: 0;
+  }
+}
+@keyframes scParticleBurst {
+  0% {
+    transform: translate(var(--x0, 0px), var(--y0, 0px)) scale(0.3);
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+    transform: translate(var(--x0, 0px), var(--y0, 0px)) scale(1.2);
+  }
+  100% {
+    transform: translate(var(--x1, 40px), var(--y1, -40px)) scale(0.7)
+      rotate(var(--rot, 200deg));
+    opacity: 0;
+  }
+}
+@keyframes scParticleFall {
+  0% {
+    transform: translate(var(--x0, 0px), calc(var(--y0, 0px) - 20px)) scale(0.5)
+      rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  85% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(
+        var(--x1, 10px),
+        calc(var(--y0, 0px) + var(--dist, 60px))
+      )
+      scale(0.9) rotate(var(--rot, 180deg));
+    opacity: 0;
+  }
+}
+@keyframes scParticleDrift {
+  0% {
+    transform: translate(var(--x0, 0px), var(--y0, 0px)) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.7;
+  }
+  50% {
+    transform: translate(var(--x1, 20px), calc(var(--y0, 0px) - 30px)) scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(var(--x2, -10px), calc(var(--y0, 0px) - 55px))
+      scale(0.8);
+    opacity: 0;
+  }
+}
+@keyframes scParticleGlitch {
+  0% {
+    transform: translate(var(--x0, 0px), var(--y0, 0px)) scaleX(1);
+    opacity: 0.9;
+  }
+  25% {
+    transform: translate(calc(var(--x0, 0px) + 8px), var(--y0, 0px)) scaleX(0.4);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translate(
+        calc(var(--x0, 0px) - 5px),
+        calc(var(--y0, 0px) - 10px)
+      )
+      scaleX(1.2);
+    opacity: 0.8;
+  }
+  75% {
+    transform: translate(
+        calc(var(--x0, 0px) + 3px),
+        calc(var(--y0, 0px) - 20px)
+      )
+      scaleX(0.7);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(var(--x0, 0px), calc(var(--y0, 0px) - 35px)) scaleX(1);
+    opacity: 0;
+  }
+}
+/* APPLY ANIMATIONS BASED ON DATA-ATTRIBUTE - THIS WAS MISSING */
+.scard .scard-particle[data-anim="rise"] {
+  animation: scParticleRise var(--dur, 1.4s) cubic-bezier(0.2, 0.8, 0.2, 1)
+    var(--delay, 0s) forwards;
+}
+.scard .scard-particle[data-anim="burst"] {
+  animation: scParticleBurst var(--dur, 1.2s) cubic-bezier(0.2, 0.9, 0.3, 1)
+    var(--delay, 0s) forwards;
+}
+.scard .scard-particle[data-anim="fall"] {
+  animation: scParticleFall var(--dur, 1.6s) cubic-bezier(0.4, 0, 0.8, 0.6)
+    var(--delay, 0s) forwards;
+}
+.scard .scard-particle[data-anim="drift"] {
+  animation: scParticleDrift var(--dur, 2s) ease-in-out var(--delay, 0s)
+    forwards;
+}
+.scard .scard-particle[data-anim="glitch"] {
+  animation: scParticleGlitch var(--dur, 0.9s) steps(2, end) var(--delay, 0s)
+    forwards;
+}
