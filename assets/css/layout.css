@@ -907,7 +907,7 @@ textarea,
   border: 1px solid var(--gold3);
   cursor: pointer;
   color: var(--gold);
-  border-radius: 8px;
+  border-radius: 999px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -922,6 +922,11 @@ textarea,
   padding: 0;
   line-height: 0;
   z-index: 4;
+  aspect-ratio: 1 / 1;
+  min-width: 30px;
+  max-width: 30px;
+  min-height: 30px;
+  max-height: 30px;
 }
 .xbtn svg {
   display: block;
@@ -936,7 +941,11 @@ textarea,
     width: 32px;
     height: 32px;
     right: 7px;
-    border-radius: 10px;
+    border-radius: 999px;
+    min-width: 32px;
+    max-width: 32px;
+    min-height: 32px;
+    max-height: 32px;
   }
 }
 @media (hover: hover) {

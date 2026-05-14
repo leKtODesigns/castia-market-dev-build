@@ -785,6 +785,12 @@ td {
   border-color: rgba(255, 255, 255, 0.2);
   width: 30px;
   height: 30px;
+  min-width: 30px;
+  max-width: 30px;
+  min-height: 30px;
+  max-height: 30px;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 30px;
   border-radius: 8px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.06),
@@ -1770,6 +1776,12 @@ td {
 .cmp-star {
   width: 32px;
   height: 32px;
+  min-width: 32px;
+  max-width: 32px;
+  min-height: 32px;
+  max-height: 32px;
+  aspect-ratio: 1 / 1;
+  flex: 0 0 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1793,6 +1805,11 @@ td {
   .cmp-star {
     width: 24px;
     height: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    flex: 0 0 24px;
     font-size: 11px;
   }
 }
@@ -1843,6 +1860,11 @@ td {
   .pcard-act.cmp-star {
     width: 24px;
     height: 24px;
+    min-width: 24px;
+    max-width: 24px;
+    min-height: 24px;
+    max-height: 24px;
+    flex: 0 0 24px;
   }
 
   .ckey .iname-txt {

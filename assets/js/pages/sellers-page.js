@@ -344,7 +344,7 @@
         var delay = (idx * 0.05).toFixed(2);
 
         return `<div class="sl-row" style="animation-delay: ${delay}s;">
-          <span class="sl-item" title="${esc(r.raw.item_name || "")}">${formatItemNameH(r.raw.item_name || "—")}</span>
+          <span class="sl-item" title="${esc(r.raw.item_name || "")}">${formatItemNameH(r.displayName || "—")}</span>
           ${countEl}
           <span class="sl-price ${r.tag}">${priceStr}</span>
           ${tagEl}
@@ -383,12 +383,15 @@
             if (unitPrice > match.median * 1.4) tag = "over";
             else if (unitPrice < match.median * 0.7) tag = "under";
           }
+          var parsed = parseKey(match?.rawKey || l.item_name || "");
           return {
             raw: l,
             unitPrice: unitPrice,
             tag: tag,
             ts: l.timestamp ? new Date(l.timestamp).getTime() : 0,
             match: match,
+            displayName:
+              (match && match.displayName) || parsed.displayName || l.item_name || "—",
           };
         });
 

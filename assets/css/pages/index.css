@@ -260,6 +260,13 @@
       align-items: center;
       justify-content: center;
       transition: background 0.2s ease;
+      padding: 0;
+      line-height: 0;
+      aspect-ratio: 1 / 1;
+      min-width: 2rem;
+      max-width: 2rem;
+      min-height: 2rem;
+      max-height: 2rem;
     }
     .xbtn:hover {
       background: rgba(255, 255, 255, 0.1);
@@ -338,6 +345,9 @@
       justify-content: center;
       flex-shrink: 0;
       margin-left: 8px;
+      aspect-ratio: 1 / 1;
+      max-width: 32px;
+      max-height: 32px;
     }
     .copy-price-btn:hover {
       background: var(--bg3);
@@ -418,6 +428,13 @@
     }
     .cmp-body {
       /* styles for body */
+    }
+
+    #cvw {
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      background: var(--bg2);
+      padding: 0.5rem;
     }
     
     /* Compare card styling - inspired by pcards */
@@ -771,6 +788,8 @@
     .listings-toolbar__bottom-left {
       flex: 1 1 35rem;
       min-width: 0;
+      padding-top: 0.18rem;
+      row-gap: 0.6rem;
     }
     .listings-toolbar__bottom-right {
       justify-content: flex-end;
@@ -1149,6 +1168,8 @@
       .listings-toolbar__bottom-left {
         align-items: stretch;
         flex-direction: column;
+        padding-top: 0.35rem;
+        row-gap: 0.62rem;
       }
       .pctrl .ctoggle {
         min-width: 0;
@@ -1164,8 +1185,9 @@
       }
       .listings-toolbar .spills {
         display: grid;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
+        grid-template-columns: repeat(6, minmax(0, max-content));
         gap: 0.45rem;
+        justify-content: center;
       }
       .listings-toolbar .spill {
         width: auto;
@@ -1188,6 +1210,8 @@
         width: 2.4rem;
         height: 2.4rem;
         min-height: 2.4rem;
+        min-width: 2.4rem;
+        max-width: 2.4rem;
         padding: 0;
         border-radius: 50%;
         justify-self: center;
