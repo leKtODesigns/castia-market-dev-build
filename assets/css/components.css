@@ -1900,6 +1900,7 @@ td {
 @media (min-width: 768px) {
   .pcard {
     padding: 14px;
+    padding-top: 52px;
   }
 
   .ccard-head {

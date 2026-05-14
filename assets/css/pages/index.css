@@ -29,11 +29,6 @@
               radial-gradient(circle at 80% 90%, rgba(255, 255, 255, 0.04), transparent 12%);
       background-attachment: fixed;
     }
-    @media (max-width: 768px) {
-      body {
-        background-attachment: scroll;
-      }
-    }
 
     main {
       padding-bottom: 3rem;
@@ -300,6 +295,7 @@
       border-radius: 999px;
       padding: 0.4rem 0.75rem;
       font-size: 0.75rem;
+      text-transform: capitalize;
       color: var(--text2);
       display: inline-flex;
       align-items: center;
@@ -883,7 +879,7 @@
       padding: 0 1rem;
       color: var(--text3);
       position: relative;
-      z-index: 4;
+      z-index: 3;
       isolation: isolate;
     }
     .listings-results-row .ri {
