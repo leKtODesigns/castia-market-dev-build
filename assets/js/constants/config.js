@@ -6,18 +6,10 @@
  */
 
 /**
- * Supabase project REST API base URL
+ * Castia Worker public API base URL.
  * @type {string}
  */
-const SB_URL = "https://opxorasggouuzzsvzlvm.supabase.co";
-
-/**
- * Supabase anonymous (publishable) API key.
- * This key is safe to expose in client-side code — it's scoped to
- * whatever Row Level Security policies are configured on the project.
- * @type {string}
- */
-const SB_KEY = "sb_publishable_PjpxLcSpHeOt2MCgl3fUUw_RUFOAb5w";
+const CASTIA_WORKER_URL = "https://castia-worker.lektodesigns.workers.dev";
 
 /**
  * Number of items shown per page in the table/card views.

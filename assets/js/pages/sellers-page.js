@@ -303,10 +303,11 @@
           if (_drawerCache[sellerName]) {
             renderSellerPanelListings(sellerName, _drawerCache[sellerName]);
           } else {
-            const rows = await sbGet(
-              "auctions",
-              `?select=item_name,unit_price,price,count,timestamp&seller=eq.${encodeURIComponent(sellerName)}&order=timestamp.desc&limit=100`,
-            );
+            const res = await workerGet("/seller-auctions", {
+              seller: sellerName,
+              limit: 100,
+            });
+            const rows = normalizeAuctionRows(res?.auctions);
             _drawerCache[sellerName] = rows;
             renderSellerPanelListings(sellerName, rows);
           }

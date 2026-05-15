@@ -233,7 +233,7 @@ function closePanel() {
 
 /**
  * Generates skeleton loading HTML for the panel body.
- * Shown while listings are being fetched from Supabase.
+ * Shown while listings are being fetched from the Castia Worker.
  * @returns {string} HTML string for the skeleton UI
  */
 function panelSkeleton() {

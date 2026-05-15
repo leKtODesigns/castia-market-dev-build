@@ -4,7 +4,7 @@
  * and hash-based item tracking.
  */
 
-/** @type {Object[]} Raw price rows fetched from Supabase price_data table */
+/** @type {Object[]} Raw price rows fetched from the Castia Worker */
 let allPrices = [],
   /** @type {Object[]} Enriched price rows with parsed displayName, category, tier, etc. */
   enriched = [],

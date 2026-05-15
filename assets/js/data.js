@@ -388,7 +388,7 @@ function parseKey(raw) {
 
 /**
  * Enriches raw data rows with parsed item information
- * @param {Object[]} rows - Array of raw data objects from Supabase
+ * @param {Object[]} rows - Array of raw data objects from the Castia Worker
  * @returns {Object[]} Enriched array with parsed properties added
  */
 function enrich(rows) {
@@ -408,8 +408,6 @@ function enrich(rows) {
   });
 }
 
-const HEADERS = { apikey: SB_KEY, Authorization: "Bearer " + SB_KEY };
-
 /**
  * Checks if the browser is currently offline.
  * @returns {boolean} True if navigator reports offline status
@@ -428,16 +426,16 @@ function _sleep(ms) {
 }
 
 /**
- * Fetches data from Supabase REST API with automatic retry and exponential backoff.
+ * Fetches data from the Castia Worker API with automatic retry and exponential backoff.
  * Retries up to 3 times on network errors or 5xx server errors.
- * Will not retry on 4xx client errors (e.g. bad API key, RLS policy blocks).
- * @param {string} table - Table name to query
- * @param {string} [params=''] - Query parameters string (starting with ?)
+ * Will not retry on 4xx client errors.
+ * @param {string} path - Worker endpoint path, e.g. "/prices"
+ * @param {Object} [params={}] - Query parameters
  * @param {number} [attempt=0] - Current retry attempt (used internally for backoff)
- * @returns {Promise<Array>} Promise resolving to array of data objects
+ * @returns {Promise<Object>} Promise resolving to Worker response object
  * @throws {Error} If all retries fail or a non-retryable error occurs
  */
-async function sbGet(table, params = "", attempt = 0) {
+async function workerGet(path, params = {}, attempt = 0) {
   const MAX_ATTEMPTS = 3;
   const BACKOFF_MS = [0, 800, 2000]; // delay before each attempt
 
@@ -448,42 +446,108 @@ async function sbGet(table, params = "", attempt = 0) {
   if (attempt > 0) {
     await _sleep(BACKOFF_MS[attempt] || 2000);
     console.warn(
-      `[sbGet] Retrying ${table} (attempt ${attempt + 1}/${MAX_ATTEMPTS})…`,
+      `[workerGet] Retrying ${path} (attempt ${attempt + 1}/${MAX_ATTEMPTS})…`,
     );
   }
 
   let r;
   try {
-    r = await fetch(`${SB_URL}/rest/v1/${table}${params}`, {
-      headers: HEADERS,
+    const url = new URL(path.replace(/^\/?/, "/"), CASTIA_WORKER_URL);
+    Object.entries(params || {}).forEach(([key, value]) => {
+      if (value != null && value !== "") url.searchParams.set(key, String(value));
+    });
+    r = await fetch(url.toString(), {
+      headers: { Accept: "application/json" },
     });
   } catch (networkErr) {
-    // Network-level failure (no response at all — DNS, CORS, etc.)
-    console.error(`[sbGet] Network error on ${table}:`, networkErr.message);
+    console.error(`[workerGet] Network error on ${path}:`, networkErr.message);
     if (attempt + 1 < MAX_ATTEMPTS) {
-      return sbGet(table, params, attempt + 1);
+      return workerGet(path, params, attempt + 1);
     }
     throw new Error(
-      `Network error loading ${table}: ${networkErr.message}. Check your connection and try again.`,
+      `Network error loading market API ${path}: ${networkErr.message}. Check your connection and try again.`,
     );
   }
 
   if (!r.ok) {
     const isRetryable = r.status >= 500;
-    console.error(`[sbGet] HTTP ${r.status} on ${table}`);
+    console.error(`[workerGet] HTTP ${r.status} on ${path}`);
     if (isRetryable && attempt + 1 < MAX_ATTEMPTS) {
-      return sbGet(table, params, attempt + 1);
+      return workerGet(path, params, attempt + 1);
     }
-    // 4xx errors: give an actionable message
-    if (r.status === 401 || r.status === 403) {
-      throw new Error(
-        `Access denied (HTTP ${r.status}) on ${table}. Check Supabase RLS policies allow anon SELECT.`,
-      );
-    }
-    throw new Error(`HTTP ${r.status} on ${table}`);
+    throw new Error(`Market API returned HTTP ${r.status} on ${path}`);
   }
 
   return r.json();
+}
+
+function normalizeDateFromMs(value) {
+  if (value == null || value === "") return null;
+  const n = Number(value);
+  if (Number.isFinite(n)) return new Date(n).toISOString();
+  const d = new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+function normalizePriceRows(workerPrices) {
+  return Object.entries(workerPrices || {}).map(([key, row]) => ({
+    key,
+    median: row?.median ?? null,
+    samples: row?.samples ?? 0,
+    confidence: row?.confidence || "unreliable",
+    iqr_low: row?.iqrLow ?? 0,
+    iqr_high: row?.iqrHigh ?? row?.median ?? 0,
+    trend: row?.trend || "stable",
+    last_seen: normalizeDateFromMs(row?.lastSeenMs),
+  }));
+}
+
+function normalizeSellerRows(workerSellers) {
+  return Object.entries(workerSellers || {}).map(([sellerKey, row]) => ({
+    seller: row?.seller || sellerKey,
+    total_listings: row?.totalListings ?? 0,
+    valid_listings: row?.totalListings ?? 0,
+    avg_markup_percent: row?.avgMarkupPercent ?? null,
+    overpriced_ratio: row?.overpricedRatio ?? null,
+    accuracy_label: row?.accuracyLabel || "Neutral",
+    is_blacklisted: !!row?.isBlacklisted,
+  }));
+}
+
+function normalizeAuctionRows(workerAuctions) {
+  return (workerAuctions || []).map((row) => ({
+    seller: row?.seller || "",
+    price: row?.price ?? null,
+    count: row?.count ?? 1,
+    unit_price: row?.unitPrice ?? null,
+    timestamp: row?.timestamp || null,
+    set_name: row?.setName || null,
+    item_name: row?.itemName || "",
+    tier: row?.tier ?? null,
+  }));
+}
+
+function normalizePrismaticTierRows(workerTiers, baseRow) {
+  const out = [];
+  const tiers = workerTiers || {};
+  for (const t of [1, 2, 3]) {
+    const list = normalizeAuctionRows(tiers[String(t)] || tiers[t] || []).filter(
+      (l) => !isBadSeller(l.seller),
+    );
+    const st = statsFromListings(list);
+    if (!st.n) continue;
+    out.push({
+      key: `${baseRow.rawKey}|t${t}`,
+      median: st.median,
+      samples: st.n,
+      confidence: confidenceFromSamples(st.n),
+      iqr_low: st.q1,
+      iqr_high: st.q3,
+      trend: trendFromListings(list),
+      last_seen: list[0]?.timestamp || null,
+    });
+  }
+  return out;
 }
 
 /**
@@ -552,7 +616,7 @@ function applyPrismaticTierCache() {
 }
 
 /**
- * Fetches all market data from Supabase and updates application state
+ * Fetches all market data from the Castia Worker and updates application state
  * @param {boolean} silent - If true, suppresses UI loading indicators and toasts
  * @returns {Promise<void>}
  */
@@ -570,21 +634,12 @@ async function fetchAll(silent) {
   try {
     prismaticTiersReady = false;
     prismaticTiersPromise = null;
-    let priceRows = [],
-      off = 0;
-    while (true) {
-      const batch = await sbGet(
-        "price_data",
-        `?select=key,median,samples,confidence,iqr_low,iqr_high,trend,last_seen&limit=1000&offset=${off}&order=median.desc`,
-      );
-      priceRows = priceRows.concat(batch);
-      if (batch.length < 1000) break;
-      off += 1000;
-    }
-    let sellerRows = await sbGet(
-      "seller_data",
-      "?select=seller,total_listings,valid_listings,avg_markup_percent,overpriced_ratio,accuracy_label,is_blacklisted",
-    ).catch(() => []);
+    const [priceRes, sellerRes] = await Promise.all([
+      workerGet("/prices"),
+      workerGet("/sellers").catch(() => ({ sellers: {} })),
+    ]);
+    const priceRows = normalizePriceRows(priceRes?.prices);
+    const sellerRows = normalizeSellerRows(sellerRes?.sellers);
     allPrices = priceRows;
     enriched = enrich(allPrices);
     const cacheApplied = applyPrismaticTierCache();
@@ -663,7 +718,7 @@ async function fetchAll(silent) {
   }
 }
 /**
- * Manually refreshes all market data from Supabase and updates application state
+ * Manually refreshes all market data from the Castia Worker and updates application state
  * @returns {Promise<void>}
  */
 function manualRefresh() {
@@ -689,7 +744,7 @@ async function ensurePrismaticTiers(opts = {}) {
 }
 
 /**
- * Builds Prismatic tier data by fetching auction data for tier 1-3 items
+ * Builds Prismatic tier data by fetching Worker auction data for tier 1-3 items
  * @param {Object} [opts={}] - Options object
  * @param {boolean} [opts.silentToast=false] - Suppress toast notifications
  * @returns {Promise<void>}
@@ -710,32 +765,11 @@ async function buildPrismaticTiers(opts = {}) {
       const idx = i++,
         r = base[idx];
       try {
-        const rows = await sbGet(
-          "auctions",
-          `?select=seller,unit_price,price,count,timestamp,tier,item_name,set_name&set_name=eq.Prismatic&item_name=ilike.${encodeURIComponent(r.displayName)}&tier=in.(1,2,3)&order=timestamp.desc&limit=1500`,
-        );
-        const cleanAll = rows.filter((l) => !isBadSeller(l.seller));
-        const grouped = { 1: [], 2: [], 3: [] };
-        for (const l of cleanAll) {
-          const t = parseInt(l.tier, 10);
-          if (t === 1 || t === 2 || t === 3) grouped[t].push(l);
-        }
-        const out = [];
-        for (const t of [1, 2, 3]) {
-          const list = grouped[t] || [],
-            st = statsFromListings(list);
-          if (!st.n) continue;
-          out.push({
-            key: `${r.rawKey}|t${t}`,
-            median: st.median,
-            samples: st.n,
-            confidence: confidenceFromSamples(st.n),
-            iqr_low: st.q1,
-            iqr_high: st.q3,
-            trend: trendFromListings(list),
-            last_seen: list[0]?.timestamp || null,
-          });
-        }
+        const res = await workerGet("/prismatic-tiers", {
+          item: r.displayName,
+          limitPerTier: 500,
+        });
+        const out = normalizePrismaticTierRows(res?.tiers, r);
         if (out.length) tierRowsByBase[r.rawKey] = out;
       } catch (e) {
         console.warn("Tier fetch failed:", e.message);
@@ -802,12 +836,13 @@ async function fetchListings(itemKey) {
   const tier = tierMatch ? parseInt(tierMatch[1]) : null;
   const baseName = itemKey.replace(/\|t[123]$/i, "").trim();
   try {
-    const tierFilter = tier ? `&tier=eq.${tier}` : "";
-    const prismaticFilter = tier ? `&set_name=eq.Prismatic` : "";
-    return await sbGet(
-      "auctions",
-      `?select=seller,price,count,unit_price,timestamp,set_name,item_name&item_name=ilike.${encodeURIComponent(baseName)}${prismaticFilter}${tierFilter}&order=timestamp.desc&limit=25`,
-    );
+    const res = await workerGet("/auctions", {
+      item: baseName,
+      limit: 25,
+      tier,
+      set: tier ? "Prismatic" : "",
+    });
+    return normalizeAuctionRows(res?.auctions);
   } catch (e) {
     const isOffline =
       _isOffline() || e.message.toLowerCase().includes("offline");
@@ -837,6 +872,6 @@ window.addEventListener("offline", () => {
 window.addEventListener("online", () => {
   console.info("[network] Browser came back online — refreshing data…");
   toast("Back online — refreshing…");
-  // Slight delay to let the connection stabilise before hitting Supabase
+  // Slight delay to let the connection stabilise before hitting the Worker API.
   setTimeout(() => fetchAll(true), 1200);
 });
