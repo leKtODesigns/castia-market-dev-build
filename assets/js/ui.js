@@ -1246,6 +1246,7 @@ function copyPrice(n, btn) {
  * @param {boolean} hasF - Whether filters are active
  */
 function showEmpty(hasF) {
+  if (!tbody && !cgrid) return;
   // Hide pagination when showing empty state
   const pagEl = document.querySelector(".pag");
   if (pagEl) pagEl.classList.add("pag-hidden");

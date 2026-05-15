@@ -504,7 +504,7 @@ function normalizePriceRows(workerPrices) {
 
 function normalizeSellerRows(workerSellers) {
   return Object.entries(workerSellers || {}).map(([sellerKey, row]) => ({
-    seller: row?.seller || sellerKey,
+    seller: row?.sellerName || row?.seller || sellerKey,
     total_listings: row?.totalListings ?? 0,
     valid_listings: row?.totalListings ?? 0,
     avg_markup_percent: row?.avgMarkupPercent ?? null,
@@ -621,10 +621,13 @@ function applyPrismaticTierCache() {
  * @returns {Promise<void>}
  */
 async function fetchAll(silent) {
+  const isListingsPage = !!(
+    document.getElementById("tbody") || document.getElementById("cgrid")
+  );
   if (!silent) {
     bootShow("Loading market data…");
     setSt("loading", "Loading...");
-    showSkel();
+    if (isListingsPage) showSkel();
   }
 
   // GUARD: Only spin button if it exists (index.html)
@@ -650,38 +653,40 @@ async function fetchAll(silent) {
     }
     lastLoaded = new Date();
 
-    window.suppressNextStaggerAnim?.();
-    buildCatFilter();
-    updateStats();
-    applyFilters();
-    updateSortUI();
+    if (isListingsPage) {
+      window.suppressNextStaggerAnim?.();
+      buildCatFilter();
+      updateStats();
+      applyFilters();
+      updateSortUI();
 
-    // GUARDS: Only update view elements if they exist (index.html)
-    const tvw = $("tvw");
-    const cvw = $("cvw");
-    const vt = $("vt");
-    const vc = $("vc");
+      // GUARDS: Only update view elements if they exist (index.html)
+      const tvw = $("tvw");
+      const cvw = $("cvw");
+      const vt = $("vt");
+      const vc = $("vc");
 
-    if (tvw) tvw.hidden = vw !== "table";
-    if (cvw) cvw.hidden = vw !== "card";
-    if (vt) vt.classList.toggle("on", vw === "table");
-    if (vc) vc.classList.toggle("on", vw === "card");
+      if (tvw) tvw.hidden = vw !== "table";
+      if (cvw) cvw.hidden = vw !== "card";
+      if (vt) vt.classList.toggle("on", vw === "table");
+      if (vc) vc.classList.toggle("on", vw === "card");
 
-    const needsPrismatic = _hasPrismaticBaseRows();
-    if (!silent && needsPrismatic && !cacheApplied) {
-      bootMsg("Loading Prismatic tiers…");
-      await ensurePrismaticTiers({ force: true, silentToast: true });
-    } else if (needsPrismatic) {
-      _idle(() =>
-        ensurePrismaticTiers({ force: true, silentToast: true }).catch(
-          () => {},
-        ),
-      );
-    }
-    if (!silent) {
-      updateTopButtons();
-      const targetKey = getHashItemKey() || _loadedUIState?.activeKey || "";
-      if (targetKey) _idle(() => openPanel(targetKey));
+      const needsPrismatic = _hasPrismaticBaseRows();
+      if (!silent && needsPrismatic && !cacheApplied) {
+        bootMsg("Loading Prismatic tiers…");
+        await ensurePrismaticTiers({ force: true, silentToast: true });
+      } else if (needsPrismatic) {
+        _idle(() =>
+          ensurePrismaticTiers({ force: true, silentToast: true }).catch(
+            () => {},
+          ),
+        );
+      }
+      if (!silent) {
+        updateTopButtons();
+        const targetKey = getHashItemKey() || _loadedUIState?.activeKey || "";
+        if (targetKey) _idle(() => openPanel(targetKey));
+      }
     }
     setSt("live", allPrices.length.toLocaleString() + " items");
 
