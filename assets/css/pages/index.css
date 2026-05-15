@@ -434,9 +434,6 @@
       font-weight: 600;
       color: var(--text);
     }
-    .cmp-body {
-      /* styles for body */
-    }
 
     #cvw {
       border: 0;
