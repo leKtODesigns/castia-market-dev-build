@@ -758,6 +758,7 @@ async function findExistingImagePath(paths) {
 function imageSlugFromRawKey(rawKey) {
   return (
       String(rawKey || "")
+          .replace(/\|v:[^|]+$/i, "")
           .replace(/\|t[123]$/i, "")
           .replace(/\s*\[[^\]]+\]\s*$/, "")
           .replace(/\s*\([\d.]+%\)\s*$/, "")
@@ -952,6 +953,55 @@ function noteKeyFromRawKey(rawKey) {
       .toLowerCase();
 }
 
+function enchantLevelToRoman(level) {
+  const n = Math.max(0, Math.floor(Number(level) || 0));
+  if (!n) return "";
+  const parts = [
+    [1000, "M"],
+    [900, "CM"],
+    [500, "D"],
+    [400, "CD"],
+    [100, "C"],
+    [90, "XC"],
+    [50, "L"],
+    [40, "XL"],
+    [10, "X"],
+    [9, "IX"],
+    [5, "V"],
+    [4, "IV"],
+    [1, "I"],
+  ];
+  let rest = n,
+      out = "";
+  for (const [value, glyph] of parts) {
+    while (rest >= value) {
+      out += glyph;
+      rest -= value;
+    }
+  }
+  return out;
+}
+
+function enchantmentLabel(name) {
+  const clean = String(name || "")
+      .replace(/^minecraft:/i, "")
+      .replace(/[_-]+/g, " ")
+      .trim();
+  return clean ? titleCase(clean) : "";
+}
+
+function dynamicEnchantmentNote(r) {
+  const entries = Object.entries(r?.enchantments || {}).filter(
+      ([name, level]) => enchantmentLabel(name) && Number(level) > 0,
+  );
+  if (!entries.length) return null;
+  const lines = entries.map(([name, level]) => {
+    const roman = enchantLevelToRoman(level);
+    return `■ ${enchantmentLabel(name)}${roman ? ` ${roman}` : ""}`;
+  });
+  return { type: "enchants", lines };
+}
+
 /**
  * Gets the card note for an item row
  * @param {Object} r - Item data row
@@ -963,7 +1013,10 @@ function getCardNoteForRow(r) {
   if (!raw) return null;
   const keyTier = noteKeyFromRawKey(raw);
   if (notes[keyTier]) return notes[keyTier];
-  return notes[keyTier.replace(/\|t[123]$/i, "")] || null;
+  const keyVariant = keyTier.replace(/\|v:[^|]+$/i, "");
+  if (notes[keyVariant]) return notes[keyVariant];
+  const keyBase = keyVariant.replace(/\|t[123]$/i, "");
+  return notes[keyBase] || dynamicEnchantmentNote(r);
 }
 
 /**

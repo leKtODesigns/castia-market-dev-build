@@ -201,9 +201,16 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug: null,
     };
   let baseKey = raw.trim(),
-    tier = 0;
+    tier = 0,
+    variantSlug = null;
+  const variantMatch = baseKey.match(/\|v:([^|]+)$/i);
+  if (variantMatch) {
+    variantSlug = (variantMatch[1] || "").trim().toLowerCase() || null;
+    baseKey = baseKey.slice(0, baseKey.lastIndexOf("|v:")).trim();
+  }
   const tierMatch = baseKey.match(/\|t([123])$/i);
   if (tierMatch) {
     tier = parseInt(tierMatch[1]);
@@ -225,6 +232,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
   }
 
@@ -252,6 +260,7 @@ function parseKey(raw) {
           tier,
           setName: titleCase(setName),
           rawKey: raw,
+          variantSlug,
         };
       }
     }
@@ -265,6 +274,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle unique relics with variants (like "christmas cap [mining]")
@@ -281,7 +291,7 @@ function parseKey(raw) {
         setName: null,
         rawKey: raw,
         skillTag: tagClass ? { text: titleCase(skill), cls: tagClass } : null,
-        variantSlug: skill || null,
+        variantSlug: variantSlug || skill || null,
       };
     }
     return {
@@ -291,6 +301,7 @@ function parseKey(raw) {
       setName: null,
       rawKey: raw,
       skillTag: null,
+      variantSlug,
     };
   }
 
@@ -306,6 +317,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle spawner and spawn egg items
@@ -316,6 +328,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
   if (kl.endsWith(" spawn egg"))
     return {
@@ -324,6 +337,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle music discs and goat horns
@@ -334,6 +348,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle resources (essences, ores, special items)
@@ -344,6 +359,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle fish items (including junk items like batteries, dirty socks)
@@ -354,6 +370,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle utility items (quest crystals, tracking oils, mushrooms, etc.)
@@ -364,6 +381,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Handle vanilla Minecraft items (blocks, items, etc.)
@@ -374,6 +392,7 @@ function parseKey(raw) {
       tier: 0,
       setName: null,
       rawKey: raw,
+      variantSlug,
     };
 
   // Fallback for everything else
@@ -383,6 +402,7 @@ function parseKey(raw) {
     tier: 0,
     setName: null,
     rawKey: raw,
+    variantSlug,
   };
 }
 
@@ -394,13 +414,18 @@ function parseKey(raw) {
 function enrich(rows) {
   return (rows || []).map((r) => {
     const parsed = parseKey(r.key);
+    const workerVariantSlug = String(r.variant_key || r.variantKey || "")
+      .trim()
+      .toLowerCase();
     const dn = String(parsed.displayName || ""),
       rk = String(parsed.rawKey || "");
     const dnLc = dn.toLowerCase(),
       rkLc = rk.toLowerCase();
     return {
       ...r,
+      enchantments: parseEnchantments(r.enchantments),
       ...parsed,
+      variantSlug: parsed.variantSlug || workerVariantSlug || null,
       _dn_lc: dnLc,
       _rk_lc: rkLc,
       _search: dnLc + " " + rkLc,
@@ -489,9 +514,25 @@ function normalizeDateFromMs(value) {
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
 }
 
+function parseEnchantments(value) {
+  if (!value) return null;
+  if (typeof value === "object" && !Array.isArray(value)) return value;
+  if (typeof value !== "string") return null;
+  try {
+    const parsed = JSON.parse(value);
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+      ? parsed
+      : null;
+  } catch (_e) {
+    return null;
+  }
+}
+
 function normalizePriceRows(workerPrices) {
   return Object.entries(workerPrices || {}).map(([key, row]) => ({
     key,
+    variant_key: row?.variantKey || null,
+    enchantments: parseEnchantments(row?.enchantments),
     median: row?.median ?? null,
     samples: row?.samples ?? 0,
     confidence: row?.confidence || "unreliable",
@@ -523,6 +564,8 @@ function normalizeAuctionRows(workerAuctions) {
     timestamp: row?.timestamp || null,
     set_name: row?.setName || null,
     item_name: row?.itemName || "",
+    variant_key: row?.variantKey || null,
+    enchantments: parseEnchantments(row?.enchantments),
     tier: row?.tier ?? null,
   }));
 }
