@@ -1825,26 +1825,6 @@ body.overlay-open #scrollTopBtn {
 
 /* ── Sellers Page Layout Improvements ── */
 @media (min-width: 769px) {
-  .sellers-toolbar {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .sellers-toolbar__search {
-    max-width: 24rem;
-    flex: 1;
-  }
-
-  .sellers-toolbar__filter {
-    flex-wrap: nowrap;
-  }
-
-  .sellers-count {
-    margin-left: 2rem;
-    margin-top: 0;
-  }
-
   .sellers-grid {
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 2rem;
