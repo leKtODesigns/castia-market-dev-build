@@ -1,55 +1,78 @@
 # Changelog
 
-All notable changes to this project will be documented here.
+This project uses grouped public-update entries instead of dates. Small fixes made close together stay under the same update batch, which keeps the history readable while still showing what changed.
 
-## [2026-05-12] - released
+## Unreleased
 
-### Changed (2026-05-12)
+- Make backend category authoritative for market rows while keeping legacy frontend inference as a fallback.
+- Suppress roman numerals for single-level enchantments in UI note formatting.
+- Normalize percentage-suffixed runestone names for prepared card-note lookup.
+- Normalize tier-suffixed runestone names for prepared card-note lookup.
+- Correct the Ruby's Fire runestone note key to match the canonical item name.
+- Preserve accented characters during image slugging and keep backend runestone categories from inheriting stale set-gear metadata.
+- Defensively route known runestones away from incorrect Set Gear aggregate labels.
+- Add legal, credits, and privacy pages plus a footer disclaimer across the site.
+- Add repository licensing guidance and a complete pending-review asset manifest.
+- Recover provenance for wiki-derived relics, mixed fish assets, and third-party enchanted-book art.
+- Add manual wiki-source recovery for unresolved vanilla/resource/utility assets plus shared spawner and generated spawn-egg handling.
+- Expand public credits with grouped attribution for Mojang, Castia-related, Re-covered, and Crafty asset sources.
+- Restore the Sellers toolbar to a stacked layout so search sits above trust filters again.
+- Restore centered Sellers controls and four-column fixed-width desktop seller cards.
 
-- Improved CSS organization with better spacing, comments, and structure
-- Enhanced mobile responsiveness for search suggestions and item displays
-- Restructured table styling for better visual hierarchy
-- Added date headers to changelog sections for better readability
+## Public update 04
 
-## [2026-05-11] - released
+### Improved
 
-### Added (2026-05-11)
+- Reworked the mobile Listings toolbar into clearer grouped controls.
+- Refined the Detail Panel controls and replaced `Include Flagged` with a labeled animated switch.
+- Improved Sellers panel header layout so seller names and multiple badges align cleanly on desktop as well as mobile.
 
-- Support for all vanilla Minecraft blocks and items (1.21.x)
-- New "Vanilla" category for vanilla items with dedicated styling
-- Descriptions for runestones (e.g., Vein Miner, Treefeller, Fire React)
-- Detailed tooltips for utility items (e.g., The Grand Scrambler)
+### Fixed
 
-### Changed (2026-05-11)
+- Corrected public-site asset routing so the live `/castia-market/` site loads its own build instead of `/castia-market-dev-build/`.
+- Hardened Knowledge Cap note lookup and variant-note matching.
 
-- Improved category badge styling and organization
-- Enhanced UI for better visual hierarchy and readability
+## Public update 03
 
-### Fixed (2026-05-11)
+### Changed
 
-- Updated .gitignore to exclude sprite-downloader/ folder
-- Removed unused fish image (trash-battery.zip)
+- Improved CSS organization with better spacing, comments, and structure.
+- Enhanced mobile responsiveness for search suggestions and item displays.
+- Restructured table styling for better visual hierarchy.
 
-## [2026-05-10] - released
+## Public update 02
 
-### Added (2026-05-10)
+### Added
 
-- New "Fish" category with 40+ fish items including anthias, blue eel, salmon, tropical fish, etc.
-- Support for multiple image formats (PNG, GIF, WEBP) with automatic fallback
-- New resources: ancient debris, legendary/epic/rare/common essence, and more
-- New utility items: armor trims, tracking oils, skill-specific mushrooms, and ore seeds
-- Detailed descriptions for Christmas Cap variants (mining, woodcutting, hunting, farming, fishing, smelting)
-- Descriptions for utility items (e.g., Begrimed Item, Blessing Dust, Tracking Oils, Quest Crystals, Ore Seeds, Mushrooms, Glass Cutter, Historical Codex, Mob Catcher, Rename Kit, Repair Oil, Echo Shard, Essences)
-- Comprehensive enchantment lists for set gear (e.g., Prismatic, Daydream, Eldritch, Halgrabind, Elven, Erphis, Llanakin, Shoopon, Athanasia, Bogmath, Curtana, Kayran, Malediction, Oceanis, Phezar, Saprophyte, Vurgohk, Azertuan, Hulia, Igru, Oldus)
+- Added support for all vanilla Minecraft blocks and items.
+- Added the `Vanilla` category with dedicated styling.
+- Added descriptions for runestones and utility items.
 
-### Changed (2026-05-10)
+### Changed
 
-- Improved image loading with existence checking to avoid 404 errors
-- Enhanced image slug generation to better handle item variants
-- Improved price rounding for more user-friendly values
-- Simplified seller flagging logic by removing redundant flagged state
+- Improved category badge styling and organization.
+- Enhanced UI hierarchy and readability.
 
-### Fixed (2026-05-10)
+### Fixed
 
-- CSS issue with panel body gradient that was causing visual artifacts
-- Image path generation for variant items
+- Updated `.gitignore` to exclude the sprite downloader folder.
+- Removed an unused fish asset.
+
+## Public update 01
+
+### Added
+
+- Added the `Fish` category and related item support.
+- Added multi-format image fallback support.
+- Added new resources, utility items, Christmas Cap variants, and detailed set-gear descriptions.
+
+### Changed
+
+- Improved image loading behavior and image slug handling.
+- Improved price rounding.
+- Simplified seller flagging logic.
+
+### Fixed
+
+- Fixed the panel-body gradient artifact.
+- Fixed image path generation for variant items.

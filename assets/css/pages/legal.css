@@ -1,0 +1,120 @@
+body.page-legal {
+  min-height: 100vh;
+  background-color: var(--bg2);
+  background-image:
+    radial-gradient(circle at 12% 10%, rgba(237, 184, 74, 0.14), transparent 18%),
+    radial-gradient(circle at 85% 20%, rgba(84, 204, 255, 0.08), transparent 18%);
+  background-attachment: fixed;
+}
+
+.legal-shell {
+  width: min(880px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 3rem 0 4rem;
+}
+
+.legal-hero {
+  margin-bottom: 1.75rem;
+}
+
+.legal-kicker {
+  margin: 0 0 0.65rem;
+  color: var(--gold);
+  font-family: "Space Mono", monospace;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.legal-title {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  line-height: 1.08;
+}
+
+.legal-lead {
+  max-width: 720px;
+  margin: 0;
+  color: var(--text2);
+  line-height: 1.75;
+}
+
+.legal-card {
+  margin-top: 1rem;
+  padding: 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--r2);
+  background: color-mix(in srgb, var(--panel) 88%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
+.legal-card h2 {
+  margin: 0 0 0.75rem;
+  color: var(--text);
+  font-size: 1rem;
+}
+
+.legal-card p,
+.legal-card li {
+  color: var(--text2);
+  line-height: 1.75;
+}
+
+.legal-card p:last-child,
+.legal-card ul:last-child {
+  margin-bottom: 0;
+}
+
+.legal-card a {
+  color: var(--gold);
+}
+
+.legal-card ul {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.legal-callout {
+  border-color: rgba(237, 184, 74, 0.35);
+}
+
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.legal-table th,
+.legal-table td {
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.legal-table th {
+  color: var(--text);
+  font-family: "Space Mono", monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.legal-table td {
+  color: var(--text2);
+}
+
+@media (max-width: 640px) {
+  .legal-shell {
+    width: min(100% - 1.5rem, 880px);
+    padding-top: 2rem;
+  }
+
+  .legal-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
