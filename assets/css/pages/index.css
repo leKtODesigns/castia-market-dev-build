@@ -154,6 +154,8 @@
       left: auto;
       transform: none;
       pointer-events: auto;
+      transition:
+        opacity 0.25s ease;
     }
 
     .market-overview-card:hover .market-overview,
