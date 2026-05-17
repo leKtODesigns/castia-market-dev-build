@@ -1,28 +1,8 @@
-/**
- * Game item classification constants.
- * Contains all item sets used by data.js for categorising market listings
- * into display groups (set gear, enchanted books, fish, vanilla blocks, etc.).
- *
- * Build order matters: VANILLA_BLOCKS is assembled from the sub-sets defined
- * above it (WOOD_BLOCKS, STONE_BLOCKS, COLORED_BLOCKS, …), so this file must
- * be loaded as a single unit — do not reorder the declarations.
- *
- * @module constants/items
- */
-
-/**
- * Returns a string of star characters based on the tier level
- * @param {number} tier - The tier level (0-3)
- * @returns {string} String containing 0-3 star characters ('', '★', '★★', '★★★')
- */
+// VANILLA_BLOCKS is assembled from earlier subsets, so declaration order matters.
 function tierStars(tier) {
   return ["", "★", "★★", "★★★"][tier] || "";
 }
 
-/**
- * Mithril gear sets available in the game
- * @type {string[]}
- */
 const MITHRIL_SETS = [
   "Springtide",
   "Jolly",
@@ -65,10 +45,6 @@ const MITHRIL_SETS = [
   "Posh",
 ];
 
-/**
- * Valid gear suffixes for item categorization
- * @type {Set<string>}
- */
 const GEAR_SUFFIXES = new Set([
   "helmet",
   "chestplate",
@@ -91,10 +67,6 @@ const GEAR_SUFFIXES = new Set([
   "elytra",
 ]);
 
-/**
- * Exact matches for unique relics (no variants)
- * @type {Set<string>}
- */
 const UNIQUE_RELICS_EXACT = new Set([
   "mistle toes",
   "posh wellies",
@@ -102,16 +74,8 @@ const UNIQUE_RELICS_EXACT = new Set([
   "bamboozle",
 ]);
 
-/**
- * Base names for unique relics with variants (e.g., "christmas cap [mining]")
- * @type {string[]}
- */
 const UNIQUE_RELICS_VARIANT = ["christmas cap", "knowledge cap"];
 
-/**
- * Available runestone types
- * @type {Set<string>}
- */
 const RUNESTONES = new Set([
   "ruby's fire",
   "end veil",
@@ -134,10 +98,6 @@ const RUNESTONES = new Set([
   "lunar lure",
 ]);
 
-/**
- * Resource items (essences, ores, special materials)
- * @type {Set<string>}
- */
 const RESOURCES = new Set([
   "mithril core",
   "mithril essence",

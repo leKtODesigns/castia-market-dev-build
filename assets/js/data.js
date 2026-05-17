@@ -1,8 +1,3 @@
-/**
- * Formats a number with appropriate units (K, M, B) or returns locale string
- * @param {number|null} n - The number to format
- * @returns {string} Formatted number string
- */
 function fmt(n) {
   if (n == null || n === "") return "—";
   const v = +n;
@@ -13,11 +8,6 @@ function fmt(n) {
   return v.toLocaleString();
 }
 
-/**
- * Formats a timestamp into a human-readable relative time string
- * @param {string|null} d - ISO date string or timestamp
- * @returns {string} Human-readable time string (e.g., "just now", "5m ago")
- */
 function fmtT(d) {
   if (!d) return "—";
   const s = (Date.now() - new Date(d).getTime()) / 1000;
@@ -28,11 +18,6 @@ function fmtT(d) {
   return new Date(d).toLocaleDateString();
 }
 
-/**
- * Escapes HTML special characters in a string
- * @param {string|null} s - String to escape
- * @returns {string} Escaped string safe for HTML insertion
- */
 function esc(s) {
   return s
     ? String(s)
@@ -43,20 +28,10 @@ function esc(s) {
     : "";
 }
 
-/**
- * Formats item display names with emphasized tier-star glyphs.
- * @param {string|null} s - Display name text
- * @returns {string} Escaped HTML with styled star runs
- */
 function formatItemNameH(s) {
   return esc(s || "").replace(/(★+)/g, '<span class="iname-tier-stars">$1</span>');
 }
 
-/**
- * Converts a string to title case with special handling for Roman numerals and lowercase words
- * @param {string} str - String to convert
- * @returns {string} Title-cased string
- */
 function titleCase(str) {
   if (!str) return str;
   return str
@@ -70,22 +45,12 @@ function titleCase(str) {
     .join(" ");
 }
 
-/**
- * Checks if a seller is blacklisted
- * @param {string|null} seller - Seller name to check
- * @returns {boolean} True if seller is blacklisted
- */
 function isBadSeller(seller) {
   if (!seller) return false;
   const sd = allSellers[String(seller).toLowerCase()];
   return !!(sd && sd.is_blacklisted);
 }
 
-/**
- * Calculates unit price from a listing object
- * @param {Object|null} l - Listing object with price and count properties
- * @returns {number} Unit price (price divided by count, or price if count is invalid)
- */
 function getUnitPrice(l) {
   if (l == null) return 0;
   if (l.unit_price != null) return +l.unit_price || 0;
@@ -94,12 +59,6 @@ function getUnitPrice(l) {
   return c ? Math.round(p / c) : p;
 }
 
-/**
- * Calculates quantile from a sorted array
- * @param {number[]} sorted - Sorted array of numbers
- * @param {number} p - Quantile probability (0-1)
- * @returns {number} Quantile value
- */
 function quantileSorted(sorted, p) {
   if (!sorted.length) return 0;
   const idx = (sorted.length - 1) * p,
@@ -109,11 +68,6 @@ function quantileSorted(sorted, p) {
   return sorted[lo] * (1 - (idx - lo)) + sorted[hi] * (idx - lo);
 }
 
-/**
- * Calculates statistics (median, quartiles) from an array of listings
- * @param {Object[]} listings - Array of listing objects
- * @returns {Object} Statistics object with n, median, q1, q3 properties
- */
 function statsFromListings(listings) {
   const vals = listings
     .map(getUnitPrice)
@@ -129,11 +83,6 @@ function statsFromListings(listings) {
   };
 }
 
-/**
- * Determines confidence level based on sample count
- * @param {number} n - Number of samples
- * @returns {string} Confidence level ('high', 'good', 'fair', 'low', 'unreliable')
- */
 function confidenceFromSamples(n) {
   if (n >= 30) return "high";
   if (n >= 15) return "good";
@@ -142,11 +91,6 @@ function confidenceFromSamples(n) {
   return "unreliable";
 }
 
-/**
- * Calculates price trend from listings over time
- * @param {Object[]} listings - Array of listing objects with timestamp and price
- * @returns {string} Trend direction ('up', 'down', 'stable')
- */
 function trendFromListings(listings) {
   const byTime = [...listings]
     .filter((l) => l.timestamp)
@@ -161,11 +105,6 @@ function trendFromListings(listings) {
   return "stable";
 }
 
-/**
- * Gets seller rating information and styling
- * @param {string|null} seller - Seller name
- * @returns {Object} Seller info with sd, label, order, isFlagged, isBlacklisted properties
- */
 function sellerRatingInfo(seller) {
   const sd = allSellers[String(seller || "").toLowerCase()];
   const isFlagged = !!(sd && sd.is_blacklisted);
@@ -179,11 +118,6 @@ function sellerRatingInfo(seller) {
   };
 }
 
-/**
- * Parses a raw item key into structured data
- * @param {string|null} raw - Raw item key string
- * @returns {Object} Parsed item data with displayName, category, tier, setName, rawKey properties
- */
 function parseKey(raw) {
   if (!raw)
     return {
@@ -750,7 +684,6 @@ async function fetchAll(silent) {
     if (isListingsPage) showSkel();
   }
 
-  // GUARD: Only spin button if it exists (index.html)
   const rBtn = $("rBtn");
   if (rBtn) rBtn.classList.add("spinning");
 
@@ -780,7 +713,6 @@ async function fetchAll(silent) {
       applyFilters();
       updateSortUI();
 
-      // GUARDS: Only update view elements if they exist (index.html)
       const tvw = $("tvw");
       const cvw = $("cvw");
       const vt = $("vt");
@@ -810,7 +742,6 @@ async function fetchAll(silent) {
     }
     setSt("live", enriched.length.toLocaleString() + " items");
 
-    // GUARD: Only remove RLS banner if it exists
     const rlsb = $("rlsb");
     if (rlsb) rlsb.classList.remove("on");
 
@@ -834,7 +765,6 @@ async function fetchAll(silent) {
       if (rlsb) rlsb.classList.add("on");
     }
   } finally {
-    // GUARD: Only stop spinning if button exists
     const rBtn = $("rBtn");
     if (rBtn) rBtn.classList.remove("spinning");
     if (!silent) bootHide();

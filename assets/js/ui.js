@@ -444,7 +444,6 @@ function updateStats() {
       : 0;
   popStat("sMax", fmt(maxR.median));
 
-  // GUARD: Check if sMaxN exists before setting text
   const sMaxN = $("sMaxN");
   if (sMaxN) {
     sMaxN.textContent = maxR.displayName
@@ -458,7 +457,6 @@ function updateStats() {
 
   popStat("sAvg", fmt(avg));
 
-  // GUARD: Check if sUpd exists
   const sUpd = $("sUpd");
   if (sUpd) sUpd.textContent = fmtT(lastLoaded);
 
@@ -1428,10 +1426,6 @@ function showErr(msg) {
   tbody.innerHTML = `<tr><td colspan="7"><div class="estate"><div class="eicon estate-error">✕</div><div class="emsg estate-error">Failed to load</div><div class="esub">${esc(msg)}S</div></div></td></tr>`;
 }
 
-/**
- * Main render function - coordinates UI rendering based on current state
- * Handles: filtering, pagination, view switching (table/cards), and updating UI elements
- */
 function render() {
   const tot = filtered.length,
       pages = Math.max(1, Math.ceil(tot / PAGE));
@@ -1443,7 +1437,6 @@ function render() {
       confEl?.value ||
       tierEl?.value !== "";
 
-  // GUARD: Only update if elements exist on the current page
   const riEl = $("ri");
   if (riEl) {
     riEl.textContent = hasF
@@ -1465,12 +1458,7 @@ function render() {
   if (sUpd && lastLoaded) sUpd.textContent = fmtT(lastLoaded);
 }
 
-/**
- * Renders pagination controls
- * @param {number} pages - Total number of pages
- */
 function renderPag(pages) {
-  // FIXED: Guard against null to prevent crashes on sellers.html
   const pmetaEl = $("pmeta");
   if (pmetaEl) {
     pmetaEl.textContent = filtered.length
@@ -1478,29 +1466,24 @@ function renderPag(pages) {
         : "";
   }
 
-  // ----- TOP pagination -----
   const elTop = $("pbtns-top");
-  const b = []; // always defined
+  const b = [];
 
   if (pages > 1) {
-    // ← Previous page
     b.push(
         `<button class="pb" data-action="go-page" data-page="${pg - 1}" ${pg === 1 ? "disabled" : ""}>←</button>`,
     );
 
-    // Page numbers
     let s = Math.max(1, pg - 2);
     let e = Math.min(pages, s + 4);
     if (e - s < 4) s = Math.max(1, e - 4);
     for (let i = s; i <= e; i++) {
-      // Add 'on' class to the button that matches the current page
       const activeCls = i === pg ? "on" : "";
       b.push(
           `<button class="pb ${activeCls}" data-action="go-page" data-page="${i}">${i}</button>`,
       );
     }
 
-    // → Next page (with ellipsis handling)
     if (e < pages) {
       if (e < pages - 1) {
         b.push(
@@ -1510,33 +1493,25 @@ function renderPag(pages) {
       b.push(`<button class="pb" data-action="go-page" data-page="${pages}">${pages}</button>`);
     }
 
-    // → Next page button
     b.push(
         `<button class="pb" data-action="go-page" data-page="${pg + 1}" ${pg === pages ? "disabled" : ""}>→</button>`,
     );
   }
 
-  // Apply the top bar (empty string when there’s only one page)
   if (elTop) {
     elTop.innerHTML = b.join("");
   }
 
-  // ----- BOTTOM pagination (duplicate the top bar) -----
   const elBottom = $("pbtns");
   if (pages <= 1) {
     if (elBottom) elBottom.innerHTML = "";
   } else {
-    // FIXED: Guard against null for bottom pagination
     if (elBottom && elTop) {
       elBottom.innerHTML = elTop.innerHTML;
     }
   }
 }
 
-/**
- * Navigates to a specific page
- * @param {number} n - Page number to navigate to
- */
 function goPg(n) {
   pg = n;
   render();
@@ -1558,10 +1533,6 @@ function goPg(n) {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-/**
- * Sets the sort column and direction
- * @param {string} col - Column to sort by
- */
 function setSort(col) {
   if (sc === col) {
     sd = sd === "asc" ? "desc" : "asc"; // toggle direction on same column
@@ -1581,9 +1552,6 @@ function setSort(col) {
   scheduleSaveUIState(); // persist UI state
 }
 
-/**
- * Toggles sort direction
- */
 function flipDir() {
   sd = sd === "asc" ? "desc" : "asc";
   if (sc === "last_seen") lastSeenDir = sd;
@@ -1592,9 +1560,6 @@ function flipDir() {
   scheduleSaveUIState();
 }
 
-/**
- * Updates sort UI indicators
- */
 function updateSortUI() {
   [
     "displayName",
@@ -1606,36 +1571,27 @@ function updateSortUI() {
   ].forEach((c) => {
     const th = $("th-" + c),
         ar = $("ar-" + c);
-    // GUARD: Only update if the table header elements exist
     if (th) th.classList.toggle("on", c === sc);
     if (ar) ar.textContent = c === sc ? (sd === "asc" ? "↑" : "↓") : "";
   });
 
   ["median", "samples", "displayName", "confidence", "last_seen"].forEach(
       (c) => {
-        // "last_seen" pill has id="sp-lastseen" (no underscore) in HTML
         const pid = c === "last_seen" ? "sp-lastseen" : "sp-" + c;
         const p = $(pid);
-        // GUARD: Only update if the sort pill button exists
         if (p) p.classList.toggle("on", c === sc);
       },
   );
 
-  // GUARD: Only update the direction arrow if it exists
   const dirBtn = $("sp-dir");
   if (dirBtn) dirBtn.textContent = sd === "asc" ? "↑" : "↓";
 
-  // GUARD: Only update the text of the last_seen button if it exists
   const tsBtn = $("sp-lastseen");
   if (tsBtn) {
     tsBtn.textContent = lastSeenDir === "asc" ? "Oldest" : "Newest";
   }
 }
 
-/**
- * Sets the view mode (table or cards)
- * @param {string} v - View mode ('table' or 'card')
- */
 function setView(v) {
   suppressNextStaggerAnim(); // avoids “double load” feeling when switching view
   vw = v;

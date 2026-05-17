@@ -1,17 +1,6 @@
-/**
- * UI features and event handling for the application.
- * Manages overlays, favorites, data saver mode, item comparison, UI updates,
- * search suggestions, filters, and keyboard shortcuts.
- */
-
-// Overlay state management
 let _scrollLockY = 0;
 let _scrollLockOn = false;
 let _compareOpenScrollY = 0;
-/**
- * Determines if body scroll should be locked based on screen size and pointer type.
- * @returns {boolean} True if scroll should be locked (mobile/coarse pointer)
- */
 function _shouldLockBodyScroll() {
   // Mobile-first: lock on coarse pointer or small screens (prevents background scroll under sheets/modals).
   try {
@@ -20,10 +9,6 @@ function _shouldLockBodyScroll() {
     return window.innerWidth <= 600;
   }
 }
-/**
- * Sets or removes body scroll locking.
- * @param {boolean} locked - Whether to lock or unlock scrolling
- */
 function _setBodyScrollLocked(locked) {
   if (!locked) {
     if (!_scrollLockOn) return;
@@ -59,10 +44,6 @@ function _setBodyScrollLocked(locked) {
   document.body.style.overflow = "hidden";
 }
 
-/**
- * Updates overlay UI based on panel and compare modal states.
- * Manages body scroll locking, aria-hidden attributes, and focus trapping.
- */
 function updateOverlayUI() {
   const panelOpen = !!(panel && panel.classList.contains("open"));
   const sellerPanel = document.getElementById("seller-panel");
@@ -78,10 +59,8 @@ function updateOverlayUI() {
 
   document.body.classList.toggle("overlay-open", open);
 
-  // Scroll-lock: always for compare modal; for detail panel only on mobile.
   _setBodyScrollLocked(lock);
 
-  // A11y / interaction: compare modal should isolate the page; detail panel only isolates on mobile.
   if (appShell) {
     appShell.setAttribute("aria-hidden", lock ? "true" : "false");
     try {
@@ -109,18 +88,12 @@ function updateOverlayUI() {
   _updateScrollTopBtnVisibility?.();
 }
 
-// Overlay focus management
 const _overlayFocus = {
   stack: [],
   keyHandler: null,
   focusInHandler: null,
 };
 
-/**
- * Gets all focusable elements within a container.
- * @param {HTMLElement|null} root - Container element
- * @returns {HTMLElement[]} Array of focusable elements
- */
 function _getFocusable(root) {
   if (!root) return [];
   const q = [
@@ -138,34 +111,18 @@ function _getFocusable(root) {
   });
 }
 
-/**
- * Gets the currently active overlay container.
- * @returns {HTMLElement|null} The topmost overlay container
- */
 function _activeOverlayContainer() {
   return _overlayFocus.stack.length
     ? _overlayFocus.stack[_overlayFocus.stack.length - 1].container
     : null;
 }
-/**
- * Gets the topmost overlay container.
- * @returns {HTMLElement|null} The topmost overlay container
- */
 function overlayFocusTop() {
   return _activeOverlayContainer();
 }
-/**
- * Checks if a container is in the overlay focus stack.
- * @param {HTMLElement} container - Container to check
- * @returns {boolean} True if container is in the stack
- */
 function overlayFocusHas(container) {
   return !!_overlayFocus.stack.find((s) => s.container === container);
 }
 
-/**
- * Ensures overlay trap handlers are attached.
- */
 function _ensureOverlayTrapHandlers() {
   if (_overlayFocus.keyHandler) return;
 
@@ -209,9 +166,6 @@ function _ensureOverlayTrapHandlers() {
   document.addEventListener("focusin", _overlayFocus.focusInHandler, true);
 }
 
-/**
- * Removes overlay trap handlers if no overlays are active.
- */
 function _maybeRemoveOverlayTrapHandlers() {
   if (_overlayFocus.stack.length) return;
   if (_overlayFocus.keyHandler)

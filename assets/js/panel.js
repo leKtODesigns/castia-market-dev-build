@@ -1,32 +1,14 @@
-/**
- * Detail panel management and UI rendering.
- * Handles opening/closing the item detail panel, rendering panel content,
- * managing listings, seller information, and panel controls.
- */
-
-/**
- * Sets the panel sort option and updates the UI.
- * @param {string} v - The sort option value ('newest', 'price_asc', 'price_desc', 'seller')
- */
 function setPanelSort(v) {
   panelSort = v;
   renderPanelFromCtx({ partial: true });
   scheduleSaveUIState();
 }
 
-/**
- * Sets whether to include flagged items in the panel and updates the UI.
- * @param {boolean} v - Whether to include flagged items
- */
 function setPanelIncludeFlagged(v) {
   panelIncludeFlagged = !!v;
   renderPanelFromCtx({ partial: true });
   scheduleSaveUIState();
 }
-/**
- * Toggles the panel sort dropdown open/closed.
- * Closes all other custom selects before opening this one.
- */
 function togglePanelSortSel() {
   const el = $("panelSortSel");
   if (!el) return;
@@ -88,11 +70,6 @@ function setPanelShellOpen(open) {
   });
 }
 
-/**
- * Animates the panel content swap with fade-out/fade-in effects.
- * @param {Function} mutator - Function to mutate the panel content
- * @returns {Promise<void>}
- */
 async function panelSwapAnimate(mutator) {
   const hdr = panel?.querySelector(".panel-header"),
     body = $("panel-body");
@@ -127,11 +104,6 @@ async function panelSwapAnimate(mutator) {
   await Promise.all(inn.map((a) => a.finished.catch(() => {})));
 }
 
-/**
- * Opens the detail panel for a specific item.
- * @param {string} key - The raw key of the item to display
- * @returns {Promise<void>}
- */
 async function openPanel(key) {
   if (!panel) return;
   const wasOpen = panel.classList.contains("open");
@@ -151,7 +123,6 @@ async function openPanel(key) {
   panel.classList.add("open");
   panelBackdrop?.classList.add("on");
   if (!wasOpen) setPanelShellOpen(true);
-  // Sync global overlay state (scroll lock, overlay-open class, etc.)
   window.updateOverlayUI?.();
   // Focus trap only on mobile (desktop should still allow selecting other cards while open).
   const lock = (() => {
@@ -181,12 +152,10 @@ async function openPanel(key) {
     $("panel-body").innerHTML = panelSkeleton();
   };
 
-  // Always animate — on first open, skip the fade-out step (nothing to hide)
   if (wasOpen) {
     await panelSwapAnimate(swap);
   } else {
     swap();
-    // Fade in skeleton on first open, consistent with subsequent opens
     const body = $("panel-body");
     if (body)
       body.animate(
@@ -213,9 +182,6 @@ async function openPanel(key) {
   renderPanelFromCtx({ partial: false });
 }
 
-/**
- * Closes the detail panel.
- */
 function closePanel() {
   if (!panel) return;
   panel.classList.remove("open");
@@ -231,19 +197,10 @@ function closePanel() {
   window.overlayFocusPop?.(panel);
 }
 
-/**
- * Generates skeleton loading HTML for the panel body.
- * Shown while listings are being fetched from the Castia Worker.
- * @returns {string} HTML string for the skeleton UI
- */
 function panelSkeleton() {
   return `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line pskel-line--md"></div><div class="pskel-line pskel-line--lg"></div><div class="pskel-line pskel-line--sm"></div></div>`;
 }
 
-/**
- * Returns a human-readable label for the current panel sort option.
- * @returns {string} Display label for the current sort (e.g. "Price ↑", "Newest")
- */
 function panelSortLabel() {
   return panelSort === "price_asc"
     ? "Price ↑"
@@ -259,12 +216,6 @@ function sellerBadgeHTML(label, text) {
   return `<span class="lr-seller-badge ${esc(cls)}">${esc(text || label || "Neutral")}</span>`;
 }
 
-/**
- * Builds HTML for the listings section in the panel.
- * @param {Object} pd - Parsed item data
- * @param {Object[]} listings - Array of listing objects
- * @returns {string} HTML string for listings
- */
 function buildPanelListingsHTML(pd, listings) {
   if (!listings.length)
     return `<div class="no-listings">No recent listings found</div>`;
@@ -298,11 +249,6 @@ function buildPanelListingsHTML(pd, listings) {
   return html;
 }
 
-/**
- * Builds HTML for the top sellers section in the panel.
- * @param {Object[]} listings - Array of listing objects
- * @returns {string} HTML string for top sellers
- */
 function buildPanelTopSellersHTML(listings) {
   const sellerCounts = {};
   for (const l of listings)
@@ -336,9 +282,6 @@ function buildPanelTopSellersHTML(listings) {
   return html;
 }
 
-/**
- * Updates the panel controls (sort dropdown and flagged toggle).
- */
 function updatePanelControls() {
   const val = $("panelSortVal");
   if (val) val.textContent = panelSortLabel();
@@ -366,11 +309,6 @@ function updatePanelControls() {
   }
 }
 
-/**
- * Renders the panel content from the current context.
- * @param {Object} [opts={}] - Options object
- * @param {boolean} [opts.partial=false] - Whether to update only parts of the panel
- */
 function renderPanelFromCtx(opts = {}) {
   if (!panelCtx) return;
   const { item, listingsRaw, listingsClean, removed, samplesFromListings } =
@@ -415,12 +353,6 @@ function renderPanelFromCtx(opts = {}) {
   updatePanelControls();
 }
 
-/**
- * Sorts listings for the panel based on the current sort setting.
- * @param {Object[]} listings - Array of listing objects to sort
- * @param {Object} pd - Parsed item data (for reference)
- * @returns {Object[]} Sorted array of listings
- */
 function sortPanelListings(listings, pd) {
   const out = [...listings].map((l) => ({
     ...l,
@@ -447,23 +379,14 @@ function sortPanelListings(listings, pd) {
   return out;
 }
 
-/**
- * Builds the complete HTML for the panel.
- * @param {Object} item - Parsed item data
- * @param {Object[]} listings - Array of listing objects to display
- * @param {Object} [meta={}] - Metadata (removed count, samplesFromListings)
- * @returns {string} Complete HTML string for the panel
- */
 function buildPanelHTML(item, listings, meta = {}) {
   const pd = item,
     removed = meta.removed || 0,
     samplesFromListings = meta.samplesFromListings || 0;
   const hasHistory = hasMarketHistory(pd);
-  // Use database samples if available, otherwise use live listing samples
   const nTotal = pd.samples || 0,
     n = nTotal > 0 ? nTotal : samplesFromListings,
     median = pd.median || 0;
-  // Raw IQR from database (may be zero for new items)
   const rawLow = pd.iqr_low || 0,
     rawHigh = pd.iqr_high || median;
 
@@ -495,7 +418,6 @@ function buildPanelHTML(item, listings, meta = {}) {
           : `<div class="range-note range-note-danger">⚠ Very few samples — treat range as indicative only</div>`;
   let html = "";
 
-  // Price hero section with median price and IQR visualization
   html += hasHistory
     ? `<div class="price-hero">
     <div class="ph-label">Median Unit Price</div>
@@ -526,7 +448,6 @@ function buildPanelHTML(item, listings, meta = {}) {
       <div class="ph-empty-sub">This item can still be inspected and compared, but there are no tracked listings to estimate a price range.</div>
     </div>`;
 
-  // Meta pills row 1: Confidence, Trend, Samples, Tier, Last seen
   if (hasHistory)
     html += `<div class="meta-pills">
     <div class="mpill"><span class="mplabel">Confidence</span> <span class="conf-b conf-inline ${confCls(pd.confidence)}">■ ${pd.confidence || "—"}</span></div>
@@ -536,7 +457,6 @@ function buildPanelHTML(item, listings, meta = {}) {
     <div class="mpill"><span class="mplabel">Last seen</span> ${fmtT(pd.last_seen)}</div>
   </div>`;
 
-  // Meta pills row 2: Favorite, Compare
   html += `<div class="meta-pills">
     <button type="button" class="mpill mpill-btn ${isFav(pd.rawKey) ? "on" : ""}" data-act="fav" data-key="${esc(pd.rawKey)}" title="Toggle favorite" aria-label="Toggle favorite" aria-pressed="${isFav(pd.rawKey) ? "true" : "false"}" id="panelFavBtn">★ Favorite</button>
     <button type="button" class="mpill mpill-btn ${compareKeys.includes(pd.rawKey) ? "on" : ""}" data-act="cmp" data-key="${esc(pd.rawKey)}" title="Toggle compare" aria-label="Toggle compare" aria-pressed="${compareKeys.includes(pd.rawKey) ? "true" : "false"}" id="panelCmpBtn">⇄ Compare</button>
@@ -544,7 +464,6 @@ function buildPanelHTML(item, listings, meta = {}) {
 
   if (!hasHistory) return html;
 
-  // Recent listings section with sortable header and controls
   html += `<div class="psec"><div class="psec-title">Listings</div>`;
   html += `<div class="pctrl">
     <span class="pcl">Sort</span>
@@ -567,18 +486,15 @@ function buildPanelHTML(item, listings, meta = {}) {
     </button>
   </div>`;
 
-  // Note about filtered listings from flagged/blacklisted sellers
   if (removed && !panelIncludeFlagged) {
     html += `<div id="panelRemovedNote" class="panel-removed-note">Filtered out ${removed} listing${removed === 1 ? "" : "s"} from flagged/blacklisted sellers</div>`;
   } else {
     html += `<div id="panelRemovedNote" class="panel-removed-note u-hidden"></div>`;
   }
 
-  // Recent listings and top sellers sections
   html += `<div id="panelListings">${buildPanelListingsHTML(pd, listings)}</div></div>`;
   html += `<div id="panelTopSellers">${buildPanelTopSellersHTML(listings)}</div>`;
 
-  // Panel scroll-to-top button
   html += `<button type="button" class="panel-scroll-top" data-act="panel-scroll-top" aria-label="Back to top">
     <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="2,7 5.5,3.5 9,7"/></svg>
     Back to top

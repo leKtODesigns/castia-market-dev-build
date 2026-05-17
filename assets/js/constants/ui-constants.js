@@ -1,15 +1,3 @@
-/**
- * UI display constants: category labels, ordering maps, color schemes, and tag classes.
- * These are consumed by ui.js, panel.js, and data.js for rendering decisions.
- *
- * @module constants/ui-constants
- */
-
-/**
- * Human-readable labels for each item category key.
- * Displayed in category filter dropdowns, badges, and chips.
- * @type {Object<string, string>}
- */
 const CAT_LABELS = {
   "set-gear": "Set Gear",
   "enchanted-book": "Enchanted Book",
@@ -25,25 +13,10 @@ const CAT_LABELS = {
   misc: "Misc",
 };
 
-/**
- * Numeric ordering for confidence levels, used for sort comparisons.
- * Lower number = higher confidence (sorts to top in descending order).
- * @type {Object<string, number>}
- */
 const CONF_ORDER = { high: 0, good: 1, fair: 2, low: 3, unreliable: 4 };
 
-/**
- * Numeric ordering for seller accuracy labels, used for sort comparisons.
- * Lower number = better seller (sorts to top in ascending order).
- * @type {Object<string, number>}
- */
 const SELLER_ORDER = { Trustworthy: 0, Neutral: 1, Suspicious: 2, Flagged: 3 };
 
-/**
- * CSS class names for skill tag badges on unique relics (e.g. Christmas Cap variants).
- * Keys match the skill name as it appears in bracket notation, e.g. "christmas cap [mining]".
- * @type {Object<string, string>}
- */
 const SKILL_TAG_CLASS = {
   mining: "st-mining",
   woodcutting: "st-woodcutting",
@@ -54,12 +27,6 @@ const SKILL_TAG_CLASS = {
   arcane: "st-arcane",
 };
 
-/**
- * Words that should remain lowercase in title-case conversion,
- * unless they are the first word in the string.
- * Follows standard English title case rules for articles, conjunctions, and prepositions.
- * @type {Set<string>}
- */
 const LOWER_WORDS = new Set([
   "a",
   "an",
