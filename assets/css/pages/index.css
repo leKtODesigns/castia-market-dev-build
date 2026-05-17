@@ -227,7 +227,7 @@
       margin-bottom: 2rem;
       padding: 0 1rem;
       position: relative;
-      z-index: 4;
+      z-index: 1;
       isolation: isolate;
     }
     .listings-toolbar__top {
@@ -927,7 +927,7 @@
       padding: 0 1rem;
       color: var(--text3);
       position: relative;
-      z-index: 3;
+      z-index: 1;
       isolation: isolate;
     }
     .listings-results-row .ri {
