@@ -869,6 +869,12 @@ main {
   .sc {
     padding: 0.55rem 0.65rem;
   }
+  .market-overview-card,
+  .market-overview-card:hover,
+  .market-overview-card:focus-visible,
+  .market-overview-card.open {
+    transform: none;
+  }
   .market-overview {
     position: fixed;
     top: 50%;

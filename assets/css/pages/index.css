@@ -180,6 +180,13 @@
       border-color: rgba(237, 184, 74, 0.3) !important;
       outline: none;
     }
+    @media (max-width: 560px) {
+      .market-overview-card:hover,
+      .market-overview-card:focus-visible,
+      .market-overview-card.open {
+        transform: none;
+      }
+    }
     .sl {
       display: block;
       font-size: 0.72rem !important;
