@@ -163,6 +163,14 @@
     .market-overview-card.open .market-overview {
       transform: none;
     }
+    /* Ensure the market overview scales correctly on small screens */
+    @media (max-width: 600px) {
+      .market-overview {
+        width: calc(100vw - 2rem);
+        left: 0;
+        right: 0;
+      }
+    }
 
     /* Make sure lower sections do not compete above it */
     .listings-toolbar,
