@@ -878,8 +878,8 @@ main {
   .market-overview {
     position: absolute;
     top: calc(100% + 0.55rem);
-    left: 0;
-    right: auto;
+    left: auto;
+    right: 0;
     width: min(22rem, calc(100vw - 2rem));
     max-height: min(70vh, 28rem);
     overflow-y: auto;
