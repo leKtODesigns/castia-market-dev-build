@@ -723,7 +723,7 @@ main {
   background: var(--border);
   border: 1px solid var(--border);
   border-radius: var(--r);
-  overflow: hidden;
+  overflow: visible;
   margin-bottom: 1rem;
 }
 @media (max-width: 900px) {
