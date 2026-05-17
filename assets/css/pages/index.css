@@ -126,6 +126,44 @@
       letter-spacing: normal;
     }
 
+        /* Keep the whole stats row above the toolbar/results while popovers are open */
+    .stats-bar {
+      position: relative;
+      z-index: 30;
+      overflow: visible;
+    }
+
+    /* The card that owns the market overview */
+    .market-overview-card {
+      position: relative;
+      z-index: 1;
+      overflow: visible;
+    }
+
+    /* Raise only the opened card above its sibling cards and lower content */
+    .market-overview-card[aria-expanded="true"] {
+      z-index: 1000;
+    }
+
+    /* The actual floating panel */
+    .market-overview {
+      position: absolute;
+      z-index: 1001;
+      top: calc(100% + 12px);
+      right: 0;
+      pointer-events: auto;
+    }
+
+    /* Make sure lower sections do not compete above it */
+    .listings-toolbar,
+    .listings-results-row,
+    #tvw,
+    #cvw,
+    .twrap {
+      position: relative;
+      z-index: 1;
+    }
+
     .stats-bar {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
