@@ -146,7 +146,9 @@
       transition: transform 0.25s ease, background 0.2s ease, border-color 0.2s ease;
     }
     .sc-action:hover,
-    .sc-action:focus-visible {
+    .sc-action:focus-visible,
+    .sc-info:hover,
+    .sc-info:focus-visible {
       transform: translateY(-1px);
       background: rgba(255, 255, 255, 0.05) !important;
       border-color: rgba(237, 184, 74, 0.3) !important;

@@ -288,10 +288,12 @@
         <div class="sv a" id="sMax">—</div>
         <div class="ss" id="sMaxN"></div>
       </button>
-      <div class="sc sc-info" title="The average of all current item medians. It summarizes the whole market, not one item.">
+      <button type="button" class="sc sc-info market-overview-card" id="sAvgCard" data-action="toggle-market-overview" aria-expanded="false" aria-haspopup="dialog">
         <div class="sl">Avg median</div>
         <div class="sv a" id="sAvg">—</div>
-      </div>
+        <div class="market-overview" id="marketOverview" role="dialog" aria-label="Current market overview"></div>
+        <span class="market-overview__donut" id="marketOverviewDonut" aria-hidden="true"></span>
+      </button>
       <button type="button" class="sc sc-action" data-action="manual-refresh" aria-label="Refresh market data">
         <div class="sl">Last updated</div>
         <div class="sv sv--small" id="sUpd">—</div>
@@ -642,7 +644,6 @@
   </p>
       <nav class="site-footer__links" aria-label="Legal links">
         <a href="/castia-market-dev-build/about/">About</a>
-        <a href="/castia-market-dev-build/catalog/">Catalog</a>
         <a href="/castia-market-dev-build/legal/">Legal</a>
     <a href="/castia-market-dev-build/credits/">Credits</a>
     <a href="/castia-market-dev-build/privacy/">Privacy</a>

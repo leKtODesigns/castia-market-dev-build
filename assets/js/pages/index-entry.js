@@ -36,6 +36,8 @@
       if (action === "stat-categories") return window.activateCategoriesStat?.();
       if (action === "stat-highest-price")
         return window.activateHighestPriceStat?.(target);
+      if (action === "toggle-market-overview")
+        return window.toggleMarketOverview?.(target);
     });
 
     document.addEventListener("input", function (event) {

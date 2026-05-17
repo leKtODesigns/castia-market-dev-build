@@ -197,7 +197,7 @@ async function openPanel(key) {
         { duration: 160, easing: "cubic-bezier(.2,.8,.2,1)" },
       );
   }
-  const listingsRaw = await fetchListings(key);
+  const listingsRaw = hasMarketHistory(item) ? await fetchListings(key) : [];
   if (activeKey !== key) return;
   const listingsClean = listingsRaw.filter((l) => !isBadSeller(l.seller));
   const removed = listingsRaw.length - listingsClean.length;
@@ -458,7 +458,7 @@ function buildPanelHTML(item, listings, meta = {}) {
   const pd = item,
     removed = meta.removed || 0,
     samplesFromListings = meta.samplesFromListings || 0;
-  const hasHistory = !pd.catalogOnly;
+  const hasHistory = hasMarketHistory(pd);
   // Use database samples if available, otherwise use live listing samples
   const nTotal = pd.samples || 0,
     n = nTotal > 0 ? nTotal : samplesFromListings,
@@ -523,11 +523,12 @@ function buildPanelHTML(item, listings, meta = {}) {
     : `<div class="price-hero price-hero--empty">
       <div class="ph-label">Market History</div>
       <div class="ph-empty">No market history yet</div>
-      <div class="ph-empty-sub">This catalog item can still be inspected and compared, but there are no tracked listings to estimate a price range.</div>
+      <div class="ph-empty-sub">This item can still be inspected and compared, but there are no tracked listings to estimate a price range.</div>
     </div>`;
 
   // Meta pills row 1: Confidence, Trend, Samples, Tier, Last seen
-  html += `<div class="meta-pills">
+  if (hasHistory)
+    html += `<div class="meta-pills">
     <div class="mpill"><span class="mplabel">Confidence</span> <span class="conf-b conf-inline ${confCls(pd.confidence)}">■ ${pd.confidence || "—"}</span></div>
     <div class="mpill"><span class="mplabel">Trend</span> ${trendH(pd.trend)}</div>
     <div class="mpill"><span class="mplabel">Samples</span> ${pd.samples?.toLocaleString() || "—"}</div>
@@ -540,6 +541,8 @@ function buildPanelHTML(item, listings, meta = {}) {
     <button type="button" class="mpill mpill-btn ${isFav(pd.rawKey) ? "on" : ""}" data-act="fav" data-key="${esc(pd.rawKey)}" title="Toggle favorite" aria-label="Toggle favorite" aria-pressed="${isFav(pd.rawKey) ? "true" : "false"}" id="panelFavBtn">★ Favorite</button>
     <button type="button" class="mpill mpill-btn ${compareKeys.includes(pd.rawKey) ? "on" : ""}" data-act="cmp" data-key="${esc(pd.rawKey)}" title="Toggle compare" aria-label="Toggle compare" aria-pressed="${compareKeys.includes(pd.rawKey) ? "true" : "false"}" id="panelCmpBtn">⇄ Compare</button>
   </div>`;
+
+  if (!hasHistory) return html;
 
   // Recent listings section with sortable header and controls
   html += `<div class="psec"><div class="psec-title">Listings</div>`;

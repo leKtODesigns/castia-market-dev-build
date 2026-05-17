@@ -763,7 +763,106 @@ main {
   cursor: pointer;
 }
 .sc-info {
-  cursor: help;
+  cursor: pointer;
+  position: relative;
+  text-align: left;
+  color: inherit;
+  appearance: none;
+  width: 100%;
+  border: 0;
+}
+.market-overview__donut {
+  position: absolute;
+  right: 0.9rem;
+  top: 0.9rem;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 50%;
+  opacity: 0.75;
+}
+.market-overview__donut::after {
+  content: "";
+  position: absolute;
+  inset: 0.34rem;
+  border-radius: inherit;
+  background: var(--bg2);
+}
+.market-overview {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 0.55rem);
+  z-index: var(--z-dropdown);
+  width: min(22rem, calc(100vw - 2rem));
+  padding: 0.9rem;
+  border: 1px solid var(--border2);
+  border-radius: var(--r);
+  background: var(--bg2);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  transform: translate(-50%, -0.25rem);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.market-overview-card:hover .market-overview,
+.market-overview-card:focus-visible .market-overview,
+.market-overview-card.open .market-overview {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+.market-overview__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  align-items: baseline;
+  margin-bottom: 0.8rem;
+}
+.market-overview__header strong {
+  font-size: 0.8rem;
+  color: var(--text);
+}
+.market-overview__header span {
+  color: var(--text3);
+  font-size: 0.72rem;
+}
+.market-overview__body {
+  display: grid;
+  gap: 0.8rem;
+}
+.market-overview__legend,
+.market-overview__bands {
+  display: grid;
+  gap: 0.45rem;
+}
+.market-overview__legend div,
+.market-overview__bands div {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  justify-content: space-between;
+  color: var(--text2);
+  font-size: 0.76rem;
+}
+.market-overview__legend span {
+  width: 0.55rem;
+  height: 0.55rem;
+  margin-right: 0.1rem;
+  border-radius: 50%;
+  background: var(--swatch);
+}
+.market-overview__legend em {
+  margin-left: auto;
+  color: var(--text3);
+  font-style: normal;
+}
+.market-overview__bands {
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+.market-overview__bands strong {
+  color: var(--gold);
+  font-family: "Space Mono", monospace;
+  font-size: 0.74rem;
 }
 @media (max-width: 560px) {
   .sc {

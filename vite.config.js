@@ -25,7 +25,6 @@ export default defineConfig({
         credits: "credits/index.html",
         privacy: "privacy/index.html",
         about: "about/index.html",
-        catalog: "catalog/index.html",
       },
     },
   },

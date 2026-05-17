@@ -431,14 +431,15 @@ function popStat(id, val) {
  * Updates all statistics in the UI
  */
 function updateStats() {
-  popStat("sTot", allPrices.length.toLocaleString());
-  const maxR = enriched.reduce(
+  const pricedRows = enriched.filter(hasMarketHistory);
+  popStat("sTot", enriched.length.toLocaleString());
+  const maxR = pricedRows.reduce(
       (a, b) => ((b.median || 0) > (a.median || 0) ? b : a),
       { median: 0 },
   );
-  const avg = enriched.length
+  const avg = pricedRows.length
       ? Math.round(
-          enriched.reduce((s, r) => s + (r.median || 0), 0) / enriched.length,
+          pricedRows.reduce((s, r) => s + (r.median || 0), 0) / pricedRows.length,
       )
       : 0;
   popStat("sMax", fmt(maxR.median));
@@ -464,8 +465,9 @@ function updateStats() {
   // Update hero items count
   const heroItemsCount = $("hero-items-count");
   if (heroItemsCount) {
-    heroItemsCount.textContent = allPrices.length.toLocaleString();
+    heroItemsCount.textContent = enriched.length.toLocaleString();
   }
+  renderMarketOverview(pricedRows);
 }
 
 /**
@@ -493,6 +495,9 @@ function applyFilters() {
     return true;
   });
   filtered.sort((a, b) => {
+    if (sc === "median" && hasMarketHistory(a) !== hasMarketHistory(b)) {
+      return hasMarketHistory(a) ? -1 : 1;
+    }
     let av = a[sc];
     let bv = b[sc];
 
@@ -749,7 +754,7 @@ async function findExistingImagePath(paths) {
       _imgExistsCache.set(path, false);
     }
   }
-  return "./assets/images/items/_placeholder.svg";
+  return siteAssetPath("assets/images/items/_placeholder.svg");
 }
 
 /**
@@ -803,7 +808,7 @@ function slugifyText(txt) {
  */
 function imagePathsForRow(r) {
   if (!r || r.category === "misc") return [];
-  const base = "./assets/images/items",
+  const base = siteAssetPath("assets/images/items"),
       baseSlug = imageSlugFromRawKey(r.rawKey),
       slug =
         r.category === "runestone"
@@ -834,14 +839,14 @@ function imgFallback(imgEl) {
         idx = parseInt(imgEl.dataset.fallbackIndex || "0", 10);
     if (idx >= list.length) {
       imgEl.onerror = null;
-      imgEl.src = "./assets/images/items/_placeholder.svg";
+      imgEl.src = siteAssetPath("assets/images/items/_placeholder.svg");
       return;
     }
     imgEl.dataset.fallbackIndex = String(idx + 1);
     imgEl.src = list[idx];
   } catch (_e) {
     imgEl.onerror = null;
-    imgEl.src = "./assets/images/items/_placeholder.svg";
+    imgEl.src = siteAssetPath("assets/images/items/_placeholder.svg");
   }
 }
 
@@ -942,12 +947,12 @@ function imageHTMLForRow(r, cls = "", opts = {}) {
   const eager = !!opts.eager,
       priority = opts.fetchPriority || "low";
   const first = paths[0],
-      fb = [...paths.slice(1), "./assets/images/items/_placeholder.svg"].join(
+      fb = [...paths.slice(1), siteAssetPath("assets/images/items/_placeholder.svg")].join(
           "|",
       );
   if (eager)
     return `<img loading="eager" fetchpriority="${esc(priority)}" decoding="async" class="${cls}" src="${esc(first)}" data-fallbacks="${esc(fb)}" data-fallback-index="0" alt="" onerror="imgFallback(this)" />`;
-  return `<img loading="lazy" fetchpriority="${esc(priority)}" decoding="async" class="${cls} lazy-img" src="./assets/images/items/_placeholder.svg" data-src="${esc(first)}" data-fallbacks="${esc(fb)}" data-fallback-index="0" data-loaded="0" alt="" onerror="imgFallback(this)" />`;
+  return `<img loading="lazy" fetchpriority="${esc(priority)}" decoding="async" class="${cls} lazy-img" src="${esc(siteAssetPath("assets/images/items/_placeholder.svg"))}" data-src="${esc(first)}" data-fallbacks="${esc(fb)}" data-fallback-index="0" data-loaded="0" alt="" onerror="imgFallback(this)" />`;
 }
 
 /**
@@ -1170,14 +1175,15 @@ function renderTbl(rows) {
         <button type="button" class="fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
         <button type="button" class="cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
       </span>`;
-        return `<tr data-key="${esc(r.rawKey)}" class="${isActive ? "active-row" : ""}">
+        const hasHistory = hasMarketHistory(r);
+        return `<tr data-key="${esc(r.rawKey)}" class="${isActive ? "active-row" : ""} ${r.catalogOnly ? "catalog-only-row" : ""}">
         <td class="item-col"><span class="iname-wrap" title="${esc(r.rawKey)}">${actions}<span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></td>
         <td class="hsm hpanel">${catBadge(r.category)}${r.tier ? "&nbsp;" + tierBadge(r.tier) : ""}</td>
-        <td><div class="price-main">${fmt(r.median)}</div><div class="price-range hmd">${fmt(ar.low)} — ${fmt(ar.high)}</div></td>
-        <td class="hmd hpanel"><span class="price-range">${fmt(ar.low)} — ${fmt(ar.high)}</span></td>
+        <td><div class="price-main">${hasHistory ? fmt(r.median) : "No market history yet"}</div><div class="price-range hmd">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "No history yet"}</div></td>
+        <td class="hmd hpanel"><span class="price-range">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "—"}</span></td>
         <td class="hsm hpanel"><span class="conf-b ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span></td>
-        <td class="hmd hpanel">${trendH(r.trend)}</td>
-        <td>${sampH(r.samples)}</td>
+        <td class="hmd hpanel">${hasHistory ? trendH(r.trend) : "—"}</td>
+        <td>${hasHistory ? sampH(r.samples) : "—"}</td>
       </tr>`;
       })
       .join("");
@@ -1237,10 +1243,10 @@ function renderCards(rows) {
         const isMisc = r.category === "misc";
         const showImg = !dataSaver && (imgPaths.length || isMisc);
         const imgHTML = showImg
-            ? `<div class="cimgwrap${isMisc ? " cimgwrap-misc" : ""}">${imgPaths.length ? imageHTMLForRow(r, "") : '<img src="./assets/images/items/_placeholder.svg" alt="" />'}</div>`
+            ? `<div class="cimgwrap${isMisc ? " cimgwrap-misc" : ""}">${imgPaths.length ? imageHTMLForRow(r, "") : `<img src="${esc(siteAssetPath("assets/images/items/_placeholder.svg"))}" alt="" />`}</div>`
             : "";
         const a11yLabel = `Open details for ${r.displayName || r.rawKey || "item"}`;
-        const hasHistory = !r.catalogOnly;
+        const hasHistory = hasMarketHistory(r);
         return `<div class="pcard ${!showImg ? "pcard-no-img" : ""} ${r.catalogOnly ? "pcard-catalog-only" : ""} ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
         ${imgHTML}
         <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
@@ -1250,8 +1256,8 @@ function renderCards(rows) {
         </div>
         ${cardExtraH(r)}
         <div class="cprice">${hasHistory ? fmt(r.median) : "No market history yet"}</div>
-        <div class="crange">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "Catalog item only"}</div>
-        <div class="cfoot">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}<span class="conf-b ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span>${trendH(r.trend)}</div>
+        <div class="crange">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "No history yet"}</div>
+        <div class="cfoot">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}<span class="conf-b ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span>${hasHistory ? trendH(r.trend) : ""}</div>
       </div>`;
       })
       .join("");
@@ -1441,7 +1447,7 @@ function render() {
   const riEl = $("ri");
   if (riEl) {
     riEl.textContent = hasF
-        ? `${tot.toLocaleString()} of ${allPrices.length.toLocaleString()} items`
+        ? `${tot.toLocaleString()} of ${enriched.length.toLocaleString()} items`
         : `${tot.toLocaleString()} items`;
   }
 
@@ -1696,3 +1702,72 @@ function activateHighestPriceStat(btn) {
   const key = btn?.dataset?.key || "";
   if (key) openPanel(key);
 }
+
+function renderMarketOverview(rows) {
+  const host = $("marketOverview");
+  const donut = $("marketOverviewDonut");
+  if (!host || !donut) return;
+  const priced = rows || [];
+  const total = priced.length || 1;
+  const catCounts = new Map();
+  priced.forEach((row) => {
+    catCounts.set(row.category, (catCounts.get(row.category) || 0) + 1);
+  });
+  const topCats = [...catCounts.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+  const palette = ["#edb84a", "#5ba3f5", "#46d679", "#f0a24b"];
+  let acc = 0;
+  const gradient = topCats
+    .map(([_, count], i) => {
+      const start = acc;
+      acc += (count / total) * 100;
+      return `${palette[i]} ${start}% ${acc}%`;
+    })
+    .join(", ");
+  donut.style.background = `conic-gradient(${gradient || "var(--bg5) 0 100%"})`;
+  const bands = [
+    ["< 100K", (row) => (row.median || 0) < 100000],
+    ["100K-1M", (row) => (row.median || 0) >= 100000 && (row.median || 0) < 1000000],
+    ["1M-10M", (row) => (row.median || 0) >= 1000000 && (row.median || 0) < 10000000],
+    ["10M+", (row) => (row.median || 0) >= 10000000],
+  ];
+  host.innerHTML = `
+    <div class="market-overview__header">
+      <strong>Current market snapshot</strong>
+      <span>${priced.length.toLocaleString()} priced items</span>
+    </div>
+    <div class="market-overview__body">
+      <div class="market-overview__legend">
+        ${topCats
+          .map(
+            ([cat, count], i) =>
+              `<div><span style="--swatch:${palette[i]}"></span>${esc(CAT_LABELS[cat] || cat)} <em>${Math.round((count / total) * 100)}%</em></div>`,
+          )
+          .join("")}
+      </div>
+      <div class="market-overview__bands">
+        ${bands
+          .map(([label, fn]) => {
+            const count = priced.filter(fn).length;
+            return `<div><span>${label}</span><strong>${count.toLocaleString()}</strong></div>`;
+          })
+          .join("")}
+      </div>
+    </div>`;
+}
+
+function toggleMarketOverview(btn) {
+  const card = btn || $("sAvgCard");
+  if (!card) return;
+  const next = !card.classList.contains("open");
+  card.classList.toggle("open", next);
+  card.setAttribute("aria-expanded", next ? "true" : "false");
+}
+
+document.addEventListener("click", (event) => {
+  const card = $("sAvgCard");
+  if (!card || card.contains(event.target)) return;
+  card.classList.remove("open");
+  card.setAttribute("aria-expanded", "false");
+});

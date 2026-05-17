@@ -495,7 +495,7 @@ function openCompare() {
             : "";
           metaHTML = `<div class="cmp-meta">${imgHTML}${noteHTML}</div>`;
         }
-        const hasHistory = !r.catalogOnly;
+        const hasHistory = hasMarketHistory(r);
         return `<div class="cmp-item">
         <div class="cmp-item-head">
           <div class="cmp-head-main">
@@ -513,7 +513,7 @@ function openCompare() {
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><path d="M1.5 7.5V1.5h6"/></svg>
           </button>` : ""}
         </div>
-        <div class="cmp-range">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "Catalog item only"}</div>
+        <div class="cmp-range">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "No history yet"}</div>
         <div class="cmp-row"><span class="rl">Trend</span><span>${trendH(r.trend)}</span></div>
         <div class="cmp-row"><span class="rl">Confidence</span><span class="conf-b conf-inline ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span></div>
         <div class="cmp-row"><span class="rl">Samples</span><span class="cmp-mono">${r.samples?.toLocaleString() || "—"}</span></div>

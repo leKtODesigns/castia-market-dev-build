@@ -463,18 +463,14 @@ function enrich(rows) {
   });
 }
 
-function buildSetGearCatalogRows() {
+function buildSetGearCatalogRows(marketRows) {
   const notes = window.CARD_NOTES || {};
-  const marketByKey = new Map(enriched.map((row) => [row.rawKey, row]));
+  const marketByKey = new Map(marketRows.map((row) => [row.rawKey, row]));
   const rows = [];
   for (const rawKey of Object.keys(notes)) {
     const parsed = parseKey(rawKey);
     if (parsed.category !== "set-gear") continue;
-    const marketRow = marketByKey.get(rawKey);
-    if (marketRow) {
-      rows.push({ ...marketRow, catalogOnly: false });
-      continue;
-    }
+    if (marketByKey.has(rawKey)) continue;
     rows.push({
       key: rawKey,
       rawKey,
@@ -505,16 +501,21 @@ function buildSetGearCatalogRows() {
 }
 
 function rebuildCatalogRows() {
-  catalogRows = buildSetGearCatalogRows();
+  const marketRows = enrich(allPrices).map((row) => ({
+    ...row,
+    catalogOnly: false,
+  }));
+  catalogRows = buildSetGearCatalogRows(marketRows);
+  enriched = [...marketRows, ...catalogRows];
   return catalogRows;
 }
 
 function findDisplayRowByKey(key) {
-  return (
-    enriched.find((row) => row.rawKey === key) ||
-    catalogRows.find((row) => row.rawKey === key) ||
-    null
-  );
+  return enriched.find((row) => row.rawKey === key) || null;
+}
+
+function hasMarketHistory(row) {
+  return !!row && !row.catalogOnly;
 }
 
 /**
@@ -683,7 +684,7 @@ function normalizePrismaticTierRows(workerTiers, baseRow) {
  * @returns {boolean} True if Prismatic base rows exist
  */
 function _hasPrismaticBaseRows() {
-  return enriched.some((r) => r.setName === "Prismatic" && r.tier === 0);
+  return enrich(allPrices).some((r) => r.setName === "Prismatic" && r.tier === 0);
 }
 /**
  * Executes a function during idle periods if supported, otherwise uses setTimeout
@@ -709,7 +710,7 @@ function applyPrismaticTierCache() {
   for (const r of allPrices) byKey[r.key] = r;
   let applied = false;
   const newRows = [];
-  for (const r of enriched) {
+  for (const r of enrich(allPrices)) {
     if (r.setName === "Prismatic" && r.tier === 0) {
       // If we have cached tier data for this base item, use it
       const tierRows = byBase[r.rawKey];
@@ -737,7 +738,6 @@ function applyPrismaticTierCache() {
   if (!applied) return false;
   // Update global state with enriched data
   allPrices = newRows;
-  enriched = enrich(allPrices);
   rebuildCatalogRows();
   maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
   prismaticTiersReady = true;
@@ -773,7 +773,6 @@ async function fetchAll(silent) {
     const priceRows = normalizePriceRows(priceRes?.prices);
     const sellerRows = normalizeSellerRows(sellerRes?.sellers);
     allPrices = priceRows;
-    enriched = enrich(allPrices);
     rebuildCatalogRows();
     const cacheApplied = applyPrismaticTierCache();
     maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
@@ -818,14 +817,14 @@ async function fetchAll(silent) {
         if (targetKey) _idle(() => openPanel(targetKey));
       }
     }
-    setSt("live", allPrices.length.toLocaleString() + " items");
+    setSt("live", enriched.length.toLocaleString() + " items");
 
     // GUARD: Only remove RLS banner if it exists
     const rlsb = $("rlsb");
     if (rlsb) rlsb.classList.remove("on");
 
     if (!silent)
-      toast("Loaded " + allPrices.length.toLocaleString() + " items");
+      toast("Loaded " + enriched.length.toLocaleString() + " items");
   } catch (e) {
     const isOffline =
       _isOffline() || e.message.toLowerCase().includes("offline");
@@ -950,7 +949,6 @@ async function buildPrismaticTiers(opts = {}) {
     );
   }
   allPrices = newRows;
-  enriched = enrich(allPrices);
   rebuildCatalogRows();
   maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
   // Background update: don't re-trigger stagger animations (can feel like a second reload).

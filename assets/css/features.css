@@ -1359,6 +1359,40 @@
   font-size: 0.75rem;
 }
 
+#seller-panel .sl-row {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "item price action"
+    "count tag median"
+    "date date date";
+  gap: 0.35rem 0.65rem;
+}
+#seller-panel .sl-item {
+  grid-area: item;
+}
+#seller-panel .sl-item-count {
+  grid-area: count;
+  justify-self: start;
+}
+#seller-panel .sl-price {
+  grid-area: price;
+}
+#seller-panel .sl-price-tag {
+  grid-area: tag;
+  justify-self: start;
+}
+#seller-panel .sl-median {
+  grid-area: median;
+}
+#seller-panel .sl-date {
+  grid-area: date;
+  text-align: left;
+}
+#seller-panel .sl-open-btn,
+#seller-panel .sl-open-missing {
+  grid-area: action;
+}
+
 @media (max-width: 760px) {
   .sl-row {
     grid-template-columns: minmax(0, 1fr) auto;
