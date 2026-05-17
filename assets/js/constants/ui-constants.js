@@ -33,34 +33,6 @@ const CAT_LABELS = {
 const CONF_ORDER = { high: 0, good: 1, fair: 2, low: 3, unreliable: 4 };
 
 /**
- * Color scheme for each seller accuracy label.
- * Each entry provides background, text, and border colors for badge styling.
- * @type {Object<string, {bg: string, color: string, border: string}>}
- */
-const SELLER_COLORS = {
-  Trustworthy: {
-    bg: "rgba(70,214,121,.1)",
-    color: "#46d679",
-    border: "rgba(70,214,121,.25)",
-  },
-  Neutral: {
-    bg: "rgba(133,138,160,.08)",
-    color: "#858aa0",
-    border: "rgba(133,138,160,.2)",
-  },
-  Suspicious: {
-    bg: "rgba(237,184,74,.1)",
-    color: "#edb84a",
-    border: "rgba(237,184,74,.25)",
-  },
-  Flagged: {
-    bg: "rgba(240,100,100,.1)",
-    color: "#f06464",
-    border: "rgba(240,100,100,.25)",
-  },
-};
-
-/**
  * Numeric ordering for seller accuracy labels, used for sort comparisons.
  * Lower number = better seller (sorts to top in ascending order).
  * @type {Object<string, number>}

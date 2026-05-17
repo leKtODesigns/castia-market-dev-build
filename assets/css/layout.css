@@ -126,16 +126,6 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   text-transform: uppercase;
 }
 
-.nav-soon {
-  opacity: 0.5;
-  border: 1px solid var(--border);
-  background: var(--bg3);
-  cursor: not-allowed;
-  pointer-events: none;
-  color: var(--text3);
-  font-style: italic;
-}
-
 /* ── Desktop nav ── */
 .site-header__nav {
   display: flex;
@@ -397,20 +387,6 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
 .mob-nav__link.active svg {
   opacity: 1;
 }
-.mob-nav__footer {
-  padding: 12px 1.25rem;
-  border-top: 1px solid var(--border);
-  margin-top: auto;
-}
-.mob-nav__status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-family: "Space Mono", monospace;
-  font-size: 11px;
-  color: var(--text3);
-}
-
 /* ── Responsive: hide/show pieces ── */
 @media (max-width: 640px) {
   .site-header__nav {
@@ -467,11 +443,6 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
   text-decoration: none;
   flex-shrink: 1;
   min-width: 0;
-}
-.logo-text {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .logo-mark {
   width: 26px;
@@ -1640,16 +1611,6 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 
-/* ── Keybinds — only on real pointer+keyboard devices ── */
-.kbwrap {
-  display: none;
-}
-@media (hover: hover) and (pointer: fine) and (min-width: 640px) {
-  .kbwrap {
-    display: inline-flex;
-  }
-}
-
 /* ── Scroll-to-top ── */
 #scrollTopBtn {
   position: fixed;
@@ -1951,12 +1912,6 @@ body.overlay-open #scrollTopBtn {
 }
 /* === Additional mobile polish fixes === */
 @media (max-width: 640px) {
-  /* Force-hide keyboard hints/tooltips on touch screens */
-  .kbwrap,
-  .keybind,
-  .keybinds,
-  .kbd,
-  [class*="keybind"],
   [class*="tooltip"] {
     display: none !important;
   }

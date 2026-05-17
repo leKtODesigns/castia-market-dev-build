@@ -2,60 +2,6 @@
    components.css  –  table, cards, panel, badges, detail view
 ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Kbd hint ── */
-.kbd {
-  display: inline-block;
-  background: var(--bg4);
-  border: 1px solid var(--border2);
-  border-radius: 3px;
-  font-family: "Space Mono", monospace;
-  font-size: 10px;
-  color: var(--text3);
-  padding: 1px 5px;
-  line-height: 1.6;
-}
-/* Visibility controlled in layout.css via pointer+hover media query */
-.kbwrap {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  margin-left: 6px;
-}
-.kbwrap .kbbtn {
-  cursor: help;
-  user-select: none;
-}
-.kbtip {
-  position: absolute;
-  left: 0;
-  top: 18px;
-  background: var(--bg3);
-  border: 1px solid var(--border2);
-  border-radius: var(--r-sm);
-  padding: 10px;
-  min-width: 220px;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
-  display: none;
-  z-index: var(--z-dropdown);
-  text-transform: none;
-  letter-spacing: 0;
-  animation: menuOpen 0.15s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-.kbwrap:hover .kbtip {
-  display: block;
-}
-.kbtip .krow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 4px 0;
-}
-.kbtip .kdesc {
-  font-size: 12px;
-  color: var(--text2);
-  font-family: "DM Sans", sans-serif;
-}
-
 /* ── Search suggestions dropdown ── */
 /* On mobile: full-width overlay that sits below the search bar with enough
    padding so it doesn't interfere with category/filter rows underneath */

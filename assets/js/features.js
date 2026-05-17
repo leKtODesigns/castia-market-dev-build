@@ -1080,22 +1080,6 @@ if (cgrid) {
 window.addEventListener("scroll", hideRowTip, { passive: true });
 window.addEventListener("resize", hideRowTip);
 
-// Empty favorites state
-/**
- * Shows the empty favorites state UI.
- */
-function showEmptyFavs() {
-  const inner = `<div class="estate">
-    <div class="eicon">★</div>
-    <div class="emsg">No favorites yet</div>
-    <div class="esub">Click the ★ star on any item to add it to your watchlist.</div>
-    <div class="esub esub-action"><button class="empty-action" data-action="toggle-fav-only">Show all items</button></div>
-  </div>`;
-  if (vw === "table")
-    tbody.innerHTML = `<tr><td colspan="7">${inner}</td></tr>`;
-  else cgrid.innerHTML = `<div class="grid-full">${inner}</div>`;
-}
-
 // Application initialization
 applyLoadedUIState();
 scheduleRefresh(); // Keep this

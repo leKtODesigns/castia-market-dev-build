@@ -14,15 +14,6 @@ function fmt(n) {
 }
 
 /**
- * Formats a number to full precision with locale string formatting
- * @param {number|null} n - The number to format
- * @returns {string} Formatted number string
- */
-function fmtFull(n) {
-  return n == null ? "—" : Math.round(n).toLocaleString();
-}
-
-/**
  * Formats a timestamp into a human-readable relative time string
  * @param {string|null} d - ISO date string or timestamp
  * @returns {string} Human-readable time string (e.g., "just now", "5m ago")

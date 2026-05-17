@@ -363,14 +363,6 @@
   animation-delay: 0.25s;
 }
 
-.sellers-empty {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 3rem 1rem;
-  color: var(--text2);
-  font-size: 1.125rem;
-}
-
 /* ==========================================
    SELLER CARDS & ANIMATIONS
    ========================================== */
@@ -1689,100 +1681,6 @@
   }
 }
 
-/* Hero stats strip */
-.sellers-hero__stats {
-  display: flex;
-  justify-content: center;
-  gap: 0;
-  margin-top: 1.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--r-lg);
-  overflow: hidden;
-  background: var(--bg2);
-  max-width: 26rem;
-  margin-left: auto;
-  margin-right: auto;
-}
-.sh-stat {
-  flex: 1;
-  text-align: center;
-  padding: 0.75rem 0.5rem;
-  position: relative;
-}
-.sh-stat + .sh-stat {
-  border-left: 1px solid var(--border);
-}
-.sh-stat__value {
-  font-family: "Space Mono", monospace;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 0.25rem;
-}
-.sh-stat__label {
-  font-size: 0.625rem;
-  font-weight: 700;
-  font-family: "Space Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--text3);
-}
-.sh-stat--trustworthy .sh-stat__value {
-  color: var(--green);
-}
-.sh-stat--suspicious .sh-stat__value {
-  color: var(--orange);
-}
-.sh-stat--flagged .sh-stat__value {
-  color: var(--red);
-}
-
-/* Panel seller stats strip */
-#seller-panel .panel-seller-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  background: var(--bg3);
-  border-radius: var(--r);
-  overflow: hidden;
-  border: 1px solid var(--border);
-  margin-top: 1rem;
-  position: relative;
-  z-index: 1;
-}
-.pss-stat {
-  text-align: center;
-  padding: 0.625rem 0.25rem;
-}
-.pss-stat + .pss-stat {
-  border-left: 1px solid var(--border);
-}
-.pss-stat__value {
-  font-family: "Space Mono", monospace;
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--text);
-  line-height: 1;
-  margin-bottom: 0.2rem;
-}
-.pss-stat__label {
-  font-size: 0.5625rem;
-  font-weight: 700;
-  font-family: "Space Mono", monospace;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-  color: var(--text3);
-}
-.pss-stat__value.good {
-  color: var(--green);
-}
-.pss-stat__value.warn {
-  color: var(--orange);
-}
-.pss-stat__value.bad {
-  color: var(--red);
-}
-
 /* Stat cell dividers */
 .scard__stat + .scard__stat {
   border-left: 1px solid var(--border);
@@ -1816,22 +1714,6 @@
   padding: 4rem 1rem;
   color: var(--text3);
 }
-.sellers-empty__icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  opacity: 0.4;
-  display: block;
-}
-.sellers-empty__msg {
-  font-size: 1rem;
-  color: var(--text2);
-  margin-bottom: 0.5rem;
-}
-.sellers-empty__sub {
-  font-size: 0.8125rem;
-  font-family: "Space Mono", monospace;
-  color: var(--text3);
-}
 
 /* Footer */
 footer {
@@ -1860,11 +1742,4 @@ footer {
 
 /* Mobile responsive overrides */
 @media (max-width: 480px) {
-  .sellers-hero__stats {
-    max-width: 100%;
-    border-radius: var(--r);
-  }
-  .sh-stat__value {
-    font-size: 1rem;
-  }
 }

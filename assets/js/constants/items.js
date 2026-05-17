@@ -135,28 +135,6 @@ const RUNESTONES = new Set([
 ]);
 
 /**
- * Valid spawner mob types
- * @type {Set<string>}
- */
-const SPAWNER_MOBS = new Set([
-  "spider",
-  "zombie",
-  "skeleton",
-  "creeper",
-  "witch",
-  "blaze",
-  "silverfish",
-  "pig",
-  "rabbit",
-  "chicken",
-  "cow",
-  "sheep",
-  "goat",
-  "cave spider",
-  "iron golem",
-]);
-
-/**
  * Resource items (essences, ores, special materials)
  * @type {Set<string>}
  */

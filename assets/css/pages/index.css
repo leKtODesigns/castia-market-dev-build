@@ -96,35 +96,6 @@
       margin: 0.75rem auto 0;
       line-height: 1.6;
     }
-    .listings-hero__panels {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, max-content));
-      gap: 0.75rem;
-      justify-content: center;
-      margin-top: 1.75rem;
-      padding: 0 0.5rem 0.5rem;
-    }
-    .hero-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-      padding: 0.8rem 1rem;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      color: var(--text3);
-      font-size: 0.78rem;
-      text-transform: uppercase;
-      letter-spacing: 0.09em;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
-    }
-    .hero-chip strong {
-      color: var(--text);
-      font-weight: 700;
-      text-transform: none;
-      letter-spacing: normal;
-    }
 
     /* Keep the stats row above lower content while a stat popover is open. */
     .stats-bar {
@@ -314,19 +285,6 @@
       justify-content: flex-start;
       flex: 1 1 24rem;
     }
-    .listings-toolbar__filter-field {
-      display: flex;
-      flex-direction: column;
-      gap: 0.35rem;
-      min-width: 180px;
-    }
-    .listings-toolbar__filter-field .fl {
-      color: var(--text3);
-      font-size: 0.76rem;
-      letter-spacing: 0.12em;
-      font-family: "Space Mono", monospace;
-      text-transform: uppercase;
-    }
     .fchips .chip {
       background: var(--bg3);
       border: 1px solid var(--border);
@@ -400,34 +358,6 @@
     .copy-price-btn:active {
       transform: scale(0.95);
     }
-    .ctoggle {
-      background: var(--bg2);
-      border: 1px solid var(--border2);
-      border-radius: var(--r-sm);
-      color: var(--text2);
-      padding: 8px 12px;
-      cursor: pointer;
-      font-family: "Space Mono", monospace;
-      font-size: 11px;
-      line-height: 1.2;
-      transition: border-color 0.15s, background 0.15s, color 0.15s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      -webkit-tap-highlight-color: transparent;
-    }
-    @media (hover: hover) {
-      .ctoggle:hover {
-        border-color: var(--gold3);
-        background: var(--gold-bg);
-        color: var(--gold);
-      }
-    }
-    .ctoggle.on {
-      border-color: var(--gold2);
-      background: var(--gold-bg);
-      color: var(--gold);
-    }
     .panel-scroll-top {
       position: static;
       gap: 4px;
@@ -480,100 +410,6 @@
       padding: 0;
     }
     
-    /* Compare card styling - inspired by pcards */
-    .compare-card {
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      padding: 1rem;
-      margin-bottom: 1rem;
-      transition: border-color 0.2s ease;
-    }
-    .compare-card:hover {
-      border-color: var(--gold3);
-    }
-    .compare-card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1rem;
-      padding-bottom: 0.75rem;
-      border-bottom: 1px solid var(--border2);
-    }
-    .compare-card-img {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--r-sm);
-      background: var(--bg3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-    }
-    .compare-card-title {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 1.1rem;
-    }
-    .compare-card-stats {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-      gap: 1rem;
-    }
-    .compare-stat {
-      display: flex;
-      flex-direction: column;
-      gap: 0.25rem;
-    }
-    .compare-stat-label {
-      font-size: 0.75rem;
-      color: var(--text3);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    .compare-stat-value {
-      font-weight: 600;
-      color: var(--text);
-      font-size: 1.1rem;
-    }
-    .compare-stat-value.gold {
-      color: var(--gold);
-    }
-    .compare-actions {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-      padding-top: 1rem;
-      border-top: 1px solid var(--border2);
-    }
-    .compare-action-btn {
-      flex: 1;
-      padding: 0.5rem;
-      border: 1px solid var(--border2);
-      background: var(--bg3);
-      border-radius: var(--r-sm);
-      color: var(--text2);
-      font-size: 0.875rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    .compare-action-btn:hover {
-      background: var(--bg4);
-      border-color: var(--border);
-      color: var(--text);
-    }
-    .compare-action-btn.primary {
-      background: var(--gold-bg);
-      border-color: var(--gold3);
-      color: var(--gold);
-    }
-    .compare-action-btn.primary:hover {
-      background: rgba(237, 184, 74, 0.2);
-    }
     .cselect {
       position: relative;
       width: 100%;
@@ -811,11 +647,6 @@
   padding: 0;
 }
 
-    .listings-toolbar__filter-field select:focus {
-      outline: none;
-      border-color: rgba(237, 184, 74, 0.75);
-      background: rgba(255, 255, 255, 0.06);
-    }
     .fchips {
       display: flex;
       flex-wrap: wrap;
@@ -1211,13 +1042,6 @@
     @media (max-width: 640px) {
       .listings-hero__title {
         font-size: 2.5rem;
-      }
-      .listings-hero__panels {
-        grid-template-columns: 1fr;
-      }
-      .listings-toolbar__filter-field {
-        min-width: 0;
-        width: 100%;
       }
       .listings-toolbar {
         padding: 0 0.75rem;
