@@ -72,7 +72,7 @@ function updateOverlayUI() {
   const cmpOpen = !!(compareModal && compareModal.classList.contains("on"));
   const open = panelOpen || sellerPanelOpen || cmpOpen;
   const lockForPanel = panelOpen && _shouldLockBodyScroll(); // mobile only
-  const lockForSellerPanel = sellerPanelOpen && _shouldLockBodyScroll(); // mobile only
+  const lockForSellerPanel = sellerPanelOpen; // seller drawer should isolate the page everywhere
   const lockForCompare = cmpOpen; // modal always locks
   const lock = lockForPanel || lockForSellerPanel || lockForCompare;
 
@@ -467,7 +467,7 @@ function openCompare() {
     </div>`;
   } else {
     const items = compareKeys
-      .map((k) => enriched.find((r) => r.rawKey === k))
+      .map((k) => findDisplayRowByKey(k))
       .filter(Boolean);
     const grid = items
       .map((r) => {
@@ -495,6 +495,7 @@ function openCompare() {
             : "";
           metaHTML = `<div class="cmp-meta">${imgHTML}${noteHTML}</div>`;
         }
+        const hasHistory = !r.catalogOnly;
         return `<div class="cmp-item">
         <div class="cmp-item-head">
           <div class="cmp-head-main">
@@ -507,12 +508,12 @@ function openCompare() {
         </div>
         ${metaHTML}
         <div class="cmp-price-row">
-          <div class="cmp-price">${fmt(r.median)}</div>
-          <button type="button" class="copy-price-btn" data-act="copy-price" data-price="${r.median}" title="Copy price" aria-label="Copy price">
+          <div class="cmp-price">${hasHistory ? fmt(r.median) : "No market history yet"}</div>
+          ${hasHistory ? `<button type="button" class="copy-price-btn" data-act="copy-price" data-price="${r.median}" title="Copy price" aria-label="Copy price">
             <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3.5" y="3.5" width="6" height="6" rx="1"/><path d="M1.5 7.5V1.5h6"/></svg>
-          </button>
+          </button>` : ""}
         </div>
-        <div class="cmp-range">${fmt(ar.low)} — ${fmt(ar.high)}</div>
+        <div class="cmp-range">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "Catalog item only"}</div>
         <div class="cmp-row"><span class="rl">Trend</span><span>${trendH(r.trend)}</span></div>
         <div class="cmp-row"><span class="rl">Confidence</span><span class="conf-b conf-inline ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span></div>
         <div class="cmp-row"><span class="rl">Samples</span><span class="cmp-mono">${r.samples?.toLocaleString() || "—"}</span></div>
@@ -845,7 +846,8 @@ window.addEventListener("hashchange", () => {
     return;
   }
   if (hk === activeKey && panel.classList.contains("open")) return;
-  if (enriched && enriched.length) openPanel(hk);
+  if ((enriched && enriched.length) || (catalogRows && catalogRows.length))
+    openPanel(hk);
 });
 
 // Keyboard shortcuts
@@ -957,7 +959,7 @@ function updateCmpTooltip() {
   } else {
     tip.innerHTML = compareKeys
       .map((k) => {
-        const r = enriched.find((e) => e.rawKey === k);
+        const r = findDisplayRowByKey(k);
         if (!r) return `<div class="cmp-tip-item">${esc(k)}</div>`;
 
         // Use displayName directly from enriched data (already formatted with titleCase and tier stars)

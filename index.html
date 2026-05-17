@@ -87,7 +87,7 @@
         </svg>
         Sellers
       </a>
-      <span class="site-header__nav-link nav-soon" aria-disabled="true">
+      <a href="/castia-market-dev-build/about/" class="site-header__nav-link">
         <svg
           width="11"
           height="11"
@@ -100,8 +100,8 @@
           <circle cx="6" cy="6" r="4.5" />
           <path d="M6 3.5v3l2 1.5" />
         </svg>
-        Coming Soon
-      </span>
+        About
+      </a>
     </nav>
 
     <div class="header-right">
@@ -181,7 +181,7 @@
       </svg>
       Sellers
     </a>
-    <span class="mob-nav__link nav-soon" aria-disabled="true">
+    <a href="/castia-market-dev-build/about/" class="mob-nav__link" data-action="close-mobile-menu">
       <svg
         width="13"
         height="13"
@@ -194,8 +194,8 @@
         <circle cx="6" cy="6" r="4.5" />
         <path d="M6 3.5v3l2 1.5" />
       </svg>
-      Coming Soon
-    </span>
+      About
+    </a>
   </nav>
 </header>
 
@@ -275,27 +275,27 @@
 
     <!-- ── Stats bar ── -->
     <div class="stats-bar">
-      <div class="sc">
+      <button type="button" class="sc sc-action" data-action="stat-total-items" aria-label="Clear filters and return to all items">
         <div class="sl">Total items</div>
         <div class="sv" id="sTot">—</div>
-      </div>
-      <div class="sc">
+      </button>
+      <button type="button" class="sc sc-action" data-action="stat-categories" aria-label="Open category filter">
         <div class="sl">Categories</div>
         <div class="sv" id="sCat">—</div>
-      </div>
-      <div class="sc">
+      </button>
+      <button type="button" class="sc sc-action" id="sMaxCard" data-action="stat-highest-price" aria-label="Open highest priced item">
         <div class="sl">Highest price</div>
         <div class="sv a" id="sMax">—</div>
         <div class="ss" id="sMaxN"></div>
-      </div>
-      <div class="sc">
+      </button>
+      <div class="sc sc-info" title="The average of all current item medians. It summarizes the whole market, not one item.">
         <div class="sl">Avg median</div>
         <div class="sv a" id="sAvg">—</div>
       </div>
-      <div class="sc">
+      <button type="button" class="sc sc-action" data-action="manual-refresh" aria-label="Refresh market data">
         <div class="sl">Last updated</div>
         <div class="sv sv--small" id="sUpd">—</div>
-      </div>
+      </button>
     </div>
 
     <div class="listings-toolbar">
@@ -391,6 +391,7 @@
         </div>
 
         <div class="listings-toolbar__bottom-right">
+          <span class="toolbar-group-label">Views & tools</span>
           <button
                   class="vbtn"
                   id="favOnlyBtn"
@@ -630,7 +631,23 @@
   </div>
 </div>
 
-<footer>Castia Market &mdash; auto-refreshes every 5 min</footer>
+<footer class="site-footer">
+  <div class="site-footer__meta">
+    <span class="footer-brand">Castia Market</span>
+    <span class="footer-sep" aria-hidden="true">•</span>
+    <span class="footer-upd">auto-refreshes every 5 min</span>
+  </div>
+  <p class="site-footer__disclaimer">
+    Castia Market is an unofficial fan-made price tracker. It is not approved by, endorsed by, or associated with Mojang, Microsoft, CastiaMC, or Crafty.
+  </p>
+      <nav class="site-footer__links" aria-label="Legal links">
+        <a href="/castia-market-dev-build/about/">About</a>
+        <a href="/castia-market-dev-build/catalog/">Catalog</a>
+        <a href="/castia-market-dev-build/legal/">Legal</a>
+    <a href="/castia-market-dev-build/credits/">Credits</a>
+    <a href="/castia-market-dev-build/privacy/">Privacy</a>
+  </nav>
+</footer>
 
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
@@ -703,5 +720,3 @@
   <script type="module" defer src="./assets/js/pages/index-entry.js?v=20260514a"></script>
 </body>
 </html>
-
-

@@ -423,7 +423,7 @@ html.panel-scrollbar-hidden body::-webkit-scrollbar {
     display: flex;
   }
   #sync-status {
-    display: flex;
+    display: none;
   }
   .logo {
     margin-right: auto;
@@ -753,6 +753,17 @@ main {
 .sc {
   background: var(--bg2);
   padding: 0.7rem 0.85rem;
+}
+.sc-action {
+  appearance: none;
+  width: 100%;
+  border: 0;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.sc-info {
+  cursor: help;
 }
 @media (max-width: 560px) {
   .sc {

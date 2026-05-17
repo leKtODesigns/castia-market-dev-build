@@ -18,6 +18,8 @@ This project uses grouped public-update entries instead of dates. Small fixes ma
 - Expand public credits with grouped attribution for Mojang, Castia-related, Re-covered, and Crafty asset sources.
 - Restore the Sellers toolbar to a stacked layout so search sits above trust filters again.
 - Restore centered Sellers controls and four-column fixed-width desktop seller cards.
+- Add About and Catalog routes, clarify seller-rating meaning, and turn listings stats into purposeful actions.
+- Improve Sellers Panel listing rows with aligned columns, visible market medians, explicit item navigation, and full-page scroll locking while open.
 
 ## Public update 04
 

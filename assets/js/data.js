@@ -217,6 +217,10 @@ function parseKey(raw) {
     baseKey = baseKey.slice(0, baseKey.lastIndexOf("|t")).trim();
   }
   const kl = baseKey.toLowerCase();
+  const klNoSuffix = kl
+    .replace(/\s*\([\d.]+%\)\s*$/, "")
+    .replace(/\s+(?:\d+|i{1,3}|iv|vi{0,3}|ix)$/i, "")
+    .trim();
 
   // Handle book items specially - they have unique formatting and categorization
   if (kl.startsWith("book:")) {
@@ -235,6 +239,18 @@ function parseKey(raw) {
       variantSlug,
     };
   }
+
+  // Exact runestone matches win before set-name inference so names like "Lunar Lure"
+  // cannot be mistaken for the Lunar gear family.
+  if (RUNESTONES.has(kl) || RUNESTONES.has(klNoSuffix))
+    return {
+      displayName: titleCase(baseKey),
+      category: "runestone",
+      tier: 0,
+      setName: null,
+      rawKey: raw,
+      variantSlug,
+    };
 
   // Check for Mithril set items (armor, tools, etc. from specific sets like Prismatic, Daydream, etc.)
   for (const setName of MITHRIL_SETS) {
@@ -304,21 +320,6 @@ function parseKey(raw) {
       variantSlug,
     };
   }
-
-  // Handle runestones (like "ruby's fire", "end veil")
-  const klNoSuffix = kl
-    .replace(/\s*\([\d.]+%\)\s*$/, "")
-    .replace(/\s+(?:\d+|i{1,3}|iv|vi{0,3}|ix)$/i, "")
-    .trim();
-  if (RUNESTONES.has(kl) || RUNESTONES.has(klNoSuffix))
-    return {
-      displayName: titleCase(baseKey),
-      category: "runestone",
-      tier: 0,
-      setName: null,
-      rawKey: raw,
-      variantSlug,
-    };
 
   // Handle spawner and spawn egg items
   if (kl.endsWith(" spawner"))
@@ -411,9 +412,36 @@ function parseKey(raw) {
  * @param {Object[]} rows - Array of raw data objects from the Castia Worker
  * @returns {Object[]} Enriched array with parsed properties added
  */
+function normalizeBackendCategory(category) {
+  const map = {
+    "Set Gear": "set-gear",
+    "Enchanted Book": "enchanted-book",
+    Spawner: "spawner",
+    "Spawn Egg": "spawn-egg",
+    Runestone: "runestone",
+    "Unique Relic": "unique-relic",
+    Resource: "resource",
+    Utility: "utility",
+    "Music Disc": "music-disc",
+    Fish: "fish",
+    Vanilla: "vanilla",
+    Misc: "misc",
+  };
+
+  const raw = String(category || "").trim();
+  return map[raw] || null;
+}
+
 function enrich(rows) {
   return (rows || []).map((r) => {
     const parsed = parseKey(r.key);
+    const backendCategory = normalizeBackendCategory(r.category);
+    // Known runestones are exact-name matches and should not inherit stale
+    // backend Set Gear labels from prefix collisions such as "Lunar Lure".
+    const category =
+      parsed.category === "runestone" && backendCategory === "set-gear"
+        ? "runestone"
+        : backendCategory || parsed.category;
     const workerVariantSlug = String(r.variant_key || r.variantKey || "")
       .trim()
       .toLowerCase();
@@ -425,12 +453,68 @@ function enrich(rows) {
       ...r,
       enchantments: parseEnchantments(r.enchantments),
       ...parsed,
+      category,
+      setName: category === "set-gear" ? parsed.setName : null,
       variantSlug: parsed.variantSlug || workerVariantSlug || null,
       _dn_lc: dnLc,
       _rk_lc: rkLc,
       _search: dnLc + " " + rkLc,
     };
   });
+}
+
+function buildSetGearCatalogRows() {
+  const notes = window.CARD_NOTES || {};
+  const marketByKey = new Map(enriched.map((row) => [row.rawKey, row]));
+  const rows = [];
+  for (const rawKey of Object.keys(notes)) {
+    const parsed = parseKey(rawKey);
+    if (parsed.category !== "set-gear") continue;
+    const marketRow = marketByKey.get(rawKey);
+    if (marketRow) {
+      rows.push({ ...marketRow, catalogOnly: false });
+      continue;
+    }
+    rows.push({
+      key: rawKey,
+      rawKey,
+      median: 0,
+      samples: 0,
+      confidence: null,
+      iqr_low: 0,
+      iqr_high: 0,
+      trend: "stable",
+      last_seen: null,
+      enchantments: null,
+      catalogOnly: true,
+      ...parsed,
+      _dn_lc: String(parsed.displayName || "").toLowerCase(),
+      _rk_lc: String(rawKey || "").toLowerCase(),
+      _search: `${String(parsed.displayName || "").toLowerCase()} ${String(rawKey || "").toLowerCase()}`,
+    });
+  }
+  const seen = new Set();
+  return rows
+    .filter((row) => {
+      const key = String(row.rawKey || "").toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => a.displayName.localeCompare(b.displayName));
+}
+
+function rebuildCatalogRows() {
+  catalogRows = buildSetGearCatalogRows();
+  return catalogRows;
+}
+
+function findDisplayRowByKey(key) {
+  return (
+    enriched.find((row) => row.rawKey === key) ||
+    catalogRows.find((row) => row.rawKey === key) ||
+    null
+  );
 }
 
 /**
@@ -531,6 +615,7 @@ function parseEnchantments(value) {
 function normalizePriceRows(workerPrices) {
   return Object.entries(workerPrices || {}).map(([key, row]) => ({
     key,
+    category: row?.category || null,
     variant_key: row?.variantKey || null,
     enchantments: parseEnchantments(row?.enchantments),
     median: row?.median ?? null,
@@ -653,6 +738,7 @@ function applyPrismaticTierCache() {
   // Update global state with enriched data
   allPrices = newRows;
   enriched = enrich(allPrices);
+  rebuildCatalogRows();
   maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
   prismaticTiersReady = true;
   return true;
@@ -688,6 +774,7 @@ async function fetchAll(silent) {
     const sellerRows = normalizeSellerRows(sellerRes?.sellers);
     allPrices = priceRows;
     enriched = enrich(allPrices);
+    rebuildCatalogRows();
     const cacheApplied = applyPrismaticTierCache();
     maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
     allSellers = {};
@@ -864,6 +951,7 @@ async function buildPrismaticTiers(opts = {}) {
   }
   allPrices = newRows;
   enriched = enrich(allPrices);
+  rebuildCatalogRows();
   maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
   // Background update: don't re-trigger stagger animations (can feel like a second reload).
   window.suppressNextStaggerAnim?.();

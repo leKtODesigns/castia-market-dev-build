@@ -452,6 +452,8 @@ function updateStats() {
             : maxR.displayName
         : "";
   }
+  const sMaxCard = $("sMaxCard");
+  if (sMaxCard) sMaxCard.dataset.key = maxR.rawKey || "";
 
   popStat("sAvg", fmt(avg));
 
@@ -763,12 +765,13 @@ function imageSlugFromRawKey(rawKey) {
           .replace(/\s*\[[^\]]+\]\s*$/, "")
           .replace(/\s*\([\d.]+%\)\s*$/, "")
           .trim()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
           .toLowerCase()
           .replace(/&/g, "and")
           .replace(/['"]/g, "")
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/^-+|-+$/g, "")
-          .replace(/-(?:\d+|i{1,3}|iv|vi{0,3}|ix)$/, "")
           .slice(0, 120) || "unknown"
   );
 }
@@ -782,6 +785,8 @@ function slugifyText(txt) {
   return (
       String(txt || "")
           .trim()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
           .toLowerCase()
           .replace(/&/g, "and")
           .replace(/['"]/g, "")
@@ -799,7 +804,11 @@ function slugifyText(txt) {
 function imagePathsForRow(r) {
   if (!r || r.category === "misc") return [];
   const base = "./assets/images/items",
-      slug = imageSlugFromRawKey(r.rawKey),
+      baseSlug = imageSlugFromRawKey(r.rawKey),
+      slug =
+        r.category === "runestone"
+          ? baseSlug.replace(/-(?:\d+|i{1,3}|iv|vi{0,3}|ix)$/, "")
+          : baseSlug,
       cat = String(r.category || "misc"),
       paths = [];
   const variantSlug = r.variantSlug
@@ -949,8 +958,36 @@ function imageHTMLForRow(r, cls = "", opts = {}) {
 function noteKeyFromRawKey(rawKey) {
   return String(rawKey || "")
       .trim()
+      .replace(/\s*\([\d.]+%\)\s*$/i, "")
+      .replace(/\s+(?:\d+|i{1,3}|iv|vi{0,3}|ix)$/i, "")
       .replace(/\s+/g, " ")
       .toLowerCase();
+}
+
+function noteVariantFromSlug(slug) {
+  const v = String(slug || "").toLowerCase().trim();
+  if (!v) return "";
+  const tail = v.split(/[|/:=]/).filter(Boolean).pop() || "";
+  return tail.replace(/[_-]+/g, " ").trim();
+}
+
+function extractSkillVariant(r) {
+  const fromTag = String(r?.skillTag?.text || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  if (fromTag) return fromTag;
+
+  const raw = String(r?.rawKey || "").toLowerCase();
+  const rawMatch = raw.match(/\[([^\]]+)\]/);
+  if (rawMatch && rawMatch[1]) return rawMatch[1].trim().replace(/\s+/g, " ");
+
+  const display = String(r?.displayName || "").toLowerCase();
+  const displayMatch = display.match(/\[([^\]]+)\]/);
+  if (displayMatch && displayMatch[1])
+    return displayMatch[1].trim().replace(/\s+/g, " ");
+
+  return noteVariantFromSlug(r?.variantSlug);
 }
 
 function enchantLevelToRoman(level) {
@@ -990,13 +1027,35 @@ function enchantmentLabel(name) {
   return clean ? titleCase(clean) : "";
 }
 
+const SINGLE_LEVEL_ENCHANTMENTS = new Set([
+  "aqua_affinity",
+  "binding_curse",
+  "channeling",
+  "flame",
+  "infinity",
+  "mending",
+  "multishot",
+  "silk_touch",
+  "vanishing_curse",
+  "unbreakable",
+]);
+
+function enchantmentKey(name) {
+  return String(name || "")
+    .replace(/^minecraft:/i, "")
+    .trim()
+    .toLowerCase();
+}
+
 function dynamicEnchantmentNote(r) {
   const entries = Object.entries(r?.enchantments || {}).filter(
       ([name, level]) => enchantmentLabel(name) && Number(level) > 0,
   );
   if (!entries.length) return null;
   const lines = entries.map(([name, level]) => {
-    const roman = enchantLevelToRoman(level);
+    const roman = SINGLE_LEVEL_ENCHANTMENTS.has(enchantmentKey(name))
+      ? ""
+      : enchantLevelToRoman(level);
     return `■ ${enchantmentLabel(name)}${roman ? ` ${roman}` : ""}`;
   });
   return { type: "enchants", lines };
@@ -1012,11 +1071,31 @@ function getCardNoteForRow(r) {
       raw = String(r?.rawKey || "").trim();
   if (!raw) return null;
   const keyTier = noteKeyFromRawKey(raw);
+  const keyNoVariant = keyTier.replace(/\|v:[^|]+$/i, "");
+  const keyBaseNoTier = keyNoVariant.replace(/\|t[123]$/i, "");
+  const skill = extractSkillVariant(r);
+
+  // Explicit handling for knowledge-cap variants to avoid any key-shape drift.
+  if (keyBaseNoTier.startsWith("knowledge cap") && skill) {
+    const explicit = `knowledge cap [${skill}]`;
+    if (notes[explicit]) return notes[explicit];
+  }
+
   if (notes[keyTier]) return notes[keyTier];
-  const keyVariant = keyTier.replace(/\|v:[^|]+$/i, "");
-  if (notes[keyVariant]) return notes[keyVariant];
-  const keyBase = keyVariant.replace(/\|t[123]$/i, "");
-  return notes[keyBase] || dynamicEnchantmentNote(r);
+  if (notes[keyNoVariant]) return notes[keyNoVariant];
+  if (skill) {
+    const bracketKey = `${keyBaseNoTier} [${skill}]`;
+    if (notes[bracketKey]) return notes[bracketKey];
+  }
+  const displayBase = String(r?.displayName || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
+  if (displayBase && skill) {
+    const displayBracketKey = `${displayBase} [${skill}]`;
+    if (notes[displayBracketKey]) return notes[displayBracketKey];
+  }
+  return notes[keyBaseNoTier] || dynamicEnchantmentNote(r);
 }
 
 /**
@@ -1161,7 +1240,8 @@ function renderCards(rows) {
             ? `<div class="cimgwrap${isMisc ? " cimgwrap-misc" : ""}">${imgPaths.length ? imageHTMLForRow(r, "") : '<img src="./assets/images/items/_placeholder.svg" alt="" />'}</div>`
             : "";
         const a11yLabel = `Open details for ${r.displayName || r.rawKey || "item"}`;
-        return `<div class="pcard ${!showImg ? "pcard-no-img" : ""} ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
+        const hasHistory = !r.catalogOnly;
+        return `<div class="pcard ${!showImg ? "pcard-no-img" : ""} ${r.catalogOnly ? "pcard-catalog-only" : ""} ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
         ${imgHTML}
         <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
         <button type="button" class="pcard-act pcard-cmp cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
@@ -1169,8 +1249,8 @@ function renderCards(rows) {
           <div class="ckey" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
         </div>
         ${cardExtraH(r)}
-        <div class="cprice">${fmt(r.median)}</div>
-        <div class="crange">${fmt(ar.low)} — ${fmt(ar.high)}</div>
+        <div class="cprice">${hasHistory ? fmt(r.median) : "No market history yet"}</div>
+        <div class="crange">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "Catalog item only"}</div>
         <div class="cfoot">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}<span class="conf-b ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span>${trendH(r.trend)}</div>
       </div>`;
       })
@@ -1596,4 +1676,23 @@ function clearAll() {
   if (confEl) refreshCSelect("confEl");
   if (tierEl) refreshCSelect("tierEl");
   applyFilters();
+}
+
+function activateTotalItemsStat() {
+  clearAll();
+  const top = document.querySelector(".listings-toolbar") || document.querySelector(".stats-bar");
+  top?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function activateCategoriesStat() {
+  const btn = document.querySelector("#catElWrap .cselect-btn");
+  const wrap = $("catElWrap");
+  if (!btn) return;
+  btn.focus({ preventScroll: true });
+  if (!wrap?.classList.contains("open")) toggleCSelect("catEl");
+}
+
+function activateHighestPriceStat(btn) {
+  const key = btn?.dataset?.key || "";
+  if (key) openPanel(key);
 }

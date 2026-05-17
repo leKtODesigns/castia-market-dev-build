@@ -8,6 +8,8 @@
 let allPrices = [],
   /** @type {Object[]} Enriched price rows with parsed displayName, category, tier, etc. */
   enriched = [],
+  /** @type {Object[]} Catalog-only rows that do not currently have market history */
+  catalogRows = [],
   /** @type {Object[]} Currently filtered + sorted subset of enriched (shown in table/cards) */
   filtered = [];
 /** @type {Object<string, Object>} Seller data keyed by lowercase seller name */

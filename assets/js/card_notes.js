@@ -2515,6 +2515,54 @@
         "\u25a0 1.5% Smelting Money Boost",
       ],
     },
+    "knowledge cap [mining]": {
+      type: "desc",
+      lines: [
+        "Protection 4",
+        "Unbreakable",
+        "\u25a0 10% Mining Exp Boost",
+      ],
+    },
+    "knowledge cap [woodcutting]": {
+      type: "desc",
+      lines: [
+        "Protection 4",
+        "Unbreakable",
+        "\u25a0 10% Woodcutting Exp Boost",
+      ],
+    },
+    "knowledge cap [hunting]": {
+      type: "desc",
+      lines: [
+        "Protection 4",
+        "Unbreakable",
+        "\u25a0 10% Hunting Exp Boost",
+      ],
+    },
+    "knowledge cap [farming]": {
+      type: "desc",
+      lines: [
+        "Protection 4",
+        "Unbreakable",
+        "\u25a0 10% Farming Exp Boost",
+      ],
+    },
+    "knowledge cap [fishing]": {
+      type: "desc",
+      lines: [
+        "Protection 4",
+        "Unbreakable",
+        "\u25a0 10% Fishing Exp Boost",
+      ],
+    },
+    "knowledge cap [smelting]": {
+      type: "desc",
+      lines: [
+        "Protection 4",
+        "Unbreakable",
+        "\u25a0 10% Smelting Exp Boost",
+      ],
+    },
     "mistle toes": {
       type: "desc",
       lines: [
@@ -2840,7 +2888,7 @@
       type: "desc",
       lines: ["\u25a0 Ability to walk on Lava. (Only works in the nether)"],
     },
-    "rubys fire": {
+    "ruby's fire": {
       type: "desc",
       lines: ["\u25a0 Automatically smelts ores when mined."],
     },

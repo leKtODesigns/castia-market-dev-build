@@ -143,7 +143,7 @@ async function openPanel(key) {
   setHashItemKey(key);
   scheduleSaveUIState();
   markActiveSelection();
-  const item = enriched.find((r) => r.rawKey === key);
+  const item = findDisplayRowByKey(key);
   if (!item) {
     closePanel();
     return;
@@ -458,6 +458,7 @@ function buildPanelHTML(item, listings, meta = {}) {
   const pd = item,
     removed = meta.removed || 0,
     samplesFromListings = meta.samplesFromListings || 0;
+  const hasHistory = !pd.catalogOnly;
   // Use database samples if available, otherwise use live listing samples
   const nTotal = pd.samples || 0,
     n = nTotal > 0 ? nTotal : samplesFromListings,
@@ -495,7 +496,8 @@ function buildPanelHTML(item, listings, meta = {}) {
   let html = "";
 
   // Price hero section with median price and IQR visualization
-  html += `<div class="price-hero">
+  html += hasHistory
+    ? `<div class="price-hero">
     <div class="ph-label">Median Unit Price</div>
     <div class="ph-head">
       <div class="ph-median">${fmt(median)}</div>
@@ -517,7 +519,12 @@ function buildPanelHTML(item, listings, meta = {}) {
       <div class="ph-range-item"><div class="ph-rl">${n >= 10 ? "IQR High" : "Est. High"}</div><div class="ph-rv">${fmt(displayHigh)}</div></div>
       <div class="ph-range-item"><div class="ph-rl">Spread</div><div class="ph-rv">${fmt(iqrSpan)}</div></div>
     </div>
-  </div>`;
+  </div>`
+    : `<div class="price-hero price-hero--empty">
+      <div class="ph-label">Market History</div>
+      <div class="ph-empty">No market history yet</div>
+      <div class="ph-empty-sub">This catalog item can still be inspected and compared, but there are no tracked listings to estimate a price range.</div>
+    </div>`;
 
   // Meta pills row 1: Confidence, Trend, Samples, Tier, Last seen
   html += `<div class="meta-pills">
@@ -549,8 +556,11 @@ function buildPanelHTML(item, listings, meta = {}) {
         <button type="button" class="copt ${panelSort === "seller" ? "on" : ""}" data-act="panel-sort" data-sort="seller">Seller rating</button>
       </div>
     </div>
-    <button type="button" class="ctoggle ${panelIncludeFlagged ? "on" : ""}" id="panelFlagTog" data-act="panel-include-flagged" role="switch" aria-checked="${panelIncludeFlagged ? "true" : "false"}">
-      <span class="ctog" aria-hidden="true">Include Flagged</span>
+    <button type="button" class="ptog-switch ${panelIncludeFlagged ? "on" : ""}" id="panelFlagTog" data-act="panel-include-flagged" role="switch" aria-checked="${panelIncludeFlagged ? "true" : "false"}">
+      <span class="ptog-switch__label">Include Flagged</span>
+      <span class="ptog-switch__track" aria-hidden="true">
+        <span class="ptog-switch__thumb"></span>
+      </span>
     </button>
   </div>`;
 

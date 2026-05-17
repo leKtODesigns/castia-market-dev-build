@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>About — Castia Market</title>
+  <meta name="theme-color" content="#0b0d12" />
+  <link rel="canonical" href="https://lektodesigns.github.io/castia-market-dev-build/about/" />
+  <link rel="shortcut icon" type="image/x-icon" href="../favicon.ico" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="../assets/css/base.css" />
+  <link rel="stylesheet" href="../assets/css/layout.css" />
+  <link rel="stylesheet" href="../assets/css/components.css" />
+  <link rel="stylesheet" href="../assets/css/pages/legal.css" />
+</head>
+<body class="page-legal">
+  <header class="site-header" aria-label="Site header">
+    <div class="site-header__inner">
+      <a href="/castia-market-dev-build/" class="logo" aria-label="Castia Market home">
+        <div class="logo-mark" aria-hidden="true"><svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 1.5L8.8 5.2L13 5.8L10 8.7L10.7 12.8L7 10.8L3.3 12.8L4 8.7L1 5.8L5.2 5.2Z" /></svg></div>
+        <div class="logo-wordmark"><span class="logo-name">CASTIA</span><span class="logo-tag">MARKET</span></div>
+      </a>
+      <nav class="site-header__nav" aria-label="Main navigation">
+        <a href="/castia-market-dev-build/" class="site-header__nav-link">Listings</a>
+        <a href="/castia-market-dev-build/sellers/" class="site-header__nav-link">Sellers</a>
+        <a href="/castia-market-dev-build/about/" class="site-header__nav-link active">About</a>
+      </nav>
+      <button class="mob-menu-btn" id="mobMenuBtn" aria-controls="mob-nav" aria-expanded="false" aria-label="Open menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+  <nav class="mob-nav" id="mob-nav" aria-label="Mobile navigation" aria-hidden="true">
+    <a href="/castia-market-dev-build/" class="mob-nav__link">Listings</a>
+    <a href="/castia-market-dev-build/sellers/" class="mob-nav__link">Sellers</a>
+    <a href="/castia-market-dev-build/about/" class="mob-nav__link active">About</a>
+  </nav>
+  <main class="legal-shell">
+    <section class="legal-hero">
+      <p class="legal-kicker">About</p>
+      <h1 class="legal-title">How to read Castia Market</h1>
+      <p class="legal-lead">Castia Market is a price tracker, not a trading authority. It summarizes current auction data so players can judge offers with more context.</p>
+    </section>
+    <section class="legal-card">
+      <h2>Prices</h2>
+      <p><strong>Median</strong> is the middle observed price after current seller listings are sorted. It is more resistant to one extreme listing than a simple average.</p>
+      <p><strong>Price range</strong> shows the usual middle band of listings. A wider range generally means the market is less consistent or has fewer useful samples.</p>
+      <p><strong>Samples</strong> means distinct current seller offers used for the item, not every historical relist ever scraped.</p>
+    </section>
+    <section class="legal-card">
+      <h2>Seller labels</h2>
+      <p>Seller labels are automatic current-state signals based on recent pricing behavior. They can improve or worsen when newer listings replace older ones.</p>
+      <ul>
+        <li><strong>Trustworthy</strong>: usually priced close to the current market median.</li>
+        <li><strong>Neutral</strong>: mixed behavior or too little signal to classify strongly.</li>
+        <li><strong>Suspicious</strong>: often priced meaningfully above the market median.</li>
+        <li><strong>Flagged</strong>: strongest automatic warning from current pricing behavior.</li>
+        <li><strong>Blacklisted</strong>: automatic current-state warning surfaced separately by the scoring system.</li>
+      </ul>
+    </section>
+    <section class="legal-card">
+      <h2>Why the system is not harsher</h2>
+      <p>Very cheap items are ignored for seller ratings because doubling a five-dollar item is not economically comparable to overpricing expensive gear.</p>
+      <p>Underpriced listings count more gently than overpriced ones. Players often undercut to help newer players or sell faster, so generosity should not damage reputation as much as aggressive overpricing.</p>
+    </section>
+    <section class="legal-card">
+      <h2>Catalog items</h2>
+      <p>The <a href="/castia-market-dev-build/catalog/">Catalog</a> includes known set gear even when no current market history exists. Those entries are useful for enchantment reference and comparison, but they do not invent prices.</p>
+    </section>
+  </main>
+  <footer class="site-footer">
+    <div class="site-footer__meta"><span class="footer-brand">Castia Market</span></div>
+    <p class="site-footer__disclaimer">Castia Market is an unofficial fan-made price tracker. It is not approved by, endorsed by, or associated with Mojang, Microsoft, CastiaMC, or Crafty.</p>
+    <nav class="site-footer__links" aria-label="Site links">
+      <a href="/castia-market-dev-build/catalog/">Catalog</a>
+      <a href="/castia-market-dev-build/legal/">Legal</a>
+      <a href="/castia-market-dev-build/credits/">Credits</a>
+      <a href="/castia-market-dev-build/privacy/">Privacy</a>
+    </nav>
+  </footer>
+  <script>
+    (function () {
+      var btn = document.getElementById("mobMenuBtn");
+      var nav = document.getElementById("mob-nav");
+      if (!btn || !nav) return;
+      btn.addEventListener("click", function () {
+        var open = nav.getAttribute("aria-hidden") === "false";
+        nav.setAttribute("aria-hidden", open ? "true" : "false");
+        nav.classList.toggle("open", !open);
+        btn.setAttribute("aria-expanded", String(!open));
+        btn.classList.toggle("open", !open);
+      });
+    })();
+  </script>
+</body>
+</html>

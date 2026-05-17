@@ -165,9 +165,23 @@
         return map[label] || map.Neutral;
       }
 
+      const TRUST_EXPLANATIONS = {
+        Trustworthy:
+          "Current pricing behavior is usually close to the market median.",
+        Neutral:
+          "Current pricing behavior is mixed or has too little signal to rate strongly.",
+        Suspicious:
+          "Current pricing behavior is often meaningfully above the market median.",
+        Flagged:
+          "Current pricing behavior is currently far from the market median often enough to trigger the strongest automatic warning.",
+        Blacklisted:
+          "Automatic current-state warning applied by the seller scoring system. It can change as newer listings replace older ones.",
+      };
+
       function trustBadgeH(label, text) {
         var cls = String(label || "Neutral").toLowerCase();
-        return `<span class="lr-seller-badge ${esc(cls)}">${trustIconH(label)}<span>${esc(text || label || "Neutral")}</span></span>`;
+        var tip = TRUST_EXPLANATIONS[label] || TRUST_EXPLANATIONS.Neutral;
+        return `<span class="lr-seller-badge ${esc(cls)}" title="${esc(tip)}" aria-label="${esc(`${text || label || "Neutral"}: ${tip}`)}">${trustIconH(label)}<span>${esc(text || label || "Neutral")}</span></span>`;
       }
 
       function barCls(pct) {
@@ -335,22 +349,25 @@
 
       function rowHTML(r) {
         var priceStr = fmt(r.unitPrice);
+        var medianStr = r.match?.median ? fmt(r.match.median) : "—";
         var tagMap = { over: "Overpriced", under: "Good deal", fair: "" };
         var tagEl =
           r.tag && r.tag !== "fair"
             ? `<span class="sl-price-tag ${r.tag}">${tagMap[r.tag]}</span>`
-            : "";
-        var countEl =
-          r.raw.count > 1
-            ? `<span class="sl-item-count">×${r.raw.count}</span>`
-            : "";
+            : `<span class="sl-price-tag fair">Fair</span>`;
+        var countEl = `<span class="sl-item-count">${r.raw.count > 1 ? `×${r.raw.count}` : "—"}</span>`;
         var date = r.raw.timestamp ? fmtT(r.raw.timestamp) : "";
+        var actionEl = r.match
+          ? `<button type="button" class="sl-open-btn" data-seller-item-key="${esc(r.match.rawKey)}">View item</button>`
+          : `<span class="sl-open-missing">No detail</span>`;
         return `<div class="sl-row">
           <span class="sl-item" title="${esc(r.raw.item_name || "")}">${formatItemNameH(r.displayName || "—")}</span>
           ${countEl}
           <span class="sl-price ${r.tag}">${priceStr}</span>
           ${tagEl}
+          <span class="sl-median" title="Current market median">Median ${medianStr}</span>
           <span class="sl-date">${esc(date)}</span>
+          ${actionEl}
         </div>`;
       }
 
@@ -833,6 +850,13 @@
               sortBtn.getAttribute("data-seller"),
               sortBtn.getAttribute("data-sort"),
             );
+          }
+          var openBtn = e.target.closest("[data-seller-item-key]");
+          if (openBtn) {
+            e.preventDefault();
+            var key = openBtn.getAttribute("data-seller-item-key");
+            window.location.href =
+              "/castia-market-dev-build/#item=" + encodeURIComponent(key);
           }
         });
         document.addEventListener("click", function (e) {

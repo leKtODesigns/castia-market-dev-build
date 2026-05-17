@@ -78,7 +78,7 @@
             </svg>
             Sellers
           </a>
-          <span class="site-header__nav-link nav-soon" aria-disabled="true">
+          <a href="/castia-market-dev-build/about/" class="site-header__nav-link">
             <svg
               width="11"
               height="11"
@@ -91,8 +91,8 @@
               <circle cx="6" cy="6" r="4.5" />
               <path d="M6 3.5v3l2 1.5" />
             </svg>
-            Coming Soon
-          </span>
+            About
+          </a>
         </nav>
         <div class="header-right">
           <div id="sync-status">
@@ -174,7 +174,7 @@
           </svg>
           Sellers
         </a>
-        <span class="mob-nav__link nav-soon" aria-disabled="true">
+        <a href="/castia-market-dev-build/about/" class="mob-nav__link" data-action="close-mobile-menu">
           <svg
             width="13"
             height="13"
@@ -187,8 +187,8 @@
             <circle cx="6" cy="6" r="4.5" />
             <path d="M6 3.5v3l2 1.5" />
           </svg>
-          Coming Soon
-        </span>
+          About
+        </a>
       </nav>
     </header>
 
@@ -274,30 +274,36 @@
             </button>
           </div>
           <div class="sellers-toolbar__filter">
-            <button class="sf-btn on" id="sf-all" data-action="set-seller-filter" data-filter="all">
+            <button class="sf-btn on" id="sf-all" data-action="set-seller-filter" data-filter="all" title="Show every seller state">
               All
             </button>
             <button
               class="sf-btn"
               id="sf-trustworthy"
               data-action="set-seller-filter" data-filter="trustworthy"
+              title="Usually priced close to the current market median"
             >
               <span class="sf-ico" aria-hidden="true">◆</span><span>Trustworthy</span>
             </button>
-            <button class="sf-btn" id="sf-neutral" data-action="set-seller-filter" data-filter="neutral">
+            <button class="sf-btn" id="sf-neutral" data-action="set-seller-filter" data-filter="neutral" title="Mixed pricing behavior or too little signal to rate strongly">
               <span class="sf-ico" aria-hidden="true">◇</span><span>Neutral</span>
             </button>
             <button
               class="sf-btn"
               id="sf-suspicious"
               data-action="set-seller-filter" data-filter="suspicious"
+              title="Often priced meaningfully above the current market median"
             >
               <span class="sf-ico" aria-hidden="true">⟁</span><span>Suspicious</span>
             </button>
-            <button class="sf-btn" id="sf-flagged" data-action="set-seller-filter" data-filter="flagged">
+            <button class="sf-btn" id="sf-flagged" data-action="set-seller-filter" data-filter="flagged" title="Strongest automatic warning based on current pricing behavior">
               <span class="sf-ico" aria-hidden="true">✕</span><span>Flagged</span>
             </button>
           </div>
+          <p class="seller-rating-note">
+            Seller labels are automatic current-state signals based on pricing behavior and can change over time.
+            <a href="/castia-market-dev-build/about/">Learn what they mean</a>
+          </p>
           <span class="sellers-count" id="sellersCount"></span>
         </div>
 
@@ -305,7 +311,23 @@
       </main>
     </div>
 
-    <footer>Castia Market &mdash; auto-refreshes every 5 min</footer>
+    <footer class="site-footer">
+      <div class="site-footer__meta">
+        <span class="footer-brand">Castia Market</span>
+        <span class="footer-sep" aria-hidden="true">•</span>
+        <span class="footer-upd">auto-refreshes every 5 min</span>
+      </div>
+      <p class="site-footer__disclaimer">
+        Castia Market is an unofficial fan-made price tracker. It is not approved by, endorsed by, or associated with Mojang, Microsoft, CastiaMC, or Crafty.
+      </p>
+      <nav class="site-footer__links" aria-label="Legal links">
+        <a href="/castia-market-dev-build/about/">About</a>
+        <a href="/castia-market-dev-build/catalog/">Catalog</a>
+        <a href="/castia-market-dev-build/legal/">Legal</a>
+        <a href="/castia-market-dev-build/credits/">Credits</a>
+        <a href="/castia-market-dev-build/privacy/">Privacy</a>
+      </nav>
+    </footer>
     <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
     <button
       id="scrollTopBtn"
@@ -329,5 +351,3 @@
     <script type="module" defer src="../assets/js/pages/sellers-entry.js?v=20260514a"></script>
 </body>
 </html>
-
-
