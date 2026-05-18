@@ -114,13 +114,12 @@
       z-index: calc(var(--z-dropdown) + 1);
     }
 
-    .listings-toolbar,
     .listings-results-row,
     #tvw,
     #cvw,
     .twrap {
       position: relative;
-      z-index: 1;
+      z-index: var(--z-base);
     }
 
     .stats-bar {
@@ -193,8 +192,7 @@
       margin-bottom: 2rem;
       padding: 0 1rem;
       position: relative;
-      z-index: 1;
-      isolation: isolate;
+      z-index: var(--z-raised);
     }
     .listings-toolbar__top {
       display: flex;
@@ -609,8 +607,7 @@
       padding: 0 1rem;
       color: var(--text3);
       position: relative;
-      z-index: 1;
-      isolation: isolate;
+      z-index: var(--z-base);
     }
     .listings-results-row .ri {
       font-size: 0.9rem;
