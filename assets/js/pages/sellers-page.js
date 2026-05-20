@@ -189,14 +189,6 @@
         return `<span class="lr-seller-badge ${esc(cls)}" title="${esc(tip)}" aria-label="${esc(`${display}: ${tip}`)}">${trustIconH(key)}<span>${esc(display)}</span></span>`;
       }
 
-      function sellerSourceShort(source) {
-        return source === "chest_shop" ? "Shop" : "AH";
-      }
-
-      function otherMarketSource() {
-        return marketSource === "chest_shop" ? "auction_house" : "chest_shop";
-      }
-
       function sellerBySource(source, name) {
         return sellerSources?.[source]?.[String(name || "").toLowerCase()] || null;
       }
@@ -206,10 +198,18 @@
         return sd.is_blacklisted ? "Flagged" : sd.accuracy_label || "Neutral";
       }
 
-      function sourceSummaryBadge(source, sd) {
+      function sourceTrustBadge(source, sd) {
         if (!sd) return "";
         var label = sellerLabel(sd);
-        return `<span class="source-summary-badge ${esc(label.toLowerCase())}" title="${esc(sourceLabel(source))}: ${esc(label)}">${esc(sellerSourceShort(source))}: ${esc(label)}</span>`;
+        return trustBadgeH(label, `${sourceShort(source)} | ${label}`);
+      }
+
+      function sellerBadgesForMode(name, sd) {
+        if (marketSource !== "both") return trustBadgeH(sellerLabel(sd), sellerLabel(sd));
+        return (
+          sourceTrustBadge("auction_house", sellerBySource("auction_house", name)) +
+          sourceTrustBadge("chest_shop", sellerBySource("chest_shop", name))
+        );
       }
 
       function barCls(pct) {
@@ -242,13 +242,7 @@
         var pct = sd.overpriced_ratio;
         var markup = sd.avg_markup_percent;
         var total = sd.total_listings;
-        var badge = trustBadgeH(label, label);
-        var blackBadge = sd.is_blacklisted
-          ? trustBadgeH("blacklisted", "Blacklisted")
-          : "";
-        var other = sellerBySource(otherMarketSource(), name);
-        var sourceBadge = sourceSummaryBadge(marketSource, sd);
-        var otherBadge = sourceSummaryBadge(otherMarketSource(), other);
+        var badges = sellerBadgesForMode(name, sd);
         var pctVal = pct != null ? pct.toFixed(1) + "%" : "—";
         var mrkVal =
           markup != null
@@ -265,7 +259,7 @@
             </div>
             <div class="scard__info">
               <div class="scard__name" title="${esc(name)}">${esc(name)}</div>
-              <div class="scard__badges">${badge}${blackBadge}${sourceBadge}${otherBadge}</div>
+              <div class="scard__badges">${badges}</div>
             </div>
             <svg class="scard__chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5,3 9,7 5,11"/></svg>
           </div>
@@ -302,6 +296,7 @@
         const sellerData = allSellers?.[sellerName.toLowerCase()];
         const name = sellerData?.seller || sellerName;
         const label = sellerLabel(sellerData);
+        if (marketSource === "both") panelSource = "auction_house";
 
         // Update header elements
         title.textContent = name;
@@ -312,16 +307,7 @@
         loadAvatarChain(avatarImg, avatarFallback, name, label, avatarEl, false);
 
         // Set badges
-        const badge = trustBadgeH(label, label);
-        const blackBadge = sellerData?.is_blacklisted
-          ? trustBadgeH("blacklisted", "Blacklisted")
-          : "";
-        const otherData = sellerBySource(otherMarketSource(), name);
-        badgesEl.innerHTML =
-          badge +
-          blackBadge +
-          sourceSummaryBadge(marketSource, sellerData) +
-          sourceSummaryBadge(otherMarketSource(), otherData);
+        badgesEl.innerHTML = sellerBadgesForMode(name, sellerData);
 
         panel.classList.add("open");
         backdropEl.classList.add("on");
@@ -348,29 +334,49 @@
 
         body.innerHTML = `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line pskel-line--md"></div><div class="pskel-line pskel-line--lg"></div></div>`;
         try {
-          const cacheKey = `${marketSource}::${sellerName.toLowerCase()}`;
-          if (_drawerCache[cacheKey]) {
-            renderSellerPanelListings(sellerName, _drawerCache[cacheKey]);
-          } else {
-            const res =
-              marketSource === "chest_shop"
-                ? await workerGet("/chest-shops", {
-                    seller: sellerName,
-                    limit: 100,
-                  })
-                : await workerGet("/seller-auctions", {
-                    seller: sellerName,
-                    limit: 100,
-                  });
-            const rows =
-              marketSource === "chest_shop"
-                ? normalizeChestShopRows(res?.shops)
-                : normalizeAuctionRows(res?.auctions);
-            _drawerCache[cacheKey] = rows;
-            renderSellerPanelListings(sellerName, rows);
-          }
+          await loadSellerPanelListings(sellerName);
         } catch (e) {
           body.innerHTML = `<div class="drawer-empty">Could not load listings.</div>`;
+        }
+      }
+
+      async function loadSellerPanelListings(sellerName) {
+        const source =
+          marketSource === "both"
+            ? normalizeConcreteSource(panelSource)
+            : normalizeConcreteSource(marketSource);
+        const cacheKey = `${source}::${sellerName.toLowerCase()}`;
+        if (_drawerCache[cacheKey]) {
+          renderSellerPanelListings(sellerName, _drawerCache[cacheKey]);
+          return;
+        }
+        const res =
+          source === "chest_shop"
+            ? await workerGet("/chest-shops", {
+                seller: sellerName,
+                limit: 100,
+              })
+            : await workerGet("/seller-auctions", {
+                seller: sellerName,
+                limit: 100,
+              });
+        const rows =
+          source === "chest_shop"
+            ? normalizeChestShopRows(res?.shops)
+            : normalizeAuctionRows(res?.auctions);
+        _drawerCache[cacheKey] = rows;
+        renderSellerPanelListings(sellerName, rows);
+      }
+
+      async function setSellerPanelSource(sellerName, source) {
+        if (marketSource !== "both") return;
+        panelSource = normalizeConcreteSource(source, panelSource);
+        const body = document.getElementById("seller-panel-body");
+        if (body) body.innerHTML = `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line pskel-line--md"></div><div class="pskel-line pskel-line--lg"></div></div>`;
+        try {
+          await loadSellerPanelListings(sellerName);
+        } catch (_e) {
+          if (body) body.innerHTML = `<div class="drawer-empty">Could not load listings.</div>`;
         }
       }
 
@@ -428,7 +434,11 @@
           return;
         }
 
-        var sourceKey = `${marketSource}::${sellerName.toLowerCase()}`;
+        var activeSource =
+          marketSource === "both"
+            ? normalizeConcreteSource(panelSource)
+            : normalizeConcreteSource(marketSource);
+        var sourceKey = `${activeSource}::${sellerName.toLowerCase()}`;
         var sort = _drawerSort[sourceKey] || "deals";
         var enrichedRows = rows.map(function (l) {
           var name = String(l.item_name || "")
@@ -443,11 +453,19 @@
               : "";
 
           var match = (typeof enriched !== "undefined" ? enriched : []).find(
-            (r) =>
-              (prismaticKey &&
-                r.rawKey.toLowerCase() === prismaticKey.toLowerCase()) ||
-              r.displayName.toLowerCase() === name ||
-              r.rawKey.toLowerCase() === name,
+            (r) => {
+              if (r.source && r.source !== activeSource) return false;
+              if (
+                prismaticKey &&
+                r.rawKey.toLowerCase() === prismaticKey.toLowerCase()
+              ) {
+                return true;
+              }
+              return (
+                r.displayName.toLowerCase() === name ||
+                r.rawKey.toLowerCase() === name
+              );
+            },
           );
 
           var unitPrice =
@@ -491,7 +509,19 @@
         }
 
         var sortActive = _drawerSort[sourceKey] || "deals";
-        var sortBar = `<div class="scard__drawer-hdr">${esc(sourceLabel())} Listings
+        var tabs =
+          marketSource === "both"
+            ? `<div class="source-tabs source-tabs--seller" role="tablist" aria-label="Seller listing source">
+                ${["auction_house", "chest_shop"]
+                  .map(
+                    (source) =>
+                      `<button type="button" class="source-tab ${activeSource === source ? "on" : ""}" data-seller-source="${source}" data-seller="${esc(sellerName)}" role="tab" aria-selected="${activeSource === source ? "true" : "false"}">${esc(sourceLabel(source))}</button>`,
+                  )
+                  .join("")}
+              </div>`
+            : "";
+        var sortBar = `<div class="scard__drawer-hdr">${esc(sourceLabel(activeSource))} Listings
+          ${tabs}
           <div class="scard__drawer-sort">
             <button class="dsort-btn ${sortActive === "deals" ? "on" : ""}" data-sort="deals" data-seller="${esc(sellerName)}">Best Deals</button>
             <button class="dsort-btn ${sortActive === "price_asc" || sortActive === "price_desc" ? "on" : ""}" data-sort="price_toggle" data-seller="${esc(sellerName)}" data-current="${sortActive}">Price ${sortActive === "price_desc" ? "↓" : "↑"}</button>
@@ -509,7 +539,11 @@
       }
 
       function setDrawerSort(sellerName, sort) {
-        var sourceKey = `${marketSource}::${sellerName.toLowerCase()}`;
+        var activeSource =
+          marketSource === "both"
+            ? normalizeConcreteSource(panelSource)
+            : normalizeConcreteSource(marketSource);
+        var sourceKey = `${activeSource}::${sellerName.toLowerCase()}`;
         if (sort === "price_toggle") {
           var currentSort = _drawerSort[sourceKey] || "deals";
           if (currentSort === "price_asc") {
@@ -538,20 +572,8 @@
               .toLowerCase()
               .includes(q),
           );
-        if (_sfFilter === "trustworthy")
-          sellers = sellers.filter(
-            (s) => s.accuracy_label === "Trustworthy" && !s.is_blacklisted,
-          );
-        else if (_sfFilter === "neutral")
-          sellers = sellers.filter(
-            (s) => s.accuracy_label === "Neutral" && !s.is_blacklisted,
-          );
-        else if (_sfFilter === "suspicious")
-          sellers = sellers.filter((s) => s.accuracy_label === "Suspicious");
-        else if (_sfFilter === "flagged")
-          sellers = sellers.filter(
-            (s) => s.is_blacklisted || s.accuracy_label === "Flagged",
-          );
+        if (_sfFilter !== "all")
+          sellers = sellers.filter((s) => sellerMatchesTrustFilter(s, _sfFilter));
         sellers.sort(
           (a, b) =>
             (a.is_blacklisted ? 1 : 0) - (b.is_blacklisted ? 1 : 0) ||
@@ -568,6 +590,21 @@
           : `<div class="sellers-empty">No sellers match filters.</div>`;
         hydrateSellerAvatars(grid);
         grid.classList.add("loaded");
+      }
+
+      function sellerMatchesTrustFilter(seller, filter) {
+        const rows =
+          marketSource === "both"
+            ? [
+                sellerBySource("auction_house", seller.seller),
+                sellerBySource("chest_shop", seller.seller),
+              ].filter(Boolean)
+            : [seller];
+        return rows.some((s) => {
+          const label = sellerLabel(s).toLowerCase();
+          if (filter === "flagged") return s.is_blacklisted || label === "flagged";
+          return label === filter && !s.is_blacklisted;
+        });
       }
 
       function showSellersSkeleton() {
@@ -900,6 +937,14 @@
             setDrawerSort(
               sortBtn.getAttribute("data-seller"),
               sortBtn.getAttribute("data-sort"),
+            );
+          }
+          var sourceBtn = e.target.closest("[data-seller-source]");
+          if (sourceBtn) {
+            e.preventDefault();
+            setSellerPanelSource(
+              sourceBtn.getAttribute("data-seller"),
+              sourceBtn.getAttribute("data-seller-source"),
             );
           }
           var openBtn = e.target.closest("[data-seller-item-key]");

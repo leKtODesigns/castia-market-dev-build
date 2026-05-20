@@ -426,7 +426,8 @@ function openCompare() {
     const grid = items
       .map((r) => {
         const ar = adaptiveRange(r),
-          inFav = isFav(r.rawKey);
+          key = r.displayKey || r.rawKey,
+          inFav = isFav(key);
         // Image + notes block (same logic as panelMetaHTML but compact)
         const note = getCardNoteForRow(r);
         const imgPaths = dataSaver ? [] : imagePathsForRow(r);
@@ -453,11 +454,11 @@ function openCompare() {
         return `<div class="cmp-item">
         <div class="cmp-item-head">
           <div class="cmp-head-main">
-            <div class="cmp-item-name" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
-            <div class="cmp-badge-row">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}</div>
+            <div class="cmp-item-name" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}${sourceBadgeH(r)}</span></div>
+            <div class="cmp-badge-row">${catBadge(r.category)}${r.tier ? tierBadge(r.tier) : ""}${sourceBadgeH(r)}</div>
           </div>
           <div class="cmp-item-actions">
-            <button type="button" class="fstar ${inFav ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${inFav ? "Remove from favorites" : "Add to favorites"}" aria-label="${inFav ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${inFav ? "true" : "false"}">★</button>
+            <button type="button" class="fstar ${inFav ? "on" : ""}" data-act="fav" data-key="${esc(key)}" title="${inFav ? "Remove from favorites" : "Add to favorites"}" aria-label="${inFav ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${inFav ? "true" : "false"}">★</button>
           </div>
         </div>
         ${metaHTML}
@@ -473,8 +474,8 @@ function openCompare() {
         <div class="cmp-row"><span class="rl">Samples</span><span class="cmp-mono">${r.samples?.toLocaleString() || "—"}</span></div>
         <div class="cmp-row"><span class="rl">Last seen</span><span class="cmp-mono">${fmtT(r.last_seen)}</span></div>
         <div class="cmp-footer">
-          <button type="button" class="hbtn" data-act="cmp-open" data-key="${esc(r.rawKey)}" aria-label="Open details">Open detail</button>
-          <button type="button" class="hbtn" data-act="cmp-remove" data-key="${esc(r.rawKey)}" aria-label="Remove from compare">Remove</button>
+          <button type="button" class="hbtn" data-act="cmp-open" data-key="${esc(key)}" aria-label="Open details">Open detail</button>
+          <button type="button" class="hbtn" data-act="cmp-remove" data-key="${esc(key)}" aria-label="Remove from compare">Remove</button>
         </div>
       </div>`;
       })
@@ -668,6 +669,11 @@ if (panel) {
     if (act.dataset.act === "panel-include-flagged") {
       e.preventDefault();
       setPanelIncludeFlagged(!panelIncludeFlagged);
+      return;
+    }
+    if (act.dataset.act === "panel-source") {
+      e.preventDefault();
+      setPanelSource(act.dataset.source);
       return;
     }
     if (act.dataset.act === "panel-scroll-top") {
@@ -987,7 +993,7 @@ if (tbody) {
     if (_isTouchPrimary()) return;
     const tr = e.target.closest("tr[data-key]");
     if (!tr) return;
-    const r = enriched.find((x) => x.rawKey === tr.dataset.key);
+    const r = findDisplayRowByKey(tr.dataset.key);
     if (!r) return;
     showRowTip(e, r);
   });
@@ -1013,7 +1019,7 @@ if (cgrid) {
     if (!card) return;
     // Don't show if hovering action buttons
     if (e.target.closest(".pcard-act")) return;
-    const r = enriched.find((x) => x.rawKey === card.dataset.key);
+    const r = findDisplayRowByKey(card.dataset.key);
     if (!r) return;
     showRowTip(e, r);
   });

@@ -453,7 +453,7 @@ function updateStats() {
         : "";
   }
   const sMaxCard = $("sMaxCard");
-  if (sMaxCard) sMaxCard.dataset.key = maxR.rawKey || "";
+  if (sMaxCard) sMaxCard.dataset.key = maxR.displayKey || maxR.rawKey || "";
 
   popStat("sAvg", fmt(avg));
 
@@ -483,7 +483,7 @@ function applyFilters() {
 
   filtered = enriched.filter((r) => {
     if (q && !(r._search || "").includes(q)) return false;
-    if (favOnly && !isFav(r.rawKey)) return false;
+    if (favOnly && !isFav(r.displayKey || r.rawKey)) return false;
     if (cat && r.category !== cat) return false;
     if (conf && r.confidence !== conf) return false;
     if (tier !== "") {
@@ -1165,18 +1165,19 @@ function renderTbl(rows) {
   tbody.classList.remove("rows-animating");
   tbody.innerHTML = rows
       .map((r, i) => {
-        const isActive = r.rawKey === activeKey,
+        const key = r.displayKey || r.rawKey;
+        const isActive = key === activeKey,
             ar = adaptiveRange(r);
-        const inCmp = compareKeys.includes(r.rawKey);
-        const favOn = isFav(r.rawKey);
+        const inCmp = compareKeys.includes(key);
+        const favOn = isFav(key);
         const actions = `<span class="row-actions">
-        <button type="button" class="fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
-        <button type="button" class="cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
+        <button type="button" class="fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(key)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
+        <button type="button" class="cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(key)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
       </span>`;
         const hasHistory = hasMarketHistory(r);
-        return `<tr data-key="${esc(r.rawKey)}" class="${isActive ? "active-row" : ""} ${r.catalogOnly ? "catalog-only-row" : ""}">
-        <td class="item-col"><span class="iname-wrap" title="${esc(r.rawKey)}">${actions}<span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></td>
-        <td class="hsm hpanel">${catBadge(r.category)}${r.tier ? "&nbsp;" + tierBadge(r.tier) : ""}</td>
+        return `<tr data-key="${esc(key)}" class="${isActive ? "active-row" : ""} ${r.catalogOnly ? "catalog-only-row" : ""}">
+        <td class="item-col"><span class="iname-wrap" title="${esc(r.rawKey)}">${actions}<span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}${sourceBadgeH(r)}</span></td>
+        <td class="hsm hpanel">${catBadge(r.category)}${r.tier ? "&nbsp;" + tierBadge(r.tier) : ""}${sourceBadgeH(r)}</td>
         <td><div class="price-main">${hasHistory ? fmt(r.median) : "No market history yet"}</div><div class="price-range hmd">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "No history yet"}</div></td>
         <td class="hmd hpanel"><span class="price-range">${hasHistory ? `${fmt(ar.low)} — ${fmt(ar.high)}` : "—"}</span></td>
         <td class="hsm hpanel"><span class="conf-b ${confCls(r.confidence)}">■ ${r.confidence || "—"}</span></td>
@@ -1233,10 +1234,11 @@ function renderCards(rows) {
   cgrid.classList.remove("cards-animating");
   cgrid.innerHTML = rows
       .map((r) => {
-        const isActive = r.rawKey === activeKey,
+        const key = r.displayKey || r.rawKey;
+        const isActive = key === activeKey,
             ar = adaptiveRange(r);
-        const inCmp = compareKeys.includes(r.rawKey);
-        const favOn = isFav(r.rawKey);
+        const inCmp = compareKeys.includes(key);
+        const favOn = isFav(key);
         const imgPaths = imagePathsForRow(r);
         const isMisc = r.category === "misc";
         const showImg = !dataSaver && (imgPaths.length || isMisc);
@@ -1245,12 +1247,12 @@ function renderCards(rows) {
             : "";
         const a11yLabel = `Open details for ${r.displayName || r.rawKey || "item"}`;
         const hasHistory = hasMarketHistory(r);
-        return `<div class="pcard ${!showImg ? "pcard-no-img" : ""} ${r.catalogOnly ? "pcard-catalog-only" : ""} ${isActive ? "active-card" : ""}" data-key="${esc(r.rawKey)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
+        return `<div class="pcard ${!showImg ? "pcard-no-img" : ""} ${r.catalogOnly ? "pcard-catalog-only" : ""} ${isActive ? "active-card" : ""}" data-key="${esc(key)}" role="button" tabindex="0" aria-label="${esc(a11yLabel)}">
         ${imgHTML}
-        <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(r.rawKey)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
-        <button type="button" class="pcard-act pcard-cmp cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(r.rawKey)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
+        <button type="button" class="pcard-act pcard-fav fstar ${favOn ? "on" : ""}" data-act="fav" data-key="${esc(key)}" title="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-label="${favOn ? "Remove from favorites" : "Add to favorites"}" aria-pressed="${favOn ? "true" : "false"}">★</button>
+        <button type="button" class="pcard-act pcard-cmp cmp-star ${inCmp ? "on" : ""}" data-act="cmp" data-key="${esc(key)}" title="${inCmp ? "Remove from compare" : "Add to compare"}" aria-label="${inCmp ? "Remove from compare" : "Add to compare"}" aria-pressed="${inCmp ? "true" : "false"}">⇄</button>
         <div class="ccard-head">
-          <div class="ckey" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}</span></div>
+          <div class="ckey" title="${esc(r.rawKey)}"><span class="iname-wrap"><span class="iname-txt">${formatItemNameH(r.displayName)}</span>${skillTagH(r.skillTag)}${sourceBadgeH(r)}</span></div>
         </div>
         ${cardExtraH(r)}
         <div class="cprice">${hasHistory ? fmt(r.median) : "No market history yet"}</div>
@@ -1272,6 +1274,11 @@ function renderCards(rows) {
         600,
     );
   });
+}
+
+function sourceBadgeH(row) {
+  if (marketSource !== "both" || !row || row.catalogOnly || !row.source) return "";
+  return `<span class="source-row-badge source-${esc(row.source)}">${esc(sourceShort(row.source))}</span>`;
 }
 
 /**

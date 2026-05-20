@@ -633,6 +633,16 @@ td {
     border-color: rgba(255, 255, 255, 0.14);
   }
 }
+
+@media (pointer: coarse), (max-width: 640px) {
+  .pcard::before {
+    display: none;
+  }
+
+  .pcard::after {
+    opacity: 0.55;
+  }
+}
 .pcard.active-card {
   border-color: rgba(237, 184, 74, 0.45);
   background:
@@ -1524,6 +1534,36 @@ td {
   z-index: var(--z-dropdown);
   left: 0;
   right: auto;
+}
+
+.source-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0.25rem 0 0.75rem;
+  padding: 0.24rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.source-tab {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text3);
+  padding: 0.38rem 0.72rem;
+  font: 700 0.7rem/1 var(--mono);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.source-tab.on {
+  color: var(--gold);
+  border-color: rgba(237, 184, 74, 0.38);
+  background: rgba(237, 184, 74, 0.1);
 }
 .pctrl .pcl {
   font-size: 10px;

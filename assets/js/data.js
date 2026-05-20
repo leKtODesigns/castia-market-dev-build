@@ -47,7 +47,11 @@ function titleCase(str) {
 
 function isBadSeller(seller) {
   if (!seller) return false;
-  const sd = allSellers[String(seller).toLowerCase()];
+  const sourceMap =
+    marketSource === "both"
+      ? sellerSources[panelSource] || {}
+      : allSellers;
+  const sd = sourceMap[String(seller).toLowerCase()];
   return !!(sd && sd.is_blacklisted);
 }
 
@@ -106,7 +110,11 @@ function trendFromListings(listings) {
 }
 
 function sellerRatingInfo(seller) {
-  const sd = allSellers[String(seller || "").toLowerCase()];
+  const sourceMap =
+    marketSource === "both"
+      ? sellerSources[panelSource] || {}
+      : allSellers;
+  const sd = sourceMap[String(seller || "").toLowerCase()];
   const isFlagged = !!(sd && sd.is_blacklisted);
   const label = isFlagged ? "Flagged" : sd?.accuracy_label || "Neutral";
   return {
@@ -357,16 +365,20 @@ function normalizeBackendCategory(category) {
   return map[raw] || null;
 }
 
+function resolveCategory(parsed, backendCategory) {
+  if (parsed.category === "runestone" && backendCategory === "set-gear")
+    return "runestone";
+  if (backendCategory && backendCategory !== "misc") return backendCategory;
+  return parsed.category && parsed.category !== "misc"
+    ? parsed.category
+    : backendCategory || parsed.category;
+}
+
 function enrich(rows) {
   return (rows || []).map((r) => {
     const parsed = parseKey(r.key);
     const backendCategory = normalizeBackendCategory(r.category);
-    // Known runestones are exact-name matches and should not inherit stale
-    // backend Set Gear labels from prefix collisions such as "Lunar Lure".
-    const category =
-      parsed.category === "runestone" && backendCategory === "set-gear"
-        ? "runestone"
-        : backendCategory || parsed.category;
+    const category = resolveCategory(parsed, backendCategory);
     const workerVariantSlug = String(r.variant_key || r.variantKey || "")
       .trim()
       .toLowerCase();
@@ -379,6 +391,8 @@ function enrich(rows) {
       enchantments: parseEnchantments(r.enchantments),
       ...parsed,
       category,
+      source: r.source || "auction_house",
+      displayKey: sourceDisplayKey(r.source || "auction_house", parsed.rawKey),
       setName: category === "set-gear" ? parsed.setName : null,
       variantSlug: parsed.variantSlug || workerVariantSlug || null,
       _dn_lc: dnLc,
@@ -409,6 +423,8 @@ function buildSetGearCatalogRows(marketRows) {
       enchantments: null,
       catalogOnly: true,
       ...parsed,
+      displayKey: rawKey,
+      source: null,
       _dn_lc: String(parsed.displayName || "").toLowerCase(),
       _rk_lc: String(rawKey || "").toLowerCase(),
       _search: `${String(parsed.displayName || "").toLowerCase()} ${String(rawKey || "").toLowerCase()}`,
@@ -436,7 +452,16 @@ function rebuildCatalogRows() {
 }
 
 function findDisplayRowByKey(key) {
-  return enriched.find((row) => row.rawKey === key) || null;
+  const parsed = splitDisplayKey(key);
+  return (
+    enriched.find((row) => row.displayKey === key) ||
+    enriched.find(
+      (row) =>
+        row.rawKey === parsed.rawKey &&
+        (!parsed.source || row.source === parsed.source),
+    ) ||
+    null
+  );
 }
 
 function hasMarketHistory(row) {
@@ -538,10 +563,10 @@ function parseEnchantments(value) {
   }
 }
 
-function normalizePriceRows(workerPrices) {
+function normalizePriceRows(workerPrices, sourceFallback = marketSource) {
   return Object.entries(workerPrices || {}).map(([key, row]) => ({
     key,
-    source: row?.source || marketSource,
+    source: row?.source || sourceFallback,
     category: row?.category || null,
     variant_key: row?.variantKey || null,
     enchantments: parseEnchantments(row?.enchantments),
@@ -555,10 +580,10 @@ function normalizePriceRows(workerPrices) {
   }));
 }
 
-function normalizeSellerRows(workerSellers) {
+function normalizeSellerRows(workerSellers, sourceFallback = marketSource) {
   return Object.entries(workerSellers || {}).map(([sellerKey, row]) => ({
     seller: row?.sellerName || row?.seller || sellerKey,
-    source: row?.source || marketSource,
+    source: row?.source || sourceFallback,
     total_listings: row?.totalListings ?? 0,
     valid_listings: row?.validListings ?? row?.totalListings ?? 0,
     avg_markup_percent: row?.avgMarkupPercent ?? null,
@@ -715,34 +740,53 @@ async function fetchAll(silent) {
   try {
     prismaticTiersReady = false;
     prismaticTiersPromise = null;
-    const otherSource =
-      marketSource === "chest_shop" ? "auction_house" : "chest_shop";
-    const [priceRes, sellerRes, otherSellerRes] = await Promise.all([
-      workerGet("/prices", { source: marketSource }),
-      workerGet("/sellers", { source: marketSource }).catch(() => ({
-        sellers: {},
-      })),
-      workerGet("/sellers", { source: otherSource }).catch(() => ({
-        sellers: {},
-      })),
+    const sources = sourceListForMode();
+    const [priceResults, sellerResults] = await Promise.all([
+      Promise.all(
+        sources.map((source) =>
+          workerGet("/prices", { source })
+            .then((res) => ({ source, res }))
+            .catch((error) => {
+              if (marketSource === "both") {
+                console.warn(`[fetchAll] ${source} prices failed:`, error.message);
+                return { source, res: { prices: {} } };
+              }
+              throw error;
+            }),
+        ),
+      ),
+      Promise.all(
+        ["auction_house", "chest_shop"].map((source) =>
+          workerGet("/sellers", { source })
+            .then((res) => ({ source, res }))
+            .catch(() => ({ source, res: { sellers: {} } })),
+        ),
+      ),
     ]);
-    const priceRows = normalizePriceRows(priceRes?.prices);
-    const sellerRows = normalizeSellerRows(sellerRes?.sellers);
-    const otherSellerRows = normalizeSellerRows(otherSellerRes?.sellers).map(
-      (s) => ({ ...s, source: otherSource }),
+    const priceRows = priceResults.flatMap(({ source, res }) =>
+      normalizePriceRows(res?.prices, source).map((row) => ({
+        ...row,
+        source,
+      })),
     );
     allPrices = priceRows;
     rebuildCatalogRows();
     const cacheApplied = applyPrismaticTierCache();
     maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
     sellerSources = { auction_house: {}, chest_shop: {} };
-    for (const s of sellerRows) {
-      if (s.seller) sellerSources[marketSource][s.seller.toLowerCase()] = s;
+    for (const { source, res } of sellerResults) {
+      const rows = normalizeSellerRows(res?.sellers, source).map((s) => ({
+        ...s,
+        source,
+      }));
+      for (const s of rows) {
+        if (s.seller) sellerSources[source][s.seller.toLowerCase()] = s;
+      }
     }
-    for (const s of otherSellerRows) {
-      if (s.seller) sellerSources[otherSource][s.seller.toLowerCase()] = s;
-    }
-    allSellers = sellerSources[marketSource] || {};
+    allSellers =
+      marketSource === "both"
+        ? mergeSellerSources()
+        : sellerSources[marketSource] || {};
     lastLoaded = new Date();
     updateSourceToggleUI();
 
@@ -815,6 +859,26 @@ async function fetchAll(silent) {
 
     if (window.onMarketDataLoaded) window.onMarketDataLoaded();
   }
+}
+
+function mergeSellerSources() {
+  const merged = {};
+  for (const source of ["auction_house", "chest_shop"]) {
+    Object.entries(sellerSources[source] || {}).forEach(([key, row]) => {
+      const existing = merged[key] || {};
+      merged[key] = {
+        ...existing,
+        ...row,
+        seller: existing.seller || row.seller,
+        source: "both",
+        total_listings:
+          (existing.total_listings || 0) + (row.total_listings || 0),
+        valid_listings:
+          (existing.valid_listings || 0) + (row.valid_listings || 0),
+      };
+    });
+  }
+  return merged;
 }
 /**
  * Manually refreshes all market data from the Castia Worker and updates application state
@@ -932,11 +996,17 @@ async function buildPrismaticTiers(opts = {}) {
  * @returns {Promise<Array>} Promise resolving to array of listing objects
  */
 async function fetchListings(itemKey) {
-  const tierMatch = itemKey.match(/\|t([123])$/i);
+  const display = splitDisplayKey(itemKey);
+  const source =
+    marketSource === "both"
+      ? normalizeConcreteSource(display.source || panelSource)
+      : normalizeConcreteSource(marketSource);
+  const rawItemKey = display.rawKey;
+  const tierMatch = rawItemKey.match(/\|t([123])$/i);
   const tier = tierMatch ? parseInt(tierMatch[1]) : null;
-  const baseName = itemKey.replace(/\|t[123]$/i, "").trim();
+  const baseName = rawItemKey.replace(/\|t[123]$/i, "").trim();
   try {
-    if (marketSource === "chest_shop") {
+    if (source === "chest_shop") {
       const res = await workerGet("/chest-shops", {
         item: baseName,
         limit: 100,

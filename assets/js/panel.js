@@ -120,6 +120,10 @@ async function openPanel(key) {
     closePanel();
     return;
   }
+  panelSource =
+    marketSource === "both"
+      ? normalizeConcreteSource(item.source || splitDisplayKey(key).source)
+      : normalizeConcreteSource(marketSource);
   panel.classList.add("open");
   panelBackdrop?.classList.add("on");
   if (!wasOpen) setPanelShellOpen(true);
@@ -143,6 +147,7 @@ async function openPanel(key) {
     const badgeLine = `
       ${item.category ? catBadge(item.category) : ""}
       ${item.setName ? `<div class="mpill"><span class="mplabel">Set</span> ${esc(item.setName)}</div>` : ""}
+      ${sourceBadgeH(item)}
     `;
     $("panel-title").innerHTML = `
       <div class="panel-title__line">${titleInner}</div>
@@ -182,6 +187,58 @@ async function openPanel(key) {
   renderPanelFromCtx({ partial: false });
 }
 
+async function setPanelSource(source) {
+  if (!panelCtx || marketSource !== "both") return;
+  const next = normalizeConcreteSource(source, panelSource);
+  if (panelSource === next) return;
+  panelSource = next;
+  const rawKey = panelCtx.item.rawKey;
+  const nextKey = sourceDisplayKey(next, rawKey);
+  const nextItem =
+    findDisplayRowByKey(nextKey) || {
+      ...panelCtx.item,
+      source: next,
+      displayKey: nextKey,
+      catalogOnly: true,
+      samples: 0,
+      median: 0,
+      iqr_low: 0,
+      iqr_high: 0,
+    };
+  activeKey = nextKey;
+  setHashItemKey(nextKey);
+  markActiveSelection();
+  const body = $("panel-body");
+  if (body) body.innerHTML = panelSkeleton();
+  const listingsRaw = hasMarketHistory(nextItem) ? await fetchListings(nextKey) : [];
+  if (activeKey !== nextKey) return;
+  const listingsClean = listingsRaw.filter((l) => !isBadSeller(l.seller));
+  const removed = listingsRaw.length - listingsClean.length;
+  const st = statsFromListings(listingsClean);
+  panelCtx = {
+    key: nextKey,
+    item: nextItem,
+    listingsRaw,
+    listingsClean,
+    removed,
+    samplesFromListings: st.n || 0,
+  };
+  $("panel-title").innerHTML = `
+    <div class="panel-title__line">
+      <span class="panel-title__inner">
+        <span class="iname-txt">${formatItemNameH(nextItem.displayName)}</span>${skillTagH(nextItem.skillTag)}
+      </span>
+    </div>
+    <div class="panel-title__line">
+      ${nextItem.category ? catBadge(nextItem.category) : ""}
+      ${nextItem.setName ? `<div class="mpill"><span class="mplabel">Set</span> ${esc(nextItem.setName)}</div>` : ""}
+      ${sourceBadgeH(nextItem)}
+    </div>
+  `;
+  panelMeta.innerHTML = panelMetaHTML(nextItem);
+  renderPanelFromCtx({ partial: false });
+}
+
 function closePanel() {
   if (!panel) return;
   panel.classList.remove("open");
@@ -218,7 +275,7 @@ function sellerBadgeHTML(label, text) {
 
 function buildPanelListingsHTML(pd, listings) {
   if (!listings.length)
-    return `<div class="no-listings">No ${sourceLabel().toLowerCase()} listings found</div>`;
+    return `<div class="no-listings">No ${sourceLabel(panelSource).toLowerCase()} listings found</div>`;
   let html = "";
   for (const l of listings) {
     const info = sellerRatingInfo(l.seller);
@@ -465,13 +522,24 @@ function buildPanelHTML(item, listings, meta = {}) {
   </div>`;
 
   html += `<div class="meta-pills">
-    <button type="button" class="mpill mpill-btn ${isFav(pd.rawKey) ? "on" : ""}" data-act="fav" data-key="${esc(pd.rawKey)}" title="Toggle favorite" aria-label="Toggle favorite" aria-pressed="${isFav(pd.rawKey) ? "true" : "false"}" id="panelFavBtn">★ Favorite</button>
-    <button type="button" class="mpill mpill-btn ${compareKeys.includes(pd.rawKey) ? "on" : ""}" data-act="cmp" data-key="${esc(pd.rawKey)}" title="Toggle compare" aria-label="Toggle compare" aria-pressed="${compareKeys.includes(pd.rawKey) ? "true" : "false"}" id="panelCmpBtn">⇄ Compare</button>
+    <button type="button" class="mpill mpill-btn ${isFav(pd.displayKey || pd.rawKey) ? "on" : ""}" data-act="fav" data-key="${esc(pd.displayKey || pd.rawKey)}" title="Toggle favorite" aria-label="Toggle favorite" aria-pressed="${isFav(pd.displayKey || pd.rawKey) ? "true" : "false"}" id="panelFavBtn">★ Favorite</button>
+    <button type="button" class="mpill mpill-btn ${compareKeys.includes(pd.displayKey || pd.rawKey) ? "on" : ""}" data-act="cmp" data-key="${esc(pd.displayKey || pd.rawKey)}" title="Toggle compare" aria-label="Toggle compare" aria-pressed="${compareKeys.includes(pd.displayKey || pd.rawKey) ? "true" : "false"}" id="panelCmpBtn">⇄ Compare</button>
   </div>`;
 
   if (!hasHistory) return html;
 
-  html += `<div class="psec"><div class="psec-title">${sourceLabel()} Listings</div>`;
+  const sourceTabs =
+    marketSource === "both"
+      ? `<div class="source-tabs" role="tablist" aria-label="Listing source">
+          ${["auction_house", "chest_shop"]
+            .map(
+              (source) =>
+                `<button type="button" class="source-tab ${panelSource === source ? "on" : ""}" data-act="panel-source" data-source="${source}" role="tab" aria-selected="${panelSource === source ? "true" : "false"}">${sourceLabel(source)}</button>`,
+            )
+            .join("")}
+        </div>`
+      : "";
+  html += `<div class="psec"><div class="psec-title">${sourceLabel(panelSource)} Listings</div>${sourceTabs}`;
   html += `<div class="pctrl">
     <span class="pcl">Sort</span>
     <div class="cselect" id="panelSortSel">

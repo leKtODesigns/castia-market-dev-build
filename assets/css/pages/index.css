@@ -192,7 +192,7 @@
       margin-bottom: 2rem;
       padding: 0 1rem;
       position: relative;
-      z-index: var(--z-raised);
+      z-index: var(--z-dropdown);
     }
     .listings-toolbar__top {
       display: flex;
@@ -352,6 +352,8 @@
     }
 
     #cvw {
+      position: relative;
+      z-index: var(--z-base);
       border: 0;
       border-radius: 0;
       background: transparent;
@@ -898,6 +900,7 @@
       }
       .listings-toolbar {
         padding: 0 0.75rem;
+        z-index: var(--z-modal);
       }
       .listings-toolbar__filters {
         display: grid;

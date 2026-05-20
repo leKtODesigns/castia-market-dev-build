@@ -17,3 +17,5 @@ PROJECT-ANALYSIS.md
 .codex-safety
 .worker-sync
 .deploy-castia-market
+assets/asset-source-overrides.json
+scripts/

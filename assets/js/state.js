@@ -40,8 +40,10 @@ let panelCtx = null;
 let panelSort = "newest";
 /** @type {boolean} Whether to include flagged/blacklisted seller listings in the panel */
 let panelIncludeFlagged = false;
-/** @type {"auction_house"|"chest_shop"} Active market data source */
+/** @type {"auction_house"|"chest_shop"|"both"} Active market data source */
 let marketSource = "auction_house";
+/** @type {"auction_house"|"chest_shop"} Active source tab inside detail/seller panels */
+let panelSource = "auction_house";
 /** @type {boolean} Whether favorites-only filter is active */
 let favOnly = false;
 /** @type {boolean} Whether data saver mode is active (hides item images) */
@@ -163,7 +165,11 @@ function applyLoadedUIState() {
   } else if (sc === "last_seen") {
     lastSeenDir = sd;
   }
-  if (st.marketSource === "chest_shop" || st.marketSource === "auction_house") {
+  if (
+    st.marketSource === "chest_shop" ||
+    st.marketSource === "auction_house" ||
+    st.marketSource === "both"
+  ) {
     marketSource = st.marketSource;
   }
   favOnly = !!st.favOnly;
@@ -251,13 +257,45 @@ function initApp() {
 }
 
 function sourceLabel(source = marketSource) {
+  if (source === "both") return "Both";
   return source === "chest_shop" ? "Chest Shops" : "Auction House";
 }
 
+function sourceShort(source = marketSource) {
+  return source === "chest_shop" ? "Shop" : source === "both" ? "Both" : "AH";
+}
+
+function sourceListForMode(source = marketSource) {
+  return source === "both" ? ["auction_house", "chest_shop"] : [source];
+}
+
+function normalizeMarketSource(source, fallback = "auction_house") {
+  if (source === "chest_shop" || source === "both" || source === "auction_house")
+    return source;
+  return fallback;
+}
+
+function normalizeConcreteSource(source, fallback = "auction_house") {
+  return source === "chest_shop" ? "chest_shop" : fallback;
+}
+
+function sourceDisplayKey(source, rawKey) {
+  const key = String(rawKey || "");
+  if (!key) return "";
+  return marketSource === "both" && source ? `${source}::${key}` : key;
+}
+
+function splitDisplayKey(key) {
+  const raw = String(key || "");
+  const m = raw.match(/^(auction_house|chest_shop)::(.+)$/);
+  return m ? { source: m[1], rawKey: m[2] } : { source: null, rawKey: raw };
+}
+
 function setMarketSource(source, opts = {}) {
-  const next = source === "chest_shop" ? "chest_shop" : "auction_house";
+  const next = normalizeMarketSource(source);
   if (marketSource === next && !opts.force) return;
   marketSource = next;
+  panelSource = next === "chest_shop" ? "chest_shop" : "auction_house";
   pg = 1;
   activeKey = null;
   panelCtx = null;
