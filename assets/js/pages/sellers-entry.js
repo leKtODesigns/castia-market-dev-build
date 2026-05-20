@@ -13,6 +13,8 @@
       if (action === "toggle-mobile-menu") return window.toggleMobMenu?.();
       if (action === "close-mobile-menu") return window.closeMobMenu?.();
       if (action === "manual-refresh") return window.manualRefresh?.();
+      if (action === "set-market-source")
+        return window.setMarketSource?.(target.getAttribute("data-market-source"));
       if (action === "close-seller-panel") return window.closeSellerPanel?.();
       if (action === "set-seller-filter")
         return window.setSf?.(target.getAttribute("data-filter"));

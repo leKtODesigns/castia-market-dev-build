@@ -179,9 +179,37 @@
       };
 
       function trustBadgeH(label, text) {
+        var display = text || label || "Neutral";
+        var key =
+          String(label || "Neutral").toLowerCase() === "blacklisted"
+            ? "Blacklisted"
+            : label || "Neutral";
         var cls = String(label || "Neutral").toLowerCase();
-        var tip = TRUST_EXPLANATIONS[label] || TRUST_EXPLANATIONS.Neutral;
-        return `<span class="lr-seller-badge ${esc(cls)}" title="${esc(tip)}" aria-label="${esc(`${text || label || "Neutral"}: ${tip}`)}">${trustIconH(label)}<span>${esc(text || label || "Neutral")}</span></span>`;
+        var tip = TRUST_EXPLANATIONS[key] || TRUST_EXPLANATIONS.Neutral;
+        return `<span class="lr-seller-badge ${esc(cls)}" title="${esc(tip)}" aria-label="${esc(`${display}: ${tip}`)}">${trustIconH(key)}<span>${esc(display)}</span></span>`;
+      }
+
+      function sellerSourceShort(source) {
+        return source === "chest_shop" ? "Shop" : "AH";
+      }
+
+      function otherMarketSource() {
+        return marketSource === "chest_shop" ? "auction_house" : "chest_shop";
+      }
+
+      function sellerBySource(source, name) {
+        return sellerSources?.[source]?.[String(name || "").toLowerCase()] || null;
+      }
+
+      function sellerLabel(sd) {
+        if (!sd) return "Neutral";
+        return sd.is_blacklisted ? "Flagged" : sd.accuracy_label || "Neutral";
+      }
+
+      function sourceSummaryBadge(source, sd) {
+        if (!sd) return "";
+        var label = sellerLabel(sd);
+        return `<span class="source-summary-badge ${esc(label.toLowerCase())}" title="${esc(sourceLabel(source))}: ${esc(label)}">${esc(sellerSourceShort(source))}: ${esc(label)}</span>`;
       }
 
       function barCls(pct) {
@@ -218,6 +246,9 @@
         var blackBadge = sd.is_blacklisted
           ? trustBadgeH("blacklisted", "Blacklisted")
           : "";
+        var other = sellerBySource(otherMarketSource(), name);
+        var sourceBadge = sourceSummaryBadge(marketSource, sd);
+        var otherBadge = sourceSummaryBadge(otherMarketSource(), other);
         var pctVal = pct != null ? pct.toFixed(1) + "%" : "—";
         var mrkVal =
           markup != null
@@ -234,7 +265,7 @@
             </div>
             <div class="scard__info">
               <div class="scard__name" title="${esc(name)}">${esc(name)}</div>
-              <div class="scard__badges">${badge}${blackBadge}</div>
+              <div class="scard__badges">${badge}${blackBadge}${sourceBadge}${otherBadge}</div>
             </div>
             <svg class="scard__chevron" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="5,3 9,7 5,11"/></svg>
           </div>
@@ -270,9 +301,7 @@
         // Get seller data
         const sellerData = allSellers?.[sellerName.toLowerCase()];
         const name = sellerData?.seller || sellerName;
-        const label = sellerData?.is_blacklisted
-          ? "Flagged"
-          : sellerData?.accuracy_label || "Neutral";
+        const label = sellerLabel(sellerData);
 
         // Update header elements
         title.textContent = name;
@@ -287,7 +316,12 @@
         const blackBadge = sellerData?.is_blacklisted
           ? trustBadgeH("blacklisted", "Blacklisted")
           : "";
-        badgesEl.innerHTML = badge + blackBadge;
+        const otherData = sellerBySource(otherMarketSource(), name);
+        badgesEl.innerHTML =
+          badge +
+          blackBadge +
+          sourceSummaryBadge(marketSource, sellerData) +
+          sourceSummaryBadge(otherMarketSource(), otherData);
 
         panel.classList.add("open");
         backdropEl.classList.add("on");
@@ -314,15 +348,25 @@
 
         body.innerHTML = `<div class="panel-skel"><div class="pskel-block"></div><div class="pskel-line pskel-line--md"></div><div class="pskel-line pskel-line--lg"></div></div>`;
         try {
-          if (_drawerCache[sellerName]) {
-            renderSellerPanelListings(sellerName, _drawerCache[sellerName]);
+          const cacheKey = `${marketSource}::${sellerName.toLowerCase()}`;
+          if (_drawerCache[cacheKey]) {
+            renderSellerPanelListings(sellerName, _drawerCache[cacheKey]);
           } else {
-            const res = await workerGet("/seller-auctions", {
-              seller: sellerName,
-              limit: 100,
-            });
-            const rows = normalizeAuctionRows(res?.auctions);
-            _drawerCache[sellerName] = rows;
+            const res =
+              marketSource === "chest_shop"
+                ? await workerGet("/chest-shops", {
+                    seller: sellerName,
+                    limit: 100,
+                  })
+                : await workerGet("/seller-auctions", {
+                    seller: sellerName,
+                    limit: 100,
+                  });
+            const rows =
+              marketSource === "chest_shop"
+                ? normalizeChestShopRows(res?.shops)
+                : normalizeAuctionRows(res?.auctions);
+            _drawerCache[cacheKey] = rows;
             renderSellerPanelListings(sellerName, rows);
           }
         } catch (e) {
@@ -357,6 +401,10 @@
             : `<span class="sl-price-tag fair">Fair</span>`;
         var countEl = `<span class="sl-item-count">${r.raw.count > 1 ? `×${r.raw.count}` : "—"}</span>`;
         var date = r.raw.timestamp ? fmtT(r.raw.timestamp) : "";
+        var locationEl =
+          r.raw.source === "chest_shop" && r.raw.dimension_key
+            ? `<span class="sl-location" title="${esc(`${r.raw.dimension_key} ${r.raw.x ?? "?"}, ${r.raw.y ?? "?"}, ${r.raw.z ?? "?"}`)}">${esc(String(r.raw.dimension_key).replace(/^minecraft:/, ""))}</span>`
+            : "";
         var actionEl = r.match
           ? `<button type="button" class="sl-open-btn" data-seller-item-key="${esc(r.match.rawKey)}">View item</button>`
           : `<span class="sl-open-missing">No detail</span>`;
@@ -367,6 +415,7 @@
           ${tagEl}
           <span class="sl-median" title="Current market median">Median ${medianStr}</span>
           <span class="sl-date">${esc(date)}</span>
+          ${locationEl}
           ${actionEl}
         </div>`;
       }
@@ -379,7 +428,8 @@
           return;
         }
 
-        var sort = _drawerSort[sellerName] || "deals";
+        var sourceKey = `${marketSource}::${sellerName.toLowerCase()}`;
+        var sort = _drawerSort[sourceKey] || "deals";
         var enrichedRows = rows.map(function (l) {
           var name = String(l.item_name || "")
             .trim()
@@ -440,8 +490,8 @@
           enrichedRows.sort((a, b) => b.ts - a.ts);
         }
 
-        var sortActive = _drawerSort[sellerName] || "deals";
-        var sortBar = `<div class="scard__drawer-hdr">Listings
+        var sortActive = _drawerSort[sourceKey] || "deals";
+        var sortBar = `<div class="scard__drawer-hdr">${esc(sourceLabel())} Listings
           <div class="scard__drawer-sort">
             <button class="dsort-btn ${sortActive === "deals" ? "on" : ""}" data-sort="deals" data-seller="${esc(sellerName)}">Best Deals</button>
             <button class="dsort-btn ${sortActive === "price_asc" || sortActive === "price_desc" ? "on" : ""}" data-sort="price_toggle" data-seller="${esc(sellerName)}" data-current="${sortActive}">Price ${sortActive === "price_desc" ? "↓" : "↑"}</button>
@@ -459,8 +509,9 @@
       }
 
       function setDrawerSort(sellerName, sort) {
+        var sourceKey = `${marketSource}::${sellerName.toLowerCase()}`;
         if (sort === "price_toggle") {
-          var currentSort = _drawerSort[sellerName] || "deals";
+          var currentSort = _drawerSort[sourceKey] || "deals";
           if (currentSort === "price_asc") {
             sort = "price_desc";
           } else if (currentSort === "price_desc") {
@@ -469,9 +520,9 @@
             sort = "price_asc";
           }
         }
-        _drawerSort[sellerName] = sort;
-        if (_drawerCache[sellerName])
-          renderSellerPanelListings(sellerName, _drawerCache[sellerName]);
+        _drawerSort[sourceKey] = sort;
+        if (_drawerCache[sourceKey])
+          renderSellerPanelListings(sellerName, _drawerCache[sourceKey]);
       }
 
       function renderSellers() {

@@ -301,6 +301,26 @@
     </div>
 
     <div class="listings-toolbar">
+      <div class="market-source-toggle" role="group" aria-label="Market source">
+        <button
+          type="button"
+          class="source-btn on"
+          data-action="set-market-source"
+          data-market-source="auction_house"
+          aria-pressed="true"
+        >
+          Auction House
+        </button>
+        <button
+          type="button"
+          class="source-btn"
+          data-action="set-market-source"
+          data-market-source="chest_shop"
+          aria-pressed="false"
+        >
+          Chest Shops
+        </button>
+      </div>
 
       <!-- Row 1: Search + filters -->
       <div class="listings-toolbar__top">

@@ -541,6 +541,7 @@ function parseEnchantments(value) {
 function normalizePriceRows(workerPrices) {
   return Object.entries(workerPrices || {}).map(([key, row]) => ({
     key,
+    source: row?.source || marketSource,
     category: row?.category || null,
     variant_key: row?.variantKey || null,
     enchantments: parseEnchantments(row?.enchantments),
@@ -557,8 +558,9 @@ function normalizePriceRows(workerPrices) {
 function normalizeSellerRows(workerSellers) {
   return Object.entries(workerSellers || {}).map(([sellerKey, row]) => ({
     seller: row?.sellerName || row?.seller || sellerKey,
+    source: row?.source || marketSource,
     total_listings: row?.totalListings ?? 0,
-    valid_listings: row?.totalListings ?? 0,
+    valid_listings: row?.validListings ?? row?.totalListings ?? 0,
     avg_markup_percent: row?.avgMarkupPercent ?? null,
     overpriced_ratio: row?.overpricedRatio ?? null,
     accuracy_label: row?.accuracyLabel || "Neutral",
@@ -568,6 +570,7 @@ function normalizeSellerRows(workerSellers) {
 
 function normalizeAuctionRows(workerAuctions) {
   return (workerAuctions || []).map((row) => ({
+    source: row?.source || "auction_house",
     seller: row?.seller || "",
     price: row?.price ?? null,
     count: row?.count ?? 1,
@@ -578,6 +581,27 @@ function normalizeAuctionRows(workerAuctions) {
     variant_key: row?.variantKey || null,
     enchantments: parseEnchantments(row?.enchantments),
     tier: row?.tier ?? null,
+  }));
+}
+
+function normalizeChestShopRows(workerRows) {
+  return (workerRows || []).map((row) => ({
+    source: "chest_shop",
+    seller: row?.seller || "",
+    price: row?.buyPrice ?? null,
+    count: row?.buyQuantity ?? 1,
+    unit_price: row?.unitPrice ?? null,
+    timestamp: row?.lastSeenAt || row?.updatedAt || null,
+    set_name: row?.setName || null,
+    item_name: row?.itemName || "",
+    variant_key: row?.variantKey || null,
+    enchantments: parseEnchantments(row?.enchantments),
+    tier: row?.tier ?? null,
+    dimension_key: row?.dimensionKey || null,
+    x: row?.x ?? null,
+    y: row?.y ?? null,
+    z: row?.z ?? null,
+    confirmed_at: row?.confirmedAt || null,
   }));
 }
 
@@ -626,6 +650,7 @@ function _idle(fn) {
  * @returns {boolean} True if cache was applied, false otherwise
  */
 function applyPrismaticTierCache() {
+  if (marketSource !== "auction_house") return false;
   // Apply cached Prismatic tier data to enrich base Prismatic items with tier-specific stats
   // Returns false if no cache or no Prismatic base rows found
   const c = _readPrismaticCache();
@@ -690,21 +715,36 @@ async function fetchAll(silent) {
   try {
     prismaticTiersReady = false;
     prismaticTiersPromise = null;
-    const [priceRes, sellerRes] = await Promise.all([
-      workerGet("/prices"),
-      workerGet("/sellers").catch(() => ({ sellers: {} })),
+    const otherSource =
+      marketSource === "chest_shop" ? "auction_house" : "chest_shop";
+    const [priceRes, sellerRes, otherSellerRes] = await Promise.all([
+      workerGet("/prices", { source: marketSource }),
+      workerGet("/sellers", { source: marketSource }).catch(() => ({
+        sellers: {},
+      })),
+      workerGet("/sellers", { source: otherSource }).catch(() => ({
+        sellers: {},
+      })),
     ]);
     const priceRows = normalizePriceRows(priceRes?.prices);
     const sellerRows = normalizeSellerRows(sellerRes?.sellers);
+    const otherSellerRows = normalizeSellerRows(otherSellerRes?.sellers).map(
+      (s) => ({ ...s, source: otherSource }),
+    );
     allPrices = priceRows;
     rebuildCatalogRows();
     const cacheApplied = applyPrismaticTierCache();
     maxSamples = Math.max(1, ...enriched.map((r) => r.samples || 0));
-    allSellers = {};
+    sellerSources = { auction_house: {}, chest_shop: {} };
     for (const s of sellerRows) {
-      if (s.seller) allSellers[s.seller.toLowerCase()] = s;
+      if (s.seller) sellerSources[marketSource][s.seller.toLowerCase()] = s;
     }
+    for (const s of otherSellerRows) {
+      if (s.seller) sellerSources[otherSource][s.seller.toLowerCase()] = s;
+    }
+    allSellers = sellerSources[marketSource] || {};
     lastLoaded = new Date();
+    updateSourceToggleUI();
 
     if (isListingsPage) {
       window.suppressNextStaggerAnim?.();
@@ -723,7 +763,8 @@ async function fetchAll(silent) {
       if (vt) vt.classList.toggle("on", vw === "table");
       if (vc) vc.classList.toggle("on", vw === "card");
 
-      const needsPrismatic = _hasPrismaticBaseRows();
+      const needsPrismatic =
+        marketSource === "auction_house" && _hasPrismaticBaseRows();
       if (!silent && needsPrismatic && !cacheApplied) {
         bootMsg("Loading Prismatic tiers…");
         await ensurePrismaticTiers({ force: true, silentToast: true });
@@ -740,7 +781,10 @@ async function fetchAll(silent) {
         if (targetKey) _idle(() => openPanel(targetKey));
       }
     }
-    setSt("live", enriched.length.toLocaleString() + " items");
+    setSt(
+      "live",
+      `${enriched.length.toLocaleString()} ${marketSource === "chest_shop" ? "shop items" : "items"}`,
+    );
 
     const rlsb = $("rlsb");
     if (rlsb) rlsb.classList.remove("on");
@@ -805,6 +849,7 @@ async function ensurePrismaticTiers(opts = {}) {
  * @returns {Promise<void>}
  */
 async function buildPrismaticTiers(opts = {}) {
+  if (marketSource !== "auction_house") return;
   const base = enriched.filter(
     (r) => r.setName === "Prismatic" && r.tier === 0,
   );
@@ -891,6 +936,15 @@ async function fetchListings(itemKey) {
   const tier = tierMatch ? parseInt(tierMatch[1]) : null;
   const baseName = itemKey.replace(/\|t[123]$/i, "").trim();
   try {
+    if (marketSource === "chest_shop") {
+      const res = await workerGet("/chest-shops", {
+        item: baseName,
+        limit: 100,
+        tier,
+        set: tier ? "Prismatic" : "",
+      });
+      return normalizeChestShopRows(res?.shops);
+    }
     const res = await workerGet("/auctions", {
       item: baseName,
       limit: 25,

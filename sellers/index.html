@@ -242,12 +242,32 @@
           <div class="sellers-hero__label">Directory</div>
           <h1 class="sellers-hero__title">Auction <span>Sellers</span></h1>
           <p class="sellers-hero__sub">
-            Reputation scores based on pricing accuracy.<br>Click any card to see
+            Source-specific reputation scores based on pricing accuracy.<br>Click any card to see
             history.
           </p>
         </div>
 
         <div class="sellers-toolbar">
+          <div class="market-source-toggle" role="group" aria-label="Seller rating source">
+            <button
+              type="button"
+              class="source-btn on"
+              data-action="set-market-source"
+              data-market-source="auction_house"
+              aria-pressed="true"
+            >
+              Auction House
+            </button>
+            <button
+              type="button"
+              class="source-btn"
+              data-action="set-market-source"
+              data-market-source="chest_shop"
+              aria-pressed="false"
+            >
+              Chest Shops
+            </button>
+          </div>
           <div class="sellers-toolbar__search site-search">
             <svg
               width="13"
@@ -299,11 +319,11 @@
             <button class="sf-btn" id="sf-flagged" data-action="set-seller-filter" data-filter="flagged" title="Strongest automatic warning based on current pricing behavior">
               <span class="sf-ico" aria-hidden="true">✕</span><span>Flagged</span>
             </button>
-          </div>
-          <p class="seller-rating-note">
-            Seller labels are automatic current-state signals based on pricing behavior and can change over time.
-            <a href="/castia-market-dev-build/about/">Learn what they mean</a>
-          </p>
+            </div>
+            <p class="seller-rating-note">
+              Seller labels are automatic current-state signals for the selected source and can change over time.
+              <a href="/castia-market-dev-build/about/">Learn what they mean</a>
+            </p>
           <span class="sellers-count" id="sellersCount"></span>
         </div>
 

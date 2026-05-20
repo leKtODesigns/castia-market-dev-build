@@ -218,7 +218,7 @@ function sellerBadgeHTML(label, text) {
 
 function buildPanelListingsHTML(pd, listings) {
   if (!listings.length)
-    return `<div class="no-listings">No recent listings found</div>`;
+    return `<div class="no-listings">No ${sourceLabel().toLowerCase()} listings found</div>`;
   let html = "";
   for (const l of listings) {
     const info = sellerRatingInfo(l.seller);
@@ -232,6 +232,12 @@ function buildPanelListingsHTML(pd, listings) {
     if (pd.iqr_high && l.unit_price > pd.iqr_high * 1.5) priceClass = "over";
     else if (pd.iqr_low && l.unit_price < pd.iqr_low * 0.7)
       priceClass = "under";
+    const isShop = l.source === "chest_shop";
+    const shopLocation =
+      isShop && l.dimension_key
+        ? `<div class="lr-date">${esc(String(l.dimension_key).replace(/^minecraft:/, ""))} ${esc([l.x, l.y, l.z].filter((v) => v != null).join(", "))}</div>`
+        : "";
+    const dateLabel = isShop ? "seen " : "";
     html += `<div class="listing-row">
       <div class="listing-row-main">
         <div class="listing-row-seller">
@@ -242,7 +248,8 @@ function buildPanelListingsHTML(pd, listings) {
       <div class="listing-row-price">
         <div class="lr-price ${priceClass}">${fmt(l.unit_price)}</div>
         ${l.count > 1 ? `<div class="lr-date">total ${fmt(l.price)}</div>` : ""}
-        <div class="lr-date">${fmtT(l.timestamp)}</div>
+        <div class="lr-date">${dateLabel}${fmtT(l.timestamp)}</div>
+        ${shopLocation}
       </div>
     </div>`;
   }
@@ -464,7 +471,7 @@ function buildPanelHTML(item, listings, meta = {}) {
 
   if (!hasHistory) return html;
 
-  html += `<div class="psec"><div class="psec-title">Listings</div>`;
+  html += `<div class="psec"><div class="psec-title">${sourceLabel()} Listings</div>`;
   html += `<div class="pctrl">
     <span class="pcl">Sort</span>
     <div class="cselect" id="panelSortSel">

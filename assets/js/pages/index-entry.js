@@ -28,6 +28,8 @@
       if (action === "open-compare") return window.openCompare?.();
       if (action === "set-view")
         return window.setView?.(target.getAttribute("data-view"));
+      if (action === "set-market-source")
+        return window.setMarketSource?.(target.getAttribute("data-market-source"));
       if (action === "scroll-top")
         return window.scrollTo({ top: 0, behavior: "smooth" });
       if (action === "close-compare") return window.closeCompare?.();

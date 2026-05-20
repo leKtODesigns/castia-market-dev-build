@@ -14,6 +14,8 @@ let allPrices = [],
   filtered = [];
 /** @type {Object<string, Object>} Seller data keyed by lowercase seller name */
 let allSellers = {};
+/** @type {Object<string, Object<string, Object>>} Seller data keyed by source, then lowercase seller name */
+let sellerSources = { auction_house: {}, chest_shop: {} };
 /** @type {string} Current view mode: 'table' or 'card' */
 let vw = "table",
   /** @type {string} Current sort column key (e.g. 'median', 'samples', 'displayName') */
@@ -38,6 +40,8 @@ let panelCtx = null;
 let panelSort = "newest";
 /** @type {boolean} Whether to include flagged/blacklisted seller listings in the panel */
 let panelIncludeFlagged = false;
+/** @type {"auction_house"|"chest_shop"} Active market data source */
+let marketSource = "auction_house";
 /** @type {boolean} Whether favorites-only filter is active */
 let favOnly = false;
 /** @type {boolean} Whether data saver mode is active (hides item images) */
@@ -137,6 +141,7 @@ function saveUIState() {
     sc,
     sd,
     lastSeenDir, // View state: table/cards view, sort column, sort direction
+    marketSource,
     favOnly: !!favOnly,
     dataSaver: !!dataSaver, // UI toggle states
     fav: [...favSet],
@@ -157,6 +162,9 @@ function applyLoadedUIState() {
     lastSeenDir = st.lastSeenDir;
   } else if (sc === "last_seen") {
     lastSeenDir = sd;
+  }
+  if (st.marketSource === "chest_shop" || st.marketSource === "auction_house") {
+    marketSource = st.marketSource;
   }
   favOnly = !!st.favOnly;
   dataSaver = !!st.dataSaver;
@@ -240,4 +248,43 @@ function initApp() {
   } else {
     setTimeout(initApp, 100);
   }
+}
+
+function sourceLabel(source = marketSource) {
+  return source === "chest_shop" ? "Chest Shops" : "Auction House";
+}
+
+function setMarketSource(source, opts = {}) {
+  const next = source === "chest_shop" ? "chest_shop" : "auction_house";
+  if (marketSource === next && !opts.force) return;
+  marketSource = next;
+  pg = 1;
+  activeKey = null;
+  panelCtx = null;
+  if (typeof closePanel === "function") closePanel();
+  if (typeof closeSellerPanel === "function") closeSellerPanel();
+  const q = $("qEl");
+  if (q && opts.clearSearch !== false) q.value = "";
+  [
+    typeof catEl !== "undefined" ? catEl : null,
+    typeof confEl !== "undefined" ? confEl : null,
+    typeof tierEl !== "undefined" ? tierEl : null,
+  ].forEach((el) => {
+    if (el) el.value = "";
+  });
+  if (typeof setSf === "function") setSf("all");
+  scheduleSaveUIState();
+  updateSourceToggleUI();
+  fetchAll(false);
+}
+
+function updateSourceToggleUI() {
+  document.querySelectorAll("[data-market-source]").forEach((btn) => {
+    const on = btn.getAttribute("data-market-source") === marketSource;
+    btn.classList.toggle("on", on);
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  });
+  document.querySelectorAll("[data-source-label]").forEach((el) => {
+    el.textContent = sourceLabel();
+  });
 }
